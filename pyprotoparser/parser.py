@@ -1,8 +1,12 @@
-from antlr4 import *
+# pyright: reportOptionalMemberAccess=false
+
+from antlr4 import CommonTokenStream, InputStream, ParseTreeWalker
+
 from pyprotoparser.antlr.ProtobufLexer import ProtobufLexer
 from pyprotoparser.antlr.ProtobufParser import ProtobufParser
 from pyprotoparser.antlr.ProtobufParserListener import ProtobufParserListener
-from pyprotoparser.model import Message, Field, Option, FieldCardinality
+from pyprotoparser.model import Field, FieldCardinality, Message, Option
+
 
 class PyProtobufParserListener(ProtobufParserListener):
     def __init__(self):
@@ -29,24 +33,35 @@ class PyProtobufParserListener(ProtobufParserListener):
             self.currentField = Field(name=fieldName, type=fieldType)
 
     # Enter a parse tree produced by ProtobufParser#fieldDeclWithCardinality.
-    def enterFieldDeclWithCardinality(self, ctx: ProtobufParser.FieldDeclWithCardinalityContext):
+    def enterFieldDeclWithCardinality(
+        self, ctx: ProtobufParser.FieldDeclWithCardinalityContext
+    ):
         fieldName = ctx.fieldName().getText()
         fieldType = ctx.fieldDeclTypeName().getText()
         cardinality = ctx.fieldCardinality().getText()
-        if cardinality == 'optional':
-            self.currentField = Field(name=fieldName, type=fieldType, cardinality=FieldCardinality.OPTIONAL)
-        elif cardinality == 'repeated':
-            self.currentField = Field(name=fieldName, type=fieldType, cardinality=FieldCardinality.REPEATED)
+        if cardinality == "optional":
+            self.currentField = Field(
+                name=fieldName, type=fieldType, cardinality=FieldCardinality.OPTIONAL
+            )
+        elif cardinality == "repeated":
+            self.currentField = Field(
+                name=fieldName, type=fieldType, cardinality=FieldCardinality.REPEATED
+            )
         else:
-            self.currentField = Field(name=fieldName, type=fieldType, cardinality=FieldCardinality.REQUIRED)
+            self.currentField = Field(
+                name=fieldName, type=fieldType, cardinality=FieldCardinality.REQUIRED
+            )
 
     # Exit a parse tree produced by ProtobufParser#messageFieldDecl.
     def exitMessageFieldDecl(self, ctx: ProtobufParser.MessageFieldDeclContext):
-        self.messageStack[-1].fields.append(self.currentField)
-        self.currentField = None
+        if self.currentField:
+            self.messageStack[-1].fields.append(self.currentField)
+            self.currentField = None
+        else:
+            raise Exception("Unexpectedly got currentField=None")
 
     # Enter a parse tree produced by ProtobufParser#compactOption.
-    def enterCompactOption(self, ctx:ProtobufParser.CompactOptionContext):
+    def enterCompactOption(self, ctx: ProtobufParser.CompactOptionContext):
         optionName = ctx.optionName().getText()
         optionValue = ctx.optionValue().getText()
         option = Option(name=optionName, value=optionValue)
