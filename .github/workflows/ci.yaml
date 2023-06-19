@@ -55,3 +55,40 @@ jobs:
       run: |
         source venv/bin/activate
         pdm run pytest
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+
+    if: github.event_name == 'release' && github.event.action == 'published'
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build using Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python3.10 -m venv venv
+        source venv/bin/activate
+        pip install pdm
+        pdm install
+
+    - name: Build ANTLR submodule
+      run: |
+        source venv/bin/activate
+        pdm run antlr
+
+    - name: Build distribution
+      run: |
+        source venv/bin/activate
+        pdm build
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        user: ${{ vars.PYPI_USER }}
+        password: ${{ secrets.PYPI_API_TOKEN }}
