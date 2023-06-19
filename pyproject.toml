@@ -8,7 +8,7 @@ authors = [
 dependencies = [
     "antlr4-python3-runtime>=4.13.0",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.8"
 readme = "README.md"
 license = {text = "MIT"}
 
@@ -40,6 +40,7 @@ skip_gitignore = true
 
 [tool.pylint.master]
 ignore = "pyprotoparser/antlr"
+fail-under = 7
 
 [tool.pylint.messages_control]
 max-line-length = 110
