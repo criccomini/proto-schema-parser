@@ -1,4 +1,4 @@
-name: pyprotoparser
+name: proto_schema_parser
 
 on:
   push:
@@ -35,16 +35,16 @@ jobs:
         source venv/bin/activate
         pdm run antlr
 
-    - name: Run black format
+    - name: Run black and isort
       run: |
         source venv/bin/activate
-        pdm run isort --check --diff pyprotoparser/ tests/
-        pdm run black --check --diff pyprotoparser/ tests/
+        pdm run isort --check --diff proto_schema_parser/ tests/
+        pdm run black --check --diff proto_schema_parser/ tests/
 
     - name: Run pylint
       run: |
         source venv/bin/activate
-        pdm run pylint pyprotoparser/ tests/
+        pdm run pylint proto_schema_parser/ tests/
 
     - name: Run pyright
       run: |

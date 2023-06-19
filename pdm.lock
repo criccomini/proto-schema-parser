@@ -30,6 +30,7 @@ dependencies = [
     "pathspec>=0.9.0",
     "platformdirs>=2",
     "tomli>=1.1.0; python_version < \"3.11\"",
+    "typing-extensions>=3.10.0.0; python_version < \"3.10\"",
 ]
 
 [[package]]
@@ -137,6 +138,7 @@ dependencies = [
     "platformdirs>=2.2.0",
     "tomli>=1.1.0; python_version < \"3.11\"",
     "tomlkit>=0.10.1",
+    "typing-extensions>=3.10.0; python_version < \"3.10\"",
 ]
 
 [[package]]
@@ -196,7 +198,7 @@ summary = "Module for decorators, wrappers and monkey patching."
 lock_version = "4.2"
 cross_platform = true
 groups = ["default", "style", "tests"]
-content_hash = "sha256:880f9fd73da4a122e7c77f73a8cbef9f4433bc5355f00ee12a53ee8d033fc8c1"
+content_hash = "sha256:9a053ba0adc82527305e62c05d4e7c1ac2068b21b26754e891d90ce7f61f035d"
 
 [metadata.files]
 "antlr4-python3-runtime 4.13.0" = [

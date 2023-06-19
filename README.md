@@ -1,18 +1,18 @@
-# pyprotoparser
+# Protobuf Schema Parser
 
-A Pure Python Protobuf 3 .proto Parser
+A Pure Python Protobuf 3 .proto schema Parser
 
 ## Install
 
 ```bash
-pip install pyprotoparser
+pip install proto-schema-parser
 ```
 
 ## Usage
 
 ```python
 from pprint import pprint
-from pyprotoparser import Parser
+from proto_schema_parser import Parser
 
 messages = Parser().parse("""
     syntax = "proto3";
@@ -47,6 +47,6 @@ pprint(messages)
 
 ## About
 
-`pyprotoparser` is a pure Python implementation of a `.proto` parser. It uses [Buf.build](https://buf.build)'s ANTLR [Proto .g4 files](https://github.com/bufbuild/protobuf.com/tree/main/examples) to generate a Python lexer and parser. The lexer and parser are complete implementations of Proto 2 and 3.
+`proto-schema-parser` is a pure Python implementation of a `.proto` parser. It uses [Buf.build](https://buf.build)'s ANTLR [Proto .g4 files](https://github.com/bufbuild/protobuf.com/tree/main/examples/antlr) to generate a Python Protocol buffer lexer and parser. The lexer and parser are complete implementations of Proto 2 and 3.
 
 The project also includes a very simple Parser class and data model to make parsing .proto text easier.

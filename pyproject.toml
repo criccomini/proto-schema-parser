@@ -1,5 +1,5 @@
 [project]
-name = "pyprotoparser"
+name = "proto-schema-parser"
 version = "0.1.0"
 description = "A Pure Python Protobuf 3 .proto Parser"
 authors = [
@@ -28,27 +28,27 @@ style = [
 ]
 
 [tool.pdm.scripts]
-antlr = "java -Xmx500M -cp antlr/antlr-4.13.0-complete.jar org.antlr.v4.Tool -Dlanguage=Python3 -visitor -o pyprotoparser -lib pyprotoparser/antlr antlr/ProtobufLexer.g4 antlr/ProtobufParser.g4"
+antlr = "java -Xmx500M -cp antlr/antlr-4.13.0-complete.jar org.antlr.v4.Tool -Dlanguage=Python3 -visitor -o proto_schema_parser -lib proto_schema_parser/antlr antlr/ProtobufLexer.g4 antlr/ProtobufParser.g4"
 
 [tool.black]
-exclude = "pyprotoparser/antlr/"
+exclude = "proto_schema_parser/antlr/"
 
 [tool.isort]
 profile = "black"
 case_sensitive = true
-skip_gitignore = true
+skip_glob = ["proto_schema_parser/antlr/*.py"]
 
 [tool.pylint.master]
-ignore = "pyprotoparser/antlr"
+ignore = "proto_schema_parser/antlr"
 fail-under = 7
 
 [tool.pylint.messages_control]
 max-line-length = 110
 
 [tool.pyright]
-include = ["pyprotoparser/"]
+include = ["proto_schema_parser/"]
 pythonPlatform = "All"
 exclude = [
     "**/__pycache__",
-    "pyprotoparser/antlr"
+    "proto_schema_parser/antlr"
 ]

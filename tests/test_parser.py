@@ -1,4 +1,4 @@
-from pyprotoparser import Field, FieldCardinality, Message, Parser
+from proto_schema_parser import FieldCardinality, Message, Parser
 
 
 def test_parser():

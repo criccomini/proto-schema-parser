@@ -2,13 +2,13 @@
 
 from antlr4 import CommonTokenStream, InputStream, ParseTreeWalker
 
-from pyprotoparser.antlr.ProtobufLexer import ProtobufLexer
-from pyprotoparser.antlr.ProtobufParser import ProtobufParser
-from pyprotoparser.antlr.ProtobufParserListener import ProtobufParserListener
-from pyprotoparser.model import Field, FieldCardinality, Message, Option
+from proto_schema_parser.antlr.ProtobufLexer import ProtobufLexer
+from proto_schema_parser.antlr.ProtobufParser import ProtobufParser
+from proto_schema_parser.antlr.ProtobufParserListener import ProtobufParserListener
+from proto_schema_parser.model import Field, FieldCardinality, Message, Option
 
 
-class PyProtobufParserListener(ProtobufParserListener):
+class ProtoSchemaParserListener(ProtobufParserListener):
     def __init__(self):
         self.messages: dict[str, Message] = {}
         self.messageStack: list[Message] = []
@@ -75,7 +75,7 @@ class Parser:
         stream = CommonTokenStream(lexer)
         parser = ProtobufParser(stream)
         tree = parser.file_()  # file_ is the start rule for proto3
-        listener = PyProtobufParserListener()
+        listener = ProtoSchemaParserListener()
         walker = ParseTreeWalker()
         walker.walk(listener, tree)
         return listener.messages
