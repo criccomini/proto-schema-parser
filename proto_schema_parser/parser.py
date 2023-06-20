@@ -1,81 +1,217 @@
-# pyright: reportOptionalMemberAccess=false
+# pyright: reportOptionalMemberAccess=false, reportOptionalIterable=false
 
-from antlr4 import CommonTokenStream, InputStream, ParseTreeWalker
+from typing import Any
 
+from antlr4 import CommonTokenStream, InputStream
+
+from proto_schema_parser import ast
 from proto_schema_parser.antlr.ProtobufLexer import ProtobufLexer
 from proto_schema_parser.antlr.ProtobufParser import ProtobufParser
-from proto_schema_parser.antlr.ProtobufParserListener import ProtobufParserListener
-from proto_schema_parser.model import Field, FieldCardinality, Message, Option
+from proto_schema_parser.antlr.ProtobufParserVisitor import ProtobufParserVisitor
 
 
-class ProtoSchemaParserListener(ProtobufParserListener):
-    def __init__(self):
-        self.messages: dict[str, Message] = {}
-        self.messageStack: list[Message] = []
-        self.currentField: Field | None = None
+class ASTConstructor(ProtobufParserVisitor):
+    def visitFile(self, ctx: ProtobufParser.FileContext):
+        syntax = (
+            self._getText(ctx.syntaxDecl().syntaxLevel()) if ctx.syntaxDecl() else None
+        )
+        file_elements = [self.visit(child) for child in ctx.fileElement()]
+        return ast.File(syntax=syntax, file_elements=file_elements)
 
-    # Enter a parse tree produced by ProtobufParser#messageDecl.
-    def enterMessageDecl(self, ctx: ProtobufParser.MessageDeclContext):
-        messageName = ctx.messageName().getText()
-        newMessage = Message(name=messageName)
-        self.messages[messageName] = newMessage
-        self.messageStack.append(newMessage)
+    def visitPackageDecl(self, ctx: ProtobufParser.PackageDeclContext):
+        name = self._getText(ctx.packageName())
+        return ast.Package(name=name)
 
-    # Exit a parse tree produced by ProtobufParser#messageDecl.
-    def exitMessageDecl(self, ctx: ProtobufParser.MessageDeclContext):
-        self.messageStack.pop()
+    def visitImportDecl(self, ctx: ProtobufParser.ImportDeclContext):
+        name = self._getText(ctx.importedFileName())
+        weak = ctx.WEAK() is not None
+        public = ctx.PUBLIC() is not None
+        return ast.Import(name=name, weak=weak, public=public)
 
-    # Enter a parse tree produced by ProtobufParser#messageFieldDecl.
-    def enterMessageFieldDecl(self, ctx: ProtobufParser.MessageFieldDeclContext):
-        if ctx.messageFieldDeclTypeName() is not None:
-            fieldName = ctx.fieldName().getText()
-            fieldType = ctx.messageFieldDeclTypeName().getText()
-            self.currentField = Field(name=fieldName, type=fieldType)
+    def visitOptionDecl(self, ctx: ProtobufParser.OptionDeclContext):
+        name = self._getText(ctx.optionName())
+        value = self._getText(ctx.optionValue())
+        return ast.Option(name=name, value=value)
 
-    # Enter a parse tree produced by ProtobufParser#fieldDeclWithCardinality.
-    def enterFieldDeclWithCardinality(
+    def visitMessageDecl(self, ctx: ProtobufParser.MessageDeclContext):
+        name = self._getText(ctx.messageName())
+        elements = [self.visit(child) for child in ctx.messageElement()]
+        return ast.Message(name=name, elements=elements)
+
+    def visitMessageFieldDecl(self, ctx: ProtobufParser.MessageFieldDeclContext):
+        if fieldWithCardinality := ctx.fieldDeclWithCardinality():
+            return self.visit(fieldWithCardinality)
+        else:
+            name = self._getText(ctx.fieldName())
+            number = int(self._getText(ctx.fieldNumber()))
+            cardinality = ast.FieldCardinality.REQUIRED
+            type = self._getText(ctx.messageFieldDeclTypeName())
+            options = self.visit(ctx.compactOptions()) if ctx.compactOptions() else []
+            return ast.Field(
+                name=name,
+                number=number,
+                cardinality=cardinality,
+                type=type,
+                options=options,
+            )
+
+    def visitFieldDeclWithCardinality(
         self, ctx: ProtobufParser.FieldDeclWithCardinalityContext
     ):
-        fieldName = ctx.fieldName().getText()
-        fieldType = ctx.fieldDeclTypeName().getText()
-        cardinality = ctx.fieldCardinality().getText()
-        if cardinality == "optional":
-            self.currentField = Field(
-                name=fieldName, type=fieldType, cardinality=FieldCardinality.OPTIONAL
-            )
-        elif cardinality == "repeated":
-            self.currentField = Field(
-                name=fieldName, type=fieldType, cardinality=FieldCardinality.REPEATED
-            )
-        else:
-            self.currentField = Field(
-                name=fieldName, type=fieldType, cardinality=FieldCardinality.REQUIRED
-            )
+        name = self._getText(ctx.fieldName())
+        number = int(self._getText(ctx.fieldNumber()))
+        cardinality = ast.FieldCardinality.REQUIRED
+        if ctx.fieldCardinality().OPTIONAL():
+            cardinality = ast.FieldCardinality.OPTIONAL
+        elif ctx.fieldCardinality().REPEATED():
+            cardinality = ast.FieldCardinality.REPEATED
+        type = self._getText(ctx.fieldDeclTypeName())
+        options = self.visit(ctx.compactOptions()) if ctx.compactOptions() else []
+        return ast.Field(
+            name=name,
+            number=number,
+            cardinality=cardinality,
+            type=type,
+            options=options,
+        )
 
-    # Exit a parse tree produced by ProtobufParser#messageFieldDecl.
-    def exitMessageFieldDecl(self, ctx: ProtobufParser.MessageFieldDeclContext):
-        if self.currentField:
-            self.messageStack[-1].fields.append(self.currentField)
-            self.currentField = None
-        else:
-            raise Exception("Unexpectedly got currentField=None")
+    def visitCompactOption(self, ctx: ProtobufParser.CompactOptionContext):
+        name = self._getText(ctx.optionName())
+        value = self._getText(ctx.optionValue())
+        return ast.Option(name=name, value=value)
 
-    # Enter a parse tree produced by ProtobufParser#compactOption.
-    def enterCompactOption(self, ctx: ProtobufParser.CompactOptionContext):
-        optionName = ctx.optionName().getText()
-        optionValue = ctx.optionValue().getText()
-        option = Option(name=optionName, value=optionValue)
-        self.currentField.options.append(option)
+    def visitCompactOptions(self, ctx: ProtobufParser.CompactOptionsContext):
+        return [self.visit(child) for child in ctx.compactOption()]
+
+    def visitOneofFieldDecl(self, ctx: ProtobufParser.OneofFieldDeclContext):
+        name = self._getText(ctx.fieldName())
+        number = int(self._getText(ctx.fieldNumber()))
+        cardinality = ast.FieldCardinality.REQUIRED
+        type = self._getText(ctx.oneofFieldDeclTypeName())
+        options = self.visit(ctx.compactOptions()) if ctx.compactOptions() else []
+        return ast.Field(
+            name=name,
+            number=number,
+            cardinality=cardinality,
+            type=type,
+            options=options,
+        )
+
+    def visitOneofGroupDecl(self, ctx: ProtobufParser.OneofGroupDeclContext):
+        name = self._getText(ctx.fieldName())
+        number = int(self._getText(ctx.fieldNumber()))
+        cardinality = ast.FieldCardinality.REQUIRED
+        elements = [self.visit(child) for child in ctx.messageElement()]
+        return ast.Group(
+            name=name,
+            number=number,
+            cardinality=cardinality,
+            elements=elements,
+        )
+
+    def visitMapFieldDecl(self, ctx: ProtobufParser.MapFieldDeclContext):
+        name = self._getText(ctx.fieldName())
+        number = int(self._getText(ctx.fieldNumber()))
+        key_type = self._getText(ctx.mapType().mapKeyType())
+        value_type = self._getText(ctx.mapType().typeName())
+        options = self.visit(ctx.compactOptions()) if ctx.compactOptions() else []
+        return ast.MapField(
+            name=name,
+            number=number,
+            key_type=key_type,
+            value_type=value_type,
+            options=options,
+        )
+
+    def visitGroupDecl(self, ctx: ProtobufParser.GroupDeclContext):
+        name = self._getText(ctx.fieldName())
+        number = int(self._getText(ctx.fieldNumber()))
+        cardinality = ast.FieldCardinality.REQUIRED
+        if fieldCardinality := ctx.fieldCardinality():
+            if fieldCardinality.OPTIONAL():
+                cardinality = ast.FieldCardinality.OPTIONAL
+            elif fieldCardinality.REPEATED():
+                cardinality = ast.FieldCardinality.REPEATED
+        elements = [self.visit(child) for child in ctx.messageElement()]
+        return ast.Group(
+            name=name,
+            number=number,
+            cardinality=cardinality,
+            elements=elements,
+        )
+
+    def visitOneofDecl(self, ctx: ProtobufParser.OneofDeclContext):
+        name = self._getText(ctx.oneofName())
+        elements = [self.visit(child) for child in ctx.oneofElement()]
+        return ast.OneOf(name=name, elements=elements)
+
+    def visitExtensionRangeDecl(self, ctx: ProtobufParser.ExtensionRangeDeclContext):
+        ranges = [self._getText(child) for child in ctx.tagRanges().tagRange()]
+        options = self.visit(ctx.compactOptions()) if ctx.compactOptions() else []
+        return ast.ExtensionRange(ranges=ranges, options=options)
+
+    def visitMessageReservedDecl(self, ctx: ProtobufParser.MessageReservedDeclContext):
+        ranges = (
+            [self._getText(child) for child in ctx.tagRanges().tagRange()]
+            if ctx.tagRanges()
+            else []
+        )
+        names = (
+            [self._getText(child) for child in ctx.names().stringLiteral()]
+            if ctx.names()
+            else []
+        )
+        return ast.Reserved(ranges=ranges, names=names)
+
+    def visitEnumDecl(self, ctx: ProtobufParser.EnumDeclContext):
+        name = self._getText(ctx.enumName())
+        elements = [self.visit(child) for child in ctx.enumElement()]
+        return ast.Enum(name=name, elements=elements)
+
+    def visitEnumValueDecl(self, ctx: ProtobufParser.EnumValueDeclContext):
+        name = self._getText(ctx.enumValueName())
+        number = int(self._getText(ctx.enumValueNumber()))
+        options = self.visit(ctx.compactOptions()) if ctx.compactOptions() else []
+        return ast.EnumValue(name=name, number=number, options=options)
+
+    def visitEnumReservedDecl(self, ctx: ProtobufParser.EnumReservedDeclContext):
+        ranges = (
+            [self._getText(child) for child in ctx.enumValueRanges().enumValueRange()]
+            if ctx.enumValueRanges()
+            else []
+        )
+        names = (
+            [self._getText(child) for child in ctx.names().stringLiteral()]
+            if ctx.names()
+            else []
+        )
+        return ast.EnumReserved(ranges=ranges, names=names)
+
+    def visitExtensionDecl(self, ctx: ProtobufParser.ExtensionDeclContext):
+        typeName = self._getText(ctx.extendedMessage())
+        elements = [self.visit(child) for child in ctx.extensionElement()]
+        return ast.Extension(typeName=typeName, elements=elements)
+
+    # ctx: ParserRuleContext, but ANTLR generates untyped code
+    def _getText(self, ctx: Any, stripQuotes: bool = True):
+        token_source = (
+            ctx.start.getTokenSource()
+        )  # pyright: ignore [reportGeneralTypeIssues]
+        input_stream = token_source.inputStream
+        start, stop = (
+            ctx.start.start,
+            ctx.stop.stop,
+        )  # pyright: ignore [reportGeneralTypeIssues]
+        text = input_stream.getText(start, stop)
+        return text.strip('"') if stripQuotes else text
 
 
 class Parser:
-    def parse(self, text: str) -> dict[str, Message]:
+    def parse(self, text: str) -> ast.File:
         input_stream = InputStream(text)
         lexer = ProtobufLexer(input_stream)
-        stream = CommonTokenStream(lexer)
-        parser = ProtobufParser(stream)
-        tree = parser.file_()  # file_ is the start rule for proto3
-        listener = ProtoSchemaParserListener()
-        walker = ParseTreeWalker()
-        walker.walk(listener, tree)
-        return listener.messages
+        token_stream = CommonTokenStream(lexer)
+        parser = ProtobufParser(token_stream)
+        parse_tree = parser.file_()
+        visitor = ASTConstructor()
+        return visitor.visit(parse_tree)  # pyright: ignore [reportGeneralTypeIssues]
