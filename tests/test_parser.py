@@ -125,7 +125,6 @@ def test_parse_search_request():
                     ast.Field(
                         name="query",
                         number=1,
-                        cardinality=ast.FieldCardinality.REQUIRED,
                         type="string",
                         # AST doesn't include white space
                         options=[
@@ -146,7 +145,6 @@ def test_parse_search_request():
                     ast.Field(
                         name="results_per_page",
                         number=3,
-                        cardinality=ast.FieldCardinality.REQUIRED,
                         type="int32",
                         options=[],
                     ),
@@ -251,21 +249,18 @@ def test_parse_oneof():
                             ast.Field(
                                 name="name",
                                 number=1,
-                                cardinality=ast.FieldCardinality.REQUIRED,
                                 type="string",
                                 options=[],
                             ),
                             ast.Field(
                                 name="id",
                                 number=2,
-                                cardinality=ast.FieldCardinality.REQUIRED,
                                 type="int32",
                                 options=[],
                             ),
                             ast.Field(
                                 name="active",
                                 number=3,
-                                cardinality=ast.FieldCardinality.REQUIRED,
                                 type="bool",
                                 options=[],
                             ),
@@ -537,7 +532,6 @@ def test_parse_message_option():
                     ast.Field(
                         name="name",
                         number=1,
-                        cardinality=ast.FieldCardinality.REQUIRED,
                         type="string",
                         options=[],
                     ),
@@ -574,14 +568,12 @@ def test_parse_oneof_option():
                             ast.Field(
                                 name="name",
                                 number=1,
-                                cardinality=ast.FieldCardinality.REQUIRED,
                                 type="string",
                                 options=[],
                             ),
                             ast.Field(
                                 name="id",
                                 number=2,
-                                cardinality=ast.FieldCardinality.REQUIRED,
                                 type="int32",
                                 options=[],
                             ),
@@ -661,7 +653,6 @@ def test_parse_oneof_group():
                             ast.Group(
                                 name="NameGroup",
                                 number=1,
-                                cardinality=ast.FieldCardinality.REQUIRED,
                                 elements=[
                                     ast.Field(
                                         name="name",
@@ -675,7 +666,6 @@ def test_parse_oneof_group():
                             ast.Field(
                                 name="id",
                                 number=3,
-                                cardinality=ast.FieldCardinality.REQUIRED,
                                 type="int32",
                                 options=[],
                             ),
@@ -718,7 +708,6 @@ def test_parse_extend_group():
                     ast.Group(
                         name="ExtendGroup",
                         number=100,
-                        cardinality=ast.FieldCardinality.REQUIRED,
                         elements=[
                             ast.Field(
                                 name="name",

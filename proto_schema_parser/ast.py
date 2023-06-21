@@ -52,8 +52,8 @@ class Message:
 class Field:
     name: str
     number: int
-    cardinality: FieldCardinality
     type: str
+    cardinality: FieldCardinality | None = None
     options: list[Option] = field(default_factory=list)
 
 
@@ -74,7 +74,7 @@ class MapField:
 class Group:
     name: str
     number: int
-    cardinality: FieldCardinality
+    cardinality: FieldCardinality | None = None
     elements: list[MessageElement] = field(default_factory=list)
 
 

@@ -44,13 +44,11 @@ class ASTConstructor(ProtobufParserVisitor):
         else:
             name = self._getText(ctx.fieldName())
             number = int(self._getText(ctx.fieldNumber()))
-            cardinality = ast.FieldCardinality.REQUIRED
             type = self._getText(ctx.messageFieldDeclTypeName())
             options = self.visit(ctx.compactOptions()) if ctx.compactOptions() else []
             return ast.Field(
                 name=name,
                 number=number,
-                cardinality=cardinality,
                 type=type,
                 options=options,
             )
@@ -60,9 +58,11 @@ class ASTConstructor(ProtobufParserVisitor):
     ):
         name = self._getText(ctx.fieldName())
         number = int(self._getText(ctx.fieldNumber()))
-        cardinality = ast.FieldCardinality.REQUIRED
+        cardinality = None
         if ctx.fieldCardinality().OPTIONAL():
             cardinality = ast.FieldCardinality.OPTIONAL
+        elif ctx.fieldCardinality().REQUIRED():
+            cardinality = ast.FieldCardinality.REQUIRED
         elif ctx.fieldCardinality().REPEATED():
             cardinality = ast.FieldCardinality.REPEATED
         type = self._getText(ctx.fieldDeclTypeName())
@@ -86,13 +86,11 @@ class ASTConstructor(ProtobufParserVisitor):
     def visitOneofFieldDecl(self, ctx: ProtobufParser.OneofFieldDeclContext):
         name = self._getText(ctx.fieldName())
         number = int(self._getText(ctx.fieldNumber()))
-        cardinality = ast.FieldCardinality.REQUIRED
         type = self._getText(ctx.oneofFieldDeclTypeName())
         options = self.visit(ctx.compactOptions()) if ctx.compactOptions() else []
         return ast.Field(
             name=name,
             number=number,
-            cardinality=cardinality,
             type=type,
             options=options,
         )
@@ -100,12 +98,10 @@ class ASTConstructor(ProtobufParserVisitor):
     def visitOneofGroupDecl(self, ctx: ProtobufParser.OneofGroupDeclContext):
         name = self._getText(ctx.fieldName())
         number = int(self._getText(ctx.fieldNumber()))
-        cardinality = ast.FieldCardinality.REQUIRED
         elements = [self.visit(child) for child in ctx.messageElement()]
         return ast.Group(
             name=name,
             number=number,
-            cardinality=cardinality,
             elements=elements,
         )
 
@@ -126,10 +122,12 @@ class ASTConstructor(ProtobufParserVisitor):
     def visitGroupDecl(self, ctx: ProtobufParser.GroupDeclContext):
         name = self._getText(ctx.fieldName())
         number = int(self._getText(ctx.fieldNumber()))
-        cardinality = ast.FieldCardinality.REQUIRED
+        cardinality = None
         if fieldCardinality := ctx.fieldCardinality():
             if fieldCardinality.OPTIONAL():
                 cardinality = ast.FieldCardinality.OPTIONAL
+            elif fieldCardinality.REQUIRED():
+                cardinality = ast.FieldCardinality.REQUIRED
             elif fieldCardinality.REPEATED():
                 cardinality = ast.FieldCardinality.REPEATED
         elements = [self.visit(child) for child in ctx.messageElement()]
