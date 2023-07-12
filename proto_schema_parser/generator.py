@@ -1,7 +1,7 @@
 from proto_schema_parser import ast
 
 
-class ProtobufGenerator:
+class Generator:
     def generate(self, file: ast.File) -> str:
         lines = []
 

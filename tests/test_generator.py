@@ -1,5 +1,5 @@
 from proto_schema_parser import ast
-from proto_schema_parser.generator import ProtobufGenerator
+from proto_schema_parser.generator import Generator
 
 
 def test_generate_simple_message():
@@ -21,7 +21,7 @@ def test_generate_simple_message():
         ],
     )
 
-    result = ProtobufGenerator()._generate_message(message)
+    result = Generator()._generate_message(message)
     expected = (
         "message MyMessage {\n"
         "  optional string my_field = 1;\n"
@@ -35,7 +35,7 @@ def test_generate_simple_message():
 def test_generate_package():
     file = ast.File(file_elements=[ast.Package(name="my.package")])
 
-    result = ProtobufGenerator().generate(file)
+    result = Generator().generate(file)
     expected = "package my.package;"
 
     assert result == expected
@@ -44,7 +44,7 @@ def test_generate_package():
 def test_generate_import():
     file = ast.File(file_elements=[ast.Import(name="my/import/path.proto")])
 
-    result = ProtobufGenerator().generate(file)
+    result = Generator().generate(file)
     expected = 'import "my/import/path.proto";'
 
     assert result == expected
@@ -55,7 +55,7 @@ def test_generate_option():
         file_elements=[ast.Option(name="java_package", value="com.example.myproto")]
     )
 
-    result = ProtobufGenerator().generate(file)
+    result = Generator().generate(file)
     expected = 'option java_package = "com.example.myproto";'
 
     assert result == expected
@@ -74,7 +74,7 @@ def test_generate_enum():
         ]
     )
 
-    result = ProtobufGenerator().generate(file)
+    result = Generator().generate(file)
     expected = "enum MyEnum {\n" "  FIRST_VALUE = 0;\n" "  SECOND_VALUE = 1;\n" "}"
 
     assert result == expected
@@ -97,7 +97,7 @@ def test_generate_extension():
         ]
     )
 
-    result = ProtobufGenerator().generate(file)
+    result = Generator().generate(file)
     expected = "extend ExtendeeType {\n" "  optional string ext_field = 1;\n" "}"
 
     assert result == expected
@@ -130,7 +130,7 @@ def test_generate_nested_message():
         ]
     )
 
-    result = ProtobufGenerator().generate(file)
+    result = Generator().generate(file)
     expected = (
         "message OuterMessage {\n"
         "  message InnerMessage {\n"
@@ -151,7 +151,7 @@ def test_generate_map_field():
         number=2,
     )
 
-    result = ProtobufGenerator()._generate_map_field(map_field)
+    result = Generator()._generate_map_field(map_field)
     expected = "map<string, int32> my_map = 2;"
 
     assert result == expected
@@ -171,7 +171,7 @@ def test_generate_group():
         ],
     )
 
-    result = ProtobufGenerator()._generate_group(group)
+    result = Generator()._generate_group(group)
     expected = "group MyGroup = 1 {\n" "  optional string my_field = 2;\n" "}"
 
     assert result == expected
@@ -205,7 +205,7 @@ def test_generate_one_of():
         ]
     )
 
-    result = ProtobufGenerator().generate(file)
+    result = Generator().generate(file)
     expected = (
         "message MyMessage {\n"
         "  oneof my_one_of {\n"
@@ -232,7 +232,7 @@ def test_generate_extension_range():
         ]
     )
 
-    result = ProtobufGenerator().generate(file)
+    result = Generator().generate(file)
     expected = "message MyMessage {\n" "  extensions 100 to 199, 300 to max;\n" "}"
 
     assert result == expected
@@ -253,7 +253,7 @@ def test_generate_reserved():
         ]
     )
 
-    result = ProtobufGenerator().generate(file)
+    result = Generator().generate(file)
     expected = "message MyMessage {\n" '  reserved 1 to 8, 10, 12, "foo", "bar";\n' "}"
 
     assert result == expected
@@ -299,7 +299,7 @@ def test_generate_with_options():
         ]
     )
 
-    result = ProtobufGenerator().generate(file)
+    result = Generator().generate(file)
     expected = (
         'option java_package = "com.example.myproto";\n'
         "message MyMessage {\n"
