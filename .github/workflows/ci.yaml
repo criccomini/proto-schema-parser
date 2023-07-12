@@ -35,11 +35,15 @@ jobs:
         source venv/bin/activate
         pdm run antlr
 
-    - name: Run black and isort
+    - name: Run black
       run: |
         source venv/bin/activate
-        pdm run isort --check --diff proto_schema_parser/ tests/
         pdm run black --check --diff proto_schema_parser/ tests/
+
+    - name: Run isort
+      run: |
+        source venv/bin/activate
+        pdm run isort proto_schema_parser/ tests/ --check-only --diff
 
     - name: Run pylint
       run: |

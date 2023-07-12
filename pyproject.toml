@@ -29,6 +29,9 @@ style = [
 
 [tool.pdm.scripts]
 antlr = "java -Xmx500M -cp antlr/antlr-4.13.0-complete.jar org.antlr.v4.Tool -Dlanguage=Python3 -visitor -o proto_schema_parser -lib proto_schema_parser/antlr antlr/ProtobufLexer.g4 antlr/ProtobufParser.g4"
+black = "black proto_schema_parser/ tests/"
+isort = "isort proto_schema_parser/ tests/"
+style = {composite = ["black", "isort"]}
 
 [tool.black]
 exclude = "proto_schema_parser/antlr/"
