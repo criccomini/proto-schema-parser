@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum as PyEnum
+from typing import Union
 
 
 class FieldCardinality(str, PyEnum):
@@ -136,7 +137,7 @@ class Extension:
 #                extensionDecl |
 #                serviceDecl |
 #                emptyDecl;
-FileElement = Import | Package | Option | Message | Enum | Extension
+FileElement = Union[Import, Package, Option, Message, Enum, Extension]
 
 # messageElement: messageFieldDecl |
 #                   groupDecl |
@@ -149,30 +150,30 @@ FileElement = Import | Package | Option | Message | Enum | Extension
 #                   extensionDecl |
 #                   mapFieldDecl |
 #                   emptyDecl;
-MessageElement = (
-    Field
-    | Group
-    | OneOf
-    | Option
-    | ExtensionRange
-    | Reserved
-    | Message
-    | Enum
-    | Extension
-    | MapField
-)
+MessageElement = Union[
+    Field,
+    Group,
+    OneOf,
+    Option,
+    ExtensionRange,
+    Reserved,
+    Message,
+    Enum,
+    Extension,
+    MapField,
+]
 
 # oneofElement: optionDecl |
 #                 oneofFieldDecl |
 #                 oneofGroupDecl;
-OneOfElement = Option | Field | Group
+OneOfElement = Union[Option, Field, Group]
 
 # enumElement: optionDecl |
 #                enumValueDecl |
 #                enumReservedDecl |
 #                emptyDecl;
-EnumElement = Option | EnumValue | EnumReserved
+EnumElement = Union[Option, EnumValue, EnumReserved]
 
 # extensionElement: extensionFieldDecl |
 #                     groupDecl;
-ExtensionElement = Field | Group
+ExtensionElement = Union[Field, Group]
