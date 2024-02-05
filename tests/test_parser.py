@@ -723,3 +723,67 @@ def test_parse_extend_group():
         ],
     )
     assert result == expected
+
+
+def test_parse_service():
+    text = """
+    syntax = "proto3";
+
+    service ExampleService {
+        rpc UnaryCall (ExampleRequest) returns (ExampleResponse);
+        rpc StreamingFromServer (ExampleRequest) returns (stream ExampleResponse);
+        rpc StreamingFromClient (stream ExampleRequest) returns (ExampleResponse);
+        option (my_service_option) = FOO;
+        rpc MyMethod(RequestType) returns(ResponseType) {
+            option (my_method_option).foo = 567;
+            option (my_method_option).bar = "Some string";
+        }
+    }
+
+    service ExampleEmptyService {}
+    """
+    result = Parser().parse(text)
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Service(
+                name="ExampleService",
+                elements=[
+                    ast.Method(
+                        name="UnaryCall",
+                        input_type=ast.MessageType(type="ExampleRequest"),
+                        output_type=ast.MessageType(type="ExampleResponse"),
+                    ),
+                    ast.Method(
+                        name="StreamingFromServer",
+                        input_type=ast.MessageType(type="ExampleRequest"),
+                        output_type=ast.MessageType(
+                            type="ExampleResponse", stream=True
+                        ),
+                    ),
+                    ast.Method(
+                        name="StreamingFromClient",
+                        input_type=ast.MessageType(type="ExampleRequest", stream=True),
+                        output_type=ast.MessageType(type="ExampleResponse"),
+                    ),
+                    ast.Option(name="(my_service_option)", value="FOO"),
+                    ast.Method(
+                        name="MyMethod",
+                        input_type=ast.MessageType(type="RequestType"),
+                        output_type=ast.MessageType(type="ResponseType"),
+                        elements=[
+                            ast.Option(name="(my_method_option).foo", value="567"),
+                            ast.Option(
+                                name="(my_method_option).bar", value="Some string"
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+            ast.Service(
+                name="ExampleEmptyService",
+                elements=[],
+            ),
+        ],
+    )
+    assert result == expected

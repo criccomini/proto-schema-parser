@@ -317,3 +317,46 @@ def test_generate_with_options():
     )
 
     assert result == expected
+
+
+def test_generate_service():
+    file = ast.File(
+        file_elements=[
+            ast.Service(
+                name="MyService",
+                elements=[
+                    ast.Method(
+                        name="MyRpc",
+                        input_type=ast.MessageType(type="MyRequest"),
+                        output_type=ast.MessageType(type="MyResponse"),
+                    ),
+                    ast.Method(
+                        name="MyRpcWithStream",
+                        input_type=ast.MessageType(type="MyRequest", stream=True),
+                        output_type=ast.MessageType(type="MyResponse"),
+                    ),
+                    ast.Method(
+                        name="MyRpcWithOption",
+                        input_type=ast.MessageType(type="MyRequest"),
+                        output_type=ast.MessageType(type="MyResponse"),
+                        elements=[ast.Option(name="deprecated", value="true")],
+                    ),
+                    ast.Option(name="MyOption", value="foo"),
+                ],
+            )
+        ]
+    )
+
+    result = Generator().generate(file)
+    expected = (
+        "service MyService {\n"
+        "  rpc MyRpc (MyRequest) returns (MyResponse);\n"
+        "  rpc MyRpcWithStream (stream MyRequest) returns (MyResponse);\n"
+        '  rpc MyRpcWithOption (MyRequest) returns (MyResponse){\n'
+        '    option deprecated = "true";\n'
+        "  }\n"
+        '  option MyOption = "foo";\n'
+        "}"
+    )
+
+    assert result == expected
