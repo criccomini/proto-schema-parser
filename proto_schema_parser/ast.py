@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum as PyEnum
-from typing import Union
+from typing import Optional, Union
 
 
 class FieldCardinality(str, PyEnum):
@@ -129,6 +129,30 @@ class Extension:
     elements: list[ExtensionElement] = field(default_factory=list)
 
 
+# serviceDecl: SERVICE serviceName L_BRACE serviceElement* R_BRACE;
+@dataclass
+class Service:
+    name: str
+    elements: list[ServiceElement] = field(default_factory=list)
+
+
+# methodDecl: RPC methodName inputType RETURNS outputType SEMICOLON |
+#             RPC methodName inputType RETURNS outputType L_BRACE methodElement* R_BRACE;
+@dataclass
+class Method:
+    name: str
+    input_type: MessageType
+    output_type: MessageType
+    elements: list[MethodElement] = field(default_factory=list)
+
+
+# messageType: L_PAREN STREAM? methodDeclTypeName R_PAREN;
+@dataclass
+class MessageType:
+    type: str
+    stream: bool = False
+
+
 # fileElement: importDecl |
 #                packageDecl |
 #                optionDecl |
@@ -177,3 +201,12 @@ EnumElement = Union[Option, EnumValue, EnumReserved]
 # extensionElement: extensionFieldDecl |
 #                     groupDecl;
 ExtensionElement = Union[Field, Group]
+
+# serviceElement: optionDecl |
+#                   methodDecl |
+#                   emptyDecl;
+ServiceElement = Union[Option, Method]
+
+# methodElement: optionDecl |
+#                 emptyDecl;
+MethodElement = Optional[Option]
