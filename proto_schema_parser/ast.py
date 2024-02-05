@@ -135,6 +135,7 @@ class Service:
     name: str
     elements: list[ServiceElement] = field(default_factory=list)
 
+
 # methodDecl: RPC methodName inputType RETURNS outputType SEMICOLON |
 #             RPC methodName inputType RETURNS outputType L_BRACE methodElement* R_BRACE;
 @dataclass
@@ -144,11 +145,13 @@ class Method:
     output_type: MessageType
     elements: list[MethodElement] = field(default_factory=list)
 
+
 # messageType: L_PAREN STREAM? methodDeclTypeName R_PAREN;
 @dataclass
 class MessageType:
     type: str
     stream: bool = False
+
 
 # fileElement: importDecl |
 #                packageDecl |

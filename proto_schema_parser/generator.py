@@ -58,7 +58,7 @@ class Generator:
                 lines.append(self._generate_extension(element, indent_level + 1))
         lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
-    
+
     def _generate_service(self, service: ast.Service, indent_level: int = 0) -> str:
         lines = [f"{'  ' * indent_level}service {service.name} {{"]
         for element in service.elements:
@@ -68,20 +68,24 @@ class Generator:
                 lines.append(self._generate_option(element, indent_level + 1))
         lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
-    
+
     def _generate_method(self, method: ast.Method, indent_level: int = 0) -> str:
         input_type_str = self._generate_message_type(method.input_type)
         output_type_str = self._generate_message_type(method.output_type)
 
-        has_options = any(isinstance(element, ast.Option) for element in method.elements)
-        lines = [f"{'  ' * indent_level}rpc {method.name} ({input_type_str}) returns ({output_type_str}){'{' if has_options else ';'}"]
+        has_options = any(
+            isinstance(element, ast.Option) for element in method.elements
+        )
+        lines = [
+            f"{'  ' * indent_level}rpc {method.name} ({input_type_str}) returns ({output_type_str}){'{' if has_options else ';'}"
+        ]
         if has_options:
             for element in method.elements:
                 if isinstance(element, ast.Option):
                     lines.append(self._generate_option(element, indent_level + 1))
             lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
-    
+
     def _generate_message_type(self, message_type: ast.MessageType) -> str:
         stream = "stream " if message_type.stream else ""
         return f"{stream}{message_type.type}"

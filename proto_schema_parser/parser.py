@@ -189,7 +189,7 @@ class ASTConstructor(ProtobufParserVisitor):
         typeName = self._getText(ctx.extendedMessage())
         elements = [self.visit(child) for child in ctx.extensionElement()]
         return ast.Extension(typeName=typeName, elements=elements)
-    
+
     def visitServiceDecl(self, ctx: ProtobufParser.ServiceDeclContext):
         name = self._getText(ctx.serviceName())
         elements = [self.visit(child) for child in ctx.serviceElement()]
@@ -200,25 +200,27 @@ class ASTConstructor(ProtobufParserVisitor):
             return self.visit(methodDecl)
         else:
             return self.visit(ctx.optionDecl())
-    
+
     def visitMethodDecl(self, ctx: ProtobufParser.MethodDeclContext):
         name = self._getText(ctx.methodName())
         input_type = self.visit(ctx.inputType())
         output_type = self.visit(ctx.outputType())
         elements = [self.visit(child) for child in ctx.methodElement()]
-        return ast.Method(name=name, input_type=input_type, output_type=output_type, elements=elements)
+        return ast.Method(
+            name=name, input_type=input_type, output_type=output_type, elements=elements
+        )
 
     def visitInputType(self, ctx: ProtobufParser.InputTypeContext):
         return self.visit(ctx.messageType())
-    
+
     def visitOutputType(self, ctx: ProtobufParser.OutputTypeContext):
         return self.visit(ctx.messageType())
-    
+
     def visitMessageType(self, ctx: ProtobufParser.MessageTypeContext):
         name = self._getText(ctx.methodDeclTypeName())
         stream = ctx.STREAM() is not None
         return ast.MessageType(type=name, stream=stream)
-    
+
     def visitMethodElement(self, ctx: ProtobufParser.MethodElementContext):
         if optionDecl := ctx.optionDecl():
             return self.visit(optionDecl)
