@@ -1,7 +1,7 @@
 [project]
 name = "proto-schema-parser"
-version = "1.0.0"
-description = "A Pure Python Protobuf 3 .proto Parser"
+version = "1.1.0"
+description = "A Pure Python Protobuf .proto Parser"
 authors = [
     {name = "Chris Riccomini", email = "criccomini@apache.org"},
 ]
