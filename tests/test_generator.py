@@ -352,7 +352,7 @@ def test_generate_service():
         "service MyService {\n"
         "  rpc MyRpc (MyRequest) returns (MyResponse);\n"
         "  rpc MyRpcWithStream (stream MyRequest) returns (MyResponse);\n"
-        '  rpc MyRpcWithOption (MyRequest) returns (MyResponse){\n'
+        "  rpc MyRpcWithOption (MyRequest) returns (MyResponse){\n"
         '    option deprecated = "true";\n'
         "  }\n"
         '  option MyOption = "foo";\n'

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum as PyEnum
-from typing import Union, Optional
+from typing import Optional, Union
 
 
 class FieldCardinality(str, PyEnum):
