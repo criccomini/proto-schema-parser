@@ -1,9 +1,11 @@
 lexer grammar ProtobufLexer;
 
-// discard whitespace and comment tokens
+// discard whitespace tokens
 WS  :   [ \t\r\n\u000C]+ -> channel(HIDDEN);
-LINE_COMMENT: '//' ~[\r\n]* -> channel(HIDDEN);
-COMMENT: '/*' .*? '*/' -> channel(HIDDEN);
+
+// comment tokens
+LINE_COMMENT: '//' ~[\r\n]*;
+COMMENT: '/*' .*? '*/';
 
 // character classes
 fragment LETTER: [A-Za-z_];

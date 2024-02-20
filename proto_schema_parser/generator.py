@@ -30,6 +30,8 @@ class Generator:
                 lines.append(self._generate_extension(element))
             elif isinstance(element, ast.Service):
                 lines.append(self._generate_service(element))
+            elif isinstance(element, ast.Comment):
+                lines.append(self._generate_comment(element))
 
         return "\n".join(lines)
 
@@ -56,6 +58,9 @@ class Generator:
                 lines.append(self._generate_enum(element, indent_level + 1))
             elif isinstance(element, ast.Extension):  # Extension
                 lines.append(self._generate_extension(element, indent_level + 1))
+            elif isinstance(element, ast.Comment):
+                lines.append(self._generate_comment(element, indent_level + 1))
+
         lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
 
@@ -67,6 +72,12 @@ class Generator:
             elif isinstance(element, ast.Option):
                 lines.append(self._generate_option(element, indent_level + 1))
         lines.append(f"{'  ' * indent_level}}}")
+        return "\n".join(lines)
+    
+    def _generate_comment(
+        self, comment: ast.Comment, indent_level: int = 0
+    ) -> str:
+        lines = [f"{'  ' * indent_level}{comment.content}"]
         return "\n".join(lines)
 
     def _generate_method(self, method: ast.Method, indent_level: int = 0) -> str:

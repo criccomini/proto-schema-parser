@@ -19,6 +19,11 @@ class ProtobufParserVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by ProtobufParser#commentDecl.
+    def visitCommentDecl(self, ctx:ProtobufParser.CommentDeclContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by ProtobufParser#syntaxDecl.
     def visitSyntaxDecl(self, ctx:ProtobufParser.SyntaxDeclContext):
         return self.visitChildren(ctx)
