@@ -360,3 +360,44 @@ def test_generate_service():
     )
 
     assert result == expected
+
+
+def test_message_with_comments():
+    file = ast.File(
+        file_elements=[
+            ast.Comment(text="// This is a comment"),
+            ast.Message(
+                name="MyMessage",
+                elements=[
+                    ast.Comment(text="/* This is a block comment */"),
+                    ast.Field(
+                        name="my_field",
+                        type="string",
+                        number=1,
+                        cardinality=ast.FieldCardinality.OPTIONAL,
+                    ),
+                    ast.Comment(text="/* This is a multi-line\n  block comment */"),
+                    ast.Field(
+                        name="another_field",
+                        type="int32",
+                        number=2,
+                        cardinality=ast.FieldCardinality.REQUIRED,
+                    ),
+                ],
+            ),
+        ]
+    )
+
+    result = Generator().generate(file)
+    expected = (
+        "// This is a comment\n"
+        "message MyMessage {\n"
+        "  /* This is a block comment */\n"
+        "  optional string my_field = 1;\n"
+        "  /* This is a multi-line\n"
+        "  block comment */\n"
+        "  required int32 another_field = 2;\n"
+        "}"
+    )
+
+    assert result == expected

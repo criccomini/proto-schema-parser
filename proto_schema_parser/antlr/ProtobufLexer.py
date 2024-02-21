@@ -255,7 +255,7 @@ class ProtobufLexer(Lexer):
 
     WS = 1
     LINE_COMMENT = 2
-    COMMENT = 3
+    BLOCK_COMMENT = 3
     BYTE_ORDER_MARK = 4
     SYNTAX = 5
     IMPORT = 6
@@ -335,7 +335,7 @@ class ProtobufLexer(Lexer):
             "')'", "'{'", "'}'", "'['", "']'", "'<'", "'>'" ]
 
     symbolicNames = [ "<INVALID>",
-            "WS", "LINE_COMMENT", "COMMENT", "BYTE_ORDER_MARK", "SYNTAX", 
+            "WS", "LINE_COMMENT", "BLOCK_COMMENT", "BYTE_ORDER_MARK", "SYNTAX", 
             "IMPORT", "WEAK", "PUBLIC", "PACKAGE", "OPTION", "INF", "REPEATED", 
             "OPTIONAL", "REQUIRED", "BOOL", "STRING", "BYTES", "FLOAT", 
             "DOUBLE", "INT32", "INT64", "UINT32", "UINT64", "SINT32", "SINT64", 
@@ -347,7 +347,7 @@ class ProtobufLexer(Lexer):
             "EQUALS", "MINUS", "PLUS", "L_PAREN", "R_PAREN", "L_BRACE", 
             "R_BRACE", "L_BRACKET", "R_BRACKET", "L_ANGLE", "R_ANGLE" ]
 
-    ruleNames = [ "WS", "LINE_COMMENT", "COMMENT", "LETTER", "DECIMAL_DIGIT", 
+    ruleNames = [ "WS", "LINE_COMMENT", "BLOCK_COMMENT", "LETTER", "DECIMAL_DIGIT", 
                   "OCTAL_DIGIT", "HEX_DIGIT", "BYTE_ORDER_MARK", "SYNTAX", 
                   "IMPORT", "WEAK", "PUBLIC", "PACKAGE", "OPTION", "INF", 
                   "REPEATED", "OPTIONAL", "REQUIRED", "BOOL", "STRING", 

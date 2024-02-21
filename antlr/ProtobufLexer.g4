@@ -5,7 +5,7 @@ WS  :   [ \t\r\n\u000C]+ -> channel(HIDDEN);
 
 // comment tokens
 LINE_COMMENT: '//' ~[\r\n]*;
-COMMENT: '/*' .*? '*/';
+BLOCK_COMMENT: '/*' .*? '*/';
 
 // character classes
 fragment LETTER: [A-Za-z_];

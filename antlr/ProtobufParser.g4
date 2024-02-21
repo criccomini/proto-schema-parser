@@ -16,7 +16,7 @@ fileElement: importDecl |
                emptyDecl |
                commentDecl;
 
-commentDecl: (LINE_COMMENT | COMMENT);
+commentDecl: (LINE_COMMENT | BLOCK_COMMENT);
 
 syntaxDecl: SYNTAX EQUALS syntaxLevel SEMICOLON;
 

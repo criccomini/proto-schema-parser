@@ -4,9 +4,14 @@ from proto_schema_parser.parser import Parser
 
 def test_parse_person():
     text = """
+    // A person with a name, id, and contact info
     message Person {
+      // Includes both first and last name
       required string name = 1;
       required int32 id = 2;
+      /* Email address
+       * Note: only one or zero is supported
+       */
       optional string email = 3;
 
       enum PhoneType {
@@ -27,9 +32,11 @@ def test_parse_person():
     expected = ast.File(
         syntax=None,
         file_elements=[
+            ast.Comment(text="// A person with a name, id, and contact info"),
             ast.Message(
                 name="Person",
                 elements=[
+                    ast.Comment(text="// Includes both first and last name"),
                     ast.Field(
                         name="name",
                         number=1,
@@ -43,6 +50,9 @@ def test_parse_person():
                         cardinality=ast.FieldCardinality.REQUIRED,
                         type="int32",
                         options=[],
+                    ),
+                    ast.Comment(
+                        text="/* Email address\n       * Note: only one or zero is supported\n       */"
                     ),
                     ast.Field(
                         name="email",
@@ -98,7 +108,7 @@ def test_parse_person():
                         options=[],
                     ),
                 ],
-            )
+            ),
         ],
     )
     assert result == expected

@@ -17,10 +17,12 @@ class File:
     syntax: str | None = None
     file_elements: list[FileElement] = field(default_factory=list)
 
-# commentDecl: (LINE_COMMENT | COMMENT)
+
+# commentDecl: (LINE_COMMENT | BLOCK_COMMENT)
 @dataclass
 class Comment:
-    content: str
+    text: str
+
 
 # packageDecl: PACKAGE packageName SEMICOLON;
 @dataclass
@@ -164,7 +166,8 @@ class MessageType:
 #                enumDecl |
 #                extensionDecl |
 #                serviceDecl |
-#                emptyDecl;
+#                emptyDecl |
+#                commentDecl;
 FileElement = Union[Comment, Import, Package, Option, Message, Enum, Extension]
 
 # messageElement: messageFieldDecl |
@@ -177,7 +180,8 @@ FileElement = Union[Comment, Import, Package, Option, Message, Enum, Extension]
 #                   enumDecl |
 #                   extensionDecl |
 #                   mapFieldDecl |
-#                   emptyDecl;
+#                   emptyDecl |
+#                   commentDecl;
 MessageElement = Union[
     Comment,
     Field,

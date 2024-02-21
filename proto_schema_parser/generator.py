@@ -73,11 +73,9 @@ class Generator:
                 lines.append(self._generate_option(element, indent_level + 1))
         lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
-    
-    def _generate_comment(
-        self, comment: ast.Comment, indent_level: int = 0
-    ) -> str:
-        lines = [f"{'  ' * indent_level}{comment.content}"]
+
+    def _generate_comment(self, comment: ast.Comment, indent_level: int = 0) -> str:
+        lines = [f"{'  ' * indent_level}{comment.text}"]
         return "\n".join(lines)
 
     def _generate_method(self, method: ast.Method, indent_level: int = 0) -> str:

@@ -346,19 +346,19 @@ class ProtobufParser ( Parser ):
                      "':'", "'='", "'-'", "'+'", "'('", "')'", "'{'", "'}'", 
                      "'['", "']'", "'<'", "'>'" ]
 
-    symbolicNames = [ "<INVALID>", "WS", "LINE_COMMENT", "COMMENT", "BYTE_ORDER_MARK", 
-                      "SYNTAX", "IMPORT", "WEAK", "PUBLIC", "PACKAGE", "OPTION", 
-                      "INF", "REPEATED", "OPTIONAL", "REQUIRED", "BOOL", 
-                      "STRING", "BYTES", "FLOAT", "DOUBLE", "INT32", "INT64", 
-                      "UINT32", "UINT64", "SINT32", "SINT64", "FIXED32", 
-                      "FIXED64", "SFIXED32", "SFIXED64", "GROUP", "ONEOF", 
-                      "MAP", "EXTENSIONS", "TO", "MAX", "RESERVED", "ENUM", 
-                      "MESSAGE", "EXTEND", "SERVICE", "RPC", "STREAM", "RETURNS", 
-                      "IDENTIFIER", "INT_LITERAL", "FLOAT_LITERAL", "INVALID_INT_LITERAL", 
-                      "INVALID_FLOAT_LITERAL", "STRING_LITERAL", "SEMICOLON", 
-                      "COMMA", "DOT", "SLASH", "COLON", "EQUALS", "MINUS", 
-                      "PLUS", "L_PAREN", "R_PAREN", "L_BRACE", "R_BRACE", 
-                      "L_BRACKET", "R_BRACKET", "L_ANGLE", "R_ANGLE" ]
+    symbolicNames = [ "<INVALID>", "WS", "LINE_COMMENT", "BLOCK_COMMENT", 
+                      "BYTE_ORDER_MARK", "SYNTAX", "IMPORT", "WEAK", "PUBLIC", 
+                      "PACKAGE", "OPTION", "INF", "REPEATED", "OPTIONAL", 
+                      "REQUIRED", "BOOL", "STRING", "BYTES", "FLOAT", "DOUBLE", 
+                      "INT32", "INT64", "UINT32", "UINT64", "SINT32", "SINT64", 
+                      "FIXED32", "FIXED64", "SFIXED32", "SFIXED64", "GROUP", 
+                      "ONEOF", "MAP", "EXTENSIONS", "TO", "MAX", "RESERVED", 
+                      "ENUM", "MESSAGE", "EXTEND", "SERVICE", "RPC", "STREAM", 
+                      "RETURNS", "IDENTIFIER", "INT_LITERAL", "FLOAT_LITERAL", 
+                      "INVALID_INT_LITERAL", "INVALID_FLOAT_LITERAL", "STRING_LITERAL", 
+                      "SEMICOLON", "COMMA", "DOT", "SLASH", "COLON", "EQUALS", 
+                      "MINUS", "PLUS", "L_PAREN", "R_PAREN", "L_BRACE", 
+                      "R_BRACE", "L_BRACKET", "R_BRACKET", "L_ANGLE", "R_ANGLE" ]
 
     RULE_file = 0
     RULE_fileElement = 1
@@ -489,7 +489,7 @@ class ProtobufParser ( Parser ):
     EOF = Token.EOF
     WS=1
     LINE_COMMENT=2
-    COMMENT=3
+    BLOCK_COMMENT=3
     BYTE_ORDER_MARK=4
     SYNTAX=5
     IMPORT=6
@@ -788,8 +788,8 @@ class ProtobufParser ( Parser ):
         def LINE_COMMENT(self):
             return self.getToken(ProtobufParser.LINE_COMMENT, 0)
 
-        def COMMENT(self):
-            return self.getToken(ProtobufParser.COMMENT, 0)
+        def BLOCK_COMMENT(self):
+            return self.getToken(ProtobufParser.BLOCK_COMMENT, 0)
 
         def getRuleIndex(self):
             return ProtobufParser.RULE_commentDecl
