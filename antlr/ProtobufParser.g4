@@ -13,7 +13,10 @@ fileElement: importDecl |
                enumDecl |
                extensionDecl |
                serviceDecl |
-               emptyDecl;
+               emptyDecl |
+               commentDecl;
+
+commentDecl: (LINE_COMMENT | BLOCK_COMMENT);
 
 syntaxDecl: SYNTAX EQUALS syntaxLevel SEMICOLON;
 
@@ -131,7 +134,8 @@ messageElement: messageFieldDecl |
                   enumDecl |
                   extensionDecl |
                   mapFieldDecl |
-                  emptyDecl;
+                  emptyDecl |
+                  commentDecl;
 
 messageFieldDecl: fieldDeclWithCardinality |
                   messageFieldDeclTypeName fieldName EQUALS fieldNumber

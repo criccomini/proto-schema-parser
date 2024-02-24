@@ -18,6 +18,9 @@ class ASTConstructor(ProtobufParserVisitor):
         file_elements = [self.visit(child) for child in ctx.fileElement()]
         return ast.File(syntax=syntax, file_elements=file_elements)
 
+    def visitCommentDecl(self, ctx: ProtobufParser.CommentDeclContext):
+        return ast.Comment(text=self._getText(ctx))
+
     def visitPackageDecl(self, ctx: ProtobufParser.PackageDeclContext):
         name = self._getText(ctx.packageName())
         return ast.Package(name=name)

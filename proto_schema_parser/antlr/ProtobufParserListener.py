@@ -26,6 +26,15 @@ class ProtobufParserListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by ProtobufParser#commentDecl.
+    def enterCommentDecl(self, ctx:ProtobufParser.CommentDeclContext):
+        pass
+
+    # Exit a parse tree produced by ProtobufParser#commentDecl.
+    def exitCommentDecl(self, ctx:ProtobufParser.CommentDeclContext):
+        pass
+
+
     # Enter a parse tree produced by ProtobufParser#syntaxDecl.
     def enterSyntaxDecl(self, ctx:ProtobufParser.SyntaxDeclContext):
         pass
