@@ -797,3 +797,60 @@ def test_parse_service():
         ],
     )
     assert result == expected
+
+
+def test_parse_comments_in_enum():
+    test = """
+    syntax = "proto3";
+
+    enum SampleEnum {
+        // This is a comment
+        UNKNOWN = 0;
+        SOMETHING = 1; // comment on same line
+        ELSE = 2;
+        // trailing comment
+        MORE = 3;
+        /* multi-line
+        comment
+        */
+    }
+    """
+
+    result = Parser().parse(test)
+
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Enum(
+                name="SampleEnum",
+                elements=[
+                    ast.Comment(text="// This is a comment"),
+                    ast.EnumValue(
+                        name="UNKNOWN",
+                        number=0,
+                        options=[],
+                    ),
+                    ast.EnumValue(
+                        name="SOMETHING",
+                        number=1,
+                        options=[],
+                    ),
+                    ast.Comment(text="// comment on same line"),
+                    ast.EnumValue(
+                        name="ELSE",
+                        number=2,
+                        options=[],
+                    ),
+                    ast.Comment(text="// trailing comment"),
+                    ast.EnumValue(
+                        name="MORE",
+                        number=3,
+                        options=[],
+                    ),
+                    ast.Comment(text="/* multi-line\n        comment\n        */"),
+                ],
+            ),
+        ],
+    )
+
+    assert result == expected

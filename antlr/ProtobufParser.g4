@@ -195,7 +195,8 @@ enumName   : identifier;
 enumElement: optionDecl |
                enumValueDecl |
                enumReservedDecl |
-               emptyDecl;
+               emptyDecl |
+               commentDecl;
 
 enumValueDecl: enumValueName EQUALS enumValueNumber compactOptions? SEMICOLON;
 

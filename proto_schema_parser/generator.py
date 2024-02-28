@@ -163,6 +163,8 @@ class Generator:
                 lines.append(self._generate_enum_reserved(element, indent_level + 1))
             elif isinstance(element, ast.Option):
                 lines.append(self._generate_option(element, indent_level + 1))
+            elif isinstance(element, ast.Comment):
+                lines.append(self._generate_comment(element, indent_level + 1))
         lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
 

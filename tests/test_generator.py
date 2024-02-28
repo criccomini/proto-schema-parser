@@ -401,3 +401,55 @@ def test_message_with_comments():
     )
 
     assert result == expected
+
+
+def test_enum_with_comments():
+    file = ast.File(
+        file_elements=[
+            ast.Enum(
+                name="SampleEnum",
+                elements=[
+                    ast.Comment(text="// This is a comment"),
+                    ast.EnumValue(
+                        name="UNKNOWN",
+                        number=0,
+                        options=[],
+                    ),
+                    ast.EnumValue(
+                        name="SOMETHING",
+                        number=1,
+                        options=[],
+                    ),
+                    ast.Comment(text="// comment on same line"),
+                    ast.EnumValue(
+                        name="ELSE",
+                        number=2,
+                        options=[],
+                    ),
+                    ast.Comment(text="// trailing comment"),
+                    ast.EnumValue(
+                        name="MORE",
+                        number=3,
+                        options=[],
+                    ),
+                    ast.Comment(text="/* Multi-line\n    comment */"),
+                ],
+            ),
+        ],
+    )
+    result = Generator().generate(file)
+    expected = (
+        "enum SampleEnum {\n"
+        "  // This is a comment\n"
+        "  UNKNOWN = 0;\n"
+        "  SOMETHING = 1;\n"
+        "  // comment on same line\n"
+        "  ELSE = 2;\n"
+        "  // trailing comment\n"
+        "  MORE = 3;\n"
+        "  /* Multi-line\n"
+        "    comment */\n"
+        "}"
+    )
+
+    assert result == expected
