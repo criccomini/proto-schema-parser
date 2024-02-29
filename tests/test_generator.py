@@ -401,3 +401,112 @@ def test_message_with_comments():
     )
 
     assert result == expected
+
+
+def test_enum_with_comments():
+    file = ast.File(
+        file_elements=[
+            ast.Enum(
+                name="SampleEnum",
+                elements=[
+                    ast.Comment(text="// This is a comment"),
+                    ast.EnumValue(
+                        name="UNKNOWN",
+                        number=0,
+                        options=[],
+                    ),
+                    ast.EnumValue(
+                        name="SOMETHING",
+                        number=1,
+                        options=[],
+                    ),
+                    ast.Comment(text="// comment on same line"),
+                    ast.EnumValue(
+                        name="ELSE",
+                        number=2,
+                        options=[],
+                    ),
+                    ast.Comment(text="// trailing comment"),
+                    ast.EnumValue(
+                        name="MORE",
+                        number=3,
+                        options=[],
+                    ),
+                    ast.Comment(text="/* Multi-line\n    comment */"),
+                ],
+            ),
+        ],
+    )
+    result = Generator().generate(file)
+    expected = (
+        "enum SampleEnum {\n"
+        "  // This is a comment\n"
+        "  UNKNOWN = 0;\n"
+        "  SOMETHING = 1;\n"
+        "  // comment on same line\n"
+        "  ELSE = 2;\n"
+        "  // trailing comment\n"
+        "  MORE = 3;\n"
+        "  /* Multi-line\n"
+        "    comment */\n"
+        "}"
+    )
+
+    assert result == expected
+
+
+def test_oneof_with_comments():
+    file = ast.File(
+        file_elements=[
+            ast.Message(
+                name="TestMessage",
+                elements=[
+                    ast.OneOf(
+                        name="test_oneof",
+                        elements=[
+                            ast.Comment(text="// This is a comment"),
+                            ast.Field(
+                                name="name",
+                                number=1,
+                                type="string",
+                                options=[],
+                            ),
+                            ast.Field(
+                                name="id",
+                                number=2,
+                                type="int32",
+                                options=[],
+                            ),
+                            ast.Comment(text="// comment on same line"),
+                            ast.Comment(text="// trailing comment"),
+                            ast.Field(
+                                name="active",
+                                number=3,
+                                type="bool",
+                                options=[],
+                            ),
+                            ast.Comment(text="/* multi-line\n    comment*/"),
+                        ],
+                    ),
+                ],
+            ),
+        ],
+    )
+    result = Generator().generate(file)
+
+    expected = (
+        "message TestMessage {\n"
+        "  oneof test_oneof {\n"
+        "    // This is a comment\n"
+        "    string name = 1;\n"
+        "    int32 id = 2;\n"
+        "    // comment on same line\n"
+        "    // trailing comment\n"
+        "    bool active = 3;\n"
+        "    /* multi-line\n"
+        "    comment*/\n"
+        "  }\n"
+        "}"
+    )
+
+    assert result == expected

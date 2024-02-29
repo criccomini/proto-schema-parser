@@ -166,7 +166,8 @@ oneofName   : identifier;
 
 oneofElement: optionDecl |
                 oneofFieldDecl |
-                oneofGroupDecl;
+                oneofGroupDecl |
+                commentDecl;
 
 oneofFieldDecl: oneofFieldDeclTypeName fieldName EQUALS fieldNumber
                   compactOptions? SEMICOLON;
@@ -195,7 +196,8 @@ enumName   : identifier;
 enumElement: optionDecl |
                enumValueDecl |
                enumReservedDecl |
-               emptyDecl;
+               emptyDecl |
+               commentDecl;
 
 enumValueDecl: enumValueName EQUALS enumValueNumber compactOptions? SEMICOLON;
 
