@@ -854,3 +854,65 @@ def test_parse_comments_in_enum():
     )
 
     assert result == expected
+
+
+def test_parse_comments_in_oneofs():
+    test = """
+    syntax = "proto3";
+    message TestMessage {
+        oneof test_oneof {
+            // This is a comment
+            string name = 1;
+            int32 id = 2; // comment on same line
+            // trailing comment
+            bool active = 3;
+            /* multi-line
+            comment
+            */
+        }
+    }
+    """
+
+    result = Parser().parse(test)
+
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Message(
+                name="TestMessage",
+                elements=[
+                    ast.OneOf(
+                        name="test_oneof",
+                        elements=[
+                            ast.Comment(text="// This is a comment"),
+                            ast.Field(
+                                name="name",
+                                number=1,
+                                type="string",
+                                options=[],
+                            ),
+                            ast.Field(
+                                name="id",
+                                number=2,
+                                type="int32",
+                                options=[],
+                            ),
+                            ast.Comment(text="// comment on same line"),
+                            ast.Comment(text="// trailing comment"),
+                            ast.Field(
+                                name="active",
+                                number=3,
+                                type="bool",
+                                options=[],
+                            ),
+                            ast.Comment(
+                                text="/* multi-line\n            comment\n            */"
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+        ],
+    )
+
+    assert result == expected

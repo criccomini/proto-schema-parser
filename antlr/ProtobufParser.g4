@@ -166,7 +166,8 @@ oneofName   : identifier;
 
 oneofElement: optionDecl |
                 oneofFieldDecl |
-                oneofGroupDecl;
+                oneofGroupDecl |
+                commentDecl;
 
 oneofFieldDecl: oneofFieldDeclTypeName fieldName EQUALS fieldNumber
                   compactOptions? SEMICOLON;

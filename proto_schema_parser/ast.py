@@ -198,8 +198,9 @@ MessageElement = Union[
 
 # oneofElement: optionDecl |
 #                 oneofFieldDecl |
-#                 oneofGroupDecl;
-OneOfElement = Union[Option, Field, Group]
+#                 oneofGroupDecl |
+#                 commentDecl;
+OneOfElement = Union[Option, Field, Group, Comment]
 
 # enumElement: optionDecl |
 #                enumValueDecl |
