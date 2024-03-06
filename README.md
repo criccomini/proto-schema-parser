@@ -73,7 +73,7 @@ from proto_schema_parser.generator import Generator
 proto = Generator().generate(result)
 ```
 
-This will print:
+The `proto` variable now contains the string:
 
 ```proto
 syntax = "proto3";
