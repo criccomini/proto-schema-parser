@@ -916,3 +916,68 @@ def test_parse_comments_in_oneofs():
     )
 
     assert result == expected
+
+
+def test_parse_comments_in_service():
+    text = """
+    syntax = "proto3";
+
+    service ExampleService {
+        // This is a comment
+        rpc UnaryCall (ExampleRequest) returns (ExampleResponse) { }
+        rpc StreamingFromServer (ExampleRequest) returns (stream ExampleResponse); // comment on same line
+        // trailing comment
+        rpc StreamingFromClient (stream ExampleRequest) returns (ExampleResponse) {
+            // comment in RPC
+            option (my_method_option).foo = 567; // comment in RPC on same line
+            /* multi-line
+            comment
+            in RPC */
+        }
+        /* multi-line
+        comment
+        */
+    }
+    """
+    result = Parser().parse(text)
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Service(
+                name="ExampleService",
+                elements=[
+                    ast.Comment(text="// This is a comment"),
+                    ast.Method(
+                        name="UnaryCall",
+                        input_type=ast.MessageType(type="ExampleRequest"),
+                        output_type=ast.MessageType(type="ExampleResponse"),
+                    ),
+                    ast.Method(
+                        name="StreamingFromServer",
+                        input_type=ast.MessageType(type="ExampleRequest"),
+                        output_type=ast.MessageType(
+                            type="ExampleResponse", stream=True
+                        ),
+                    ),
+                    ast.Comment(text="// comment on same line"),
+                    ast.Comment(text="// trailing comment"),
+                    ast.Method(
+                        name="StreamingFromClient",
+                        input_type=ast.MessageType(type="ExampleRequest", stream=True),
+                        output_type=ast.MessageType(type="ExampleResponse"),
+                        elements=[
+                            ast.Comment(text="// comment in RPC"),
+                            ast.Option(name="(my_method_option).foo", value="567"),
+                            ast.Comment(text="// comment in RPC on same line"),
+                            ast.Comment(
+                                text="/* multi-line\n            comment\n            in RPC */"
+                            ),
+                        ],
+                    ),
+                    ast.Comment(text="/* multi-line\n        comment\n        */"),
+                ],
+            ),
+        ],
+    )
+
+    assert result == expected
