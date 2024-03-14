@@ -969,7 +969,9 @@ def test_parse_comments_in_service():
                             ast.Comment(text="// comment in RPC"),
                             ast.Option(name="(my_method_option).foo", value="567"),
                             ast.Comment(text="// comment in RPC on same line"),
-                            ast.Comment(text="/* multi-line\n            comment\n            in RPC */"),
+                            ast.Comment(
+                                text="/* multi-line\n            comment\n            in RPC */"
+                            ),
                         ],
                     ),
                     ast.Comment(text="/* multi-line\n        comment\n        */"),

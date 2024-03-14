@@ -206,7 +206,7 @@ class ASTConstructor(ProtobufParserVisitor):
         elif commentDecl := ctx.commentDecl():
             return self.visit(commentDecl)
         else:
-            raise AttributeError('invalid service element')
+            raise AttributeError("invalid service element")
 
     def visitMethodDecl(self, ctx: ProtobufParser.MethodDeclContext):
         name = self._getText(ctx.methodName())
@@ -214,7 +214,10 @@ class ASTConstructor(ProtobufParserVisitor):
         output_type = self.visit(ctx.outputType())
         elements = [self.visit(child) for child in ctx.methodElement()]
         return ast.Method(
-            name=name, input_type=input_type, output_type=output_type, elements=elements,
+            name=name,
+            input_type=input_type,
+            output_type=output_type,
+            elements=elements,
         )
 
     def visitInputType(self, ctx: ProtobufParser.InputTypeContext):
@@ -234,7 +237,7 @@ class ASTConstructor(ProtobufParserVisitor):
         elif commentDecl := ctx.commentDecl():
             return self.visit(commentDecl)
         else:
-            raise AttributeError('invalid method element')
+            raise AttributeError("invalid method element")
 
     # ctx: ParserRuleContext, but ANTLR generates untyped code
     def _getText(self, ctx: Any, stripQuotes: bool = True):
