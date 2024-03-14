@@ -166,9 +166,9 @@ class MessageType:
 #                enumDecl |
 #                extensionDecl |
 #                serviceDecl |
-#                emptyDecl |
-#                commentDecl;
-FileElement = Union[Comment, Import, Package, Option, Message, Enum, Extension]
+#                commentDecl |
+#                emptyDecl;
+FileElement = Union[Import, Package, Option, Message, Enum, Extension, Service, Comment]
 
 # messageElement: messageFieldDecl |
 #                   groupDecl |
@@ -215,9 +215,11 @@ ExtensionElement = Union[Field, Group]
 
 # serviceElement: optionDecl |
 #                   methodDecl |
+#                   commentDecl |
 #                   emptyDecl;
-ServiceElement = Union[Option, Method]
+ServiceElement = Union[Option, Method, Comment]
 
 # methodElement: optionDecl |
+#                 commentDecl |
 #                 emptyDecl;
-MethodElement = Optional[Option]
+MethodElement = Union[Option, Comment]

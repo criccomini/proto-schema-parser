@@ -231,6 +231,7 @@ serviceDecl: SERVICE serviceName L_BRACE serviceElement* R_BRACE;
 serviceName   : identifier;
 
 serviceElement: optionDecl |
+                  commentDecl |
                   methodDecl |
                   emptyDecl;
 
@@ -244,6 +245,7 @@ inputType    : messageType;
 outputType   : messageType;
 
 methodElement: optionDecl |
+                commentDecl |
                 emptyDecl;
 
 messageType: L_PAREN STREAM? methodDeclTypeName R_PAREN;
