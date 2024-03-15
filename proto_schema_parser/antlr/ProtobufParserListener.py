@@ -278,15 +278,6 @@ class ProtobufParserListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by ProtobufParser#uintLiteral.
-    def enterUintLiteral(self, ctx:ProtobufParser.UintLiteralContext):
-        pass
-
-    # Exit a parse tree produced by ProtobufParser#uintLiteral.
-    def exitUintLiteral(self, ctx:ProtobufParser.UintLiteralContext):
-        pass
-
-
     # Enter a parse tree produced by ProtobufParser#intLiteral.
     def enterIntLiteral(self, ctx:ProtobufParser.IntLiteralContext):
         pass
@@ -302,6 +293,15 @@ class ProtobufParserListener(ParseTreeListener):
 
     # Exit a parse tree produced by ProtobufParser#floatLiteral.
     def exitFloatLiteral(self, ctx:ProtobufParser.FloatLiteralContext):
+        pass
+
+
+    # Enter a parse tree produced by ProtobufParser#specialFloatLiteral.
+    def enterSpecialFloatLiteral(self, ctx:ProtobufParser.SpecialFloatLiteralContext):
+        pass
+
+    # Exit a parse tree produced by ProtobufParser#specialFloatLiteral.
+    def exitSpecialFloatLiteral(self, ctx:ProtobufParser.SpecialFloatLiteralContext):
         pass
 
 

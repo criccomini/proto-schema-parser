@@ -32,6 +32,7 @@ antlr = "java -Xmx500M -cp antlr/antlr-4.13.0-complete.jar org.antlr.v4.Tool -Dl
 black = "black proto_schema_parser/ tests/"
 isort = "isort proto_schema_parser/ tests/"
 style = {composite = ["black", "isort"]}
+test = "pytest"
 
 [tool.black]
 exclude = "proto_schema_parser/antlr/"
