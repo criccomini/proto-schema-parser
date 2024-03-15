@@ -159,11 +159,6 @@ class ProtobufParserVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by ProtobufParser#uintLiteral.
-    def visitUintLiteral(self, ctx:ProtobufParser.UintLiteralContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by ProtobufParser#intLiteral.
     def visitIntLiteral(self, ctx:ProtobufParser.IntLiteralContext):
         return self.visitChildren(ctx)
@@ -171,6 +166,11 @@ class ProtobufParserVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by ProtobufParser#floatLiteral.
     def visitFloatLiteral(self, ctx:ProtobufParser.FloatLiteralContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ProtobufParser#specialFloatLiteral.
+    def visitSpecialFloatLiteral(self, ctx:ProtobufParser.SpecialFloatLiteralContext):
         return self.visitChildren(ctx)
 
 
