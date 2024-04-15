@@ -4,7 +4,7 @@ options {
 	tokenVocab = ProtobufLexer;
 }
 
-file: BYTE_ORDER_MARK? syntaxDecl? fileElement* EOF;
+file: BYTE_ORDER_MARK? commentDecl* syntaxDecl? fileElement* EOF;
 
 fileElement: importDecl |
                packageDecl |

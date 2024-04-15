@@ -981,3 +981,37 @@ def test_parse_comments_in_service():
     )
 
     assert result == expected
+
+
+def test_comments_at_beginning_of_file():
+    text = """
+    // This is a comment
+    syntax = "proto3";
+
+    message ExampleMessage {
+        // Field comment
+        string example_field = 1;
+    }
+    """
+    result = Parser().parse(text)
+
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Comment(text="// This is a comment"),
+            ast.Message(
+                name="ExampleMessage",
+                elements=[
+                    ast.Comment(text="// Field comment"),
+                    ast.Field(
+                        name="example_field",
+                        number=1,
+                        type="string",
+                        options=[],
+                    ),
+                ],
+            ),
+        ],
+    )
+
+    assert result == expected

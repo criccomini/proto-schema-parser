@@ -15,7 +15,9 @@ class ASTConstructor(ProtobufParserVisitor):
         syntax = (
             self._getText(ctx.syntaxDecl().syntaxLevel()) if ctx.syntaxDecl() else None
         )
-        file_elements = [self.visit(child) for child in ctx.fileElement()]
+        file_elements = [self.visit(child) for child in ctx.commentDecl()] + [
+            self.visit(child) for child in ctx.fileElement()
+        ]
         return ast.File(syntax=syntax, file_elements=file_elements)
 
     def visitCommentDecl(self, ctx: ProtobufParser.CommentDeclContext):
