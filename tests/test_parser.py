@@ -748,6 +748,10 @@ def test_parse_service():
             option (my_method_option).foo = 567;
             option (my_method_option).bar = "Some string";
         }
+        rpc MyMethod_Semicolon(RequestType) returns(ResponseType) {
+            option (my_method_option).foo = 567;
+            option (my_method_option).bar = "Some string";
+        };
     }
 
     service ExampleEmptyService {}
@@ -779,6 +783,17 @@ def test_parse_service():
                     ast.Option(name="(my_service_option)", value="FOO"),
                     ast.Method(
                         name="MyMethod",
+                        input_type=ast.MessageType(type="RequestType"),
+                        output_type=ast.MessageType(type="ResponseType"),
+                        elements=[
+                            ast.Option(name="(my_method_option).foo", value="567"),
+                            ast.Option(
+                                name="(my_method_option).bar", value="Some string"
+                            ),
+                        ],
+                    ),
+                    ast.Method(
+                        name="MyMethod_Semicolon",
                         input_type=ast.MessageType(type="RequestType"),
                         output_type=ast.MessageType(type="ResponseType"),
                         elements=[

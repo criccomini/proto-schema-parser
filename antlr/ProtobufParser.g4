@@ -237,7 +237,7 @@ serviceElement: optionDecl |
                   emptyDecl;
 
 methodDecl: RPC methodName inputType RETURNS outputType SEMICOLON |
-              RPC methodName inputType RETURNS outputType L_BRACE methodElement* R_BRACE;
+              RPC methodName inputType RETURNS outputType L_BRACE methodElement* R_BRACE SEMICOLON?;
 
 methodName   : identifier;
 
