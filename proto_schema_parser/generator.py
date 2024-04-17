@@ -21,7 +21,13 @@ class Generator:
                     modifier = "public "
                 lines.append(f'import {modifier}"{element.name}";')
             elif isinstance(element, ast.Option):
-                lines.append(f'option {element.name} = "{element.value}";')
+                if isinstance(element.value, bool):
+                    if element.value:
+                        lines.append(f'option {element.name} = true;')
+                    else:
+                        lines.append(f'option {element.name} = false;')
+                else:
+                    lines.append(f'option {element.name} = "{element.value}";')
             elif isinstance(element, ast.Message):
                 lines.append(self._generate_message(element))
             elif isinstance(element, ast.Enum):
