@@ -122,7 +122,11 @@ def test_generate_extension_with_comment():
     )
 
     result = Generator().generate(file)
-    expected = "extend ExtendeeType {\n" "  // This is a comment. \n  optional string ext_field = 1;\n" "}"
+    expected = (
+        "extend ExtendeeType {\n"
+        "  // This is a comment. \n  optional string ext_field = 1;\n"
+        "}"
+    )
 
     assert result == expected
 
