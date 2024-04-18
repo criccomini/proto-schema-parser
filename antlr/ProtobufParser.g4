@@ -221,7 +221,8 @@ extensionDecl: EXTEND extendedMessage L_BRACE extensionElement* R_BRACE;
 extendedMessage : typeName;
 
 extensionElement: extensionFieldDecl |
-                    groupDecl;
+                    groupDecl |
+                    commentDecl;
 
 extensionFieldDecl: fieldDeclWithCardinality |
                     extensionFieldDeclTypeName fieldName EQUALS fieldNumber

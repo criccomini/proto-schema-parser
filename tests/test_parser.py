@@ -377,6 +377,11 @@ def test_parse_extension():
     extend Foo {
       optional int32 bar = 101;
     }
+
+    extend Foo_Comment {
+      // This is a comment.
+      optional int32 bar = 101;
+    }
     """
     result = Parser().parse(text)
     expected = ast.File(
@@ -393,6 +398,19 @@ def test_parse_extension():
             ast.Extension(
                 typeName="Foo",
                 elements=[
+                    ast.Field(
+                        name="bar",
+                        number=101,
+                        cardinality=ast.FieldCardinality.OPTIONAL,
+                        type="int32",
+                        options=[],
+                    ),
+                ],
+            ),
+            ast.Extension(
+                typeName="Foo_Comment",
+                elements=[
+                    ast.Comment(text="// This is a comment."),
                     ast.Field(
                         name="bar",
                         number=101,
