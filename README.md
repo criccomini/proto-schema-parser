@@ -45,24 +45,31 @@ result = Parser().parse(text)
 
 This will return an AST object (`ast.File`) representing the parsed protobuf schema.
 
-```
-File(syntax='proto3',
-     file_elements=[Message(name='SearchRequest',
-                            elements=[Field(name='query',
-                                            number=1,
-                                            type='string',
-                                            cardinality=None,
-                                            options=[]),
-                                      Field(name='page_number',
-                                            number=2,
-                                            type='int32',
-                                            cardinality=None,
-                                            options=[]),
-                                      Field(name='result_per_page',
-                                            number=3,
-                                            type='int32',
-                                            cardinality=None,
-                                            options=[])])])
+```python
+File(
+  syntax='proto3',
+  file_elements=[
+    Message(
+      name='SearchRequest',
+      elements=[
+        Field(
+          name='query',
+          number=1,
+          type='string',
+          cardinality=None,
+          options=[]),
+        Field(
+          name='page_number',
+          number=2,
+          type='int32',
+          cardinality=None,
+          options=[]),
+        Field(
+          name='result_per_page',
+          number=3,
+          type='int32',
+          cardinality=None,
+          options=[])])])
 ```
 
 To write the AST back to a protobuf schema, create a `Generator` object and call the `generate` method:
