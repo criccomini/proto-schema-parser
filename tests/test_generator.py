@@ -103,6 +103,34 @@ def test_generate_extension():
     assert result == expected
 
 
+def test_generate_extension_with_comment():
+    file = ast.File(
+        file_elements=[
+            ast.Extension(
+                typeName="ExtendeeType",
+                elements=[
+                    ast.Comment(text="// This is a comment. "),
+                    ast.Field(
+                        name="ext_field",
+                        type="string",
+                        number=1,
+                        cardinality=ast.FieldCardinality.OPTIONAL,
+                    ),
+                ],
+            )
+        ]
+    )
+
+    result = Generator().generate(file)
+    expected = (
+        "extend ExtendeeType {\n"
+        "  // This is a comment. \n  optional string ext_field = 1;\n"
+        "}"
+    )
+
+    assert result == expected
+
+
 def test_generate_nested_message():
     file = ast.File(
         file_elements=[

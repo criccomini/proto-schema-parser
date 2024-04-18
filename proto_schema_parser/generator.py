@@ -161,6 +161,8 @@ class Generator:
                 lines.append(self._generate_field(element, indent_level + 1))
             elif isinstance(element, ast.Group):
                 lines.append(self._generate_group(element, indent_level + 1))
+            elif isinstance(element, ast.Comment):
+                lines.append(self._generate_comment(element, indent_level + 1))
         lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
 
