@@ -23,9 +23,9 @@ class Generator:
             elif isinstance(element, ast.Option):
                 if isinstance(element.value, bool):
                     if element.value:
-                        lines.append(f'option {element.name} = true;')
+                        lines.append(f"option {element.name} = true;")
                     else:
-                        lines.append(f'option {element.name} = false;')
+                        lines.append(f"option {element.name} = false;")
                 else:
                     lines.append(f'option {element.name} = "{element.value}";')
             elif isinstance(element, ast.Message):
