@@ -173,7 +173,11 @@ class ASTConstructor(ProtobufParserVisitor):
 
     def visitEnumValueDecl(self, ctx: ProtobufParser.EnumValueDeclContext):
         name = self._getText(ctx.enumValueName())
-        number = int(self._getText(ctx.enumValueNumber()))
+        number_text = self._getText(ctx.enumValueNumber())
+        if number_text.lower().startswith("0x"):
+            number = int(number_text, 16)
+        else:
+            number = int(number_text)
         options = self.visit(ctx.compactOptions()) if ctx.compactOptions() else []
         return ast.EnumValue(name=name, number=number, options=options)
 
