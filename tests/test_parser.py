@@ -1048,3 +1048,44 @@ def test_comments_at_beginning_of_file():
     )
 
     assert result == expected
+
+
+def test_enum_with_hex_value():
+    text = """
+    syntax = "proto3";
+
+    enum SampleEnum {
+        UNKNOWN = 0;
+        SOMETHING = 0xC8;
+        ELSE = 2;
+    }
+    """
+    result = Parser().parse(text)
+
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Enum(
+                name="SampleEnum",
+                elements=[
+                    ast.EnumValue(
+                        name="UNKNOWN",
+                        number=0,
+                        options=[],
+                    ),
+                    ast.EnumValue(
+                        name="SOMETHING",
+                        number=200,
+                        options=[],
+                    ),
+                    ast.EnumValue(
+                        name="ELSE",
+                        number=2,
+                        options=[],
+                    ),
+                ],
+            ),
+        ],
+    )
+
+    assert result == expected
