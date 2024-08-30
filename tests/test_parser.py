@@ -1136,7 +1136,7 @@ def test_comments_on_service_and_options():
                         elements=[
                             ast.Option(
                                 name="(google.api.http)",
-                                value="""{\n                // some comment about the option\n                get: "/v1/search/{query}"\n            }"""
+                                value="""{\n                // some comment about the option\n                get: "/v1/search/{query}"\n            }""",
                             ),
                         ],
                     ),
