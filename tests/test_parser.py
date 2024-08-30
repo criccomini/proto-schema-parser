@@ -1089,3 +1089,60 @@ def test_enum_with_hex_value():
     )
 
     assert result == expected
+
+
+def test_comments_on_service_and_options():
+    text = """
+    syntax = "proto3";
+
+    message SearchRequest {
+        string query = 1;
+    }
+
+    service SearchService {
+        // Do the search
+        rpc Search(SearchRequest) returns (SearchResponse) {
+            option (google.api.http) = {
+                // some comment about the option
+                get: "/v1/search/{query}"
+            };
+        }
+    }
+    """
+    result = Parser().parse(text)
+
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Message(
+                name="SearchRequest",
+                elements=[
+                    ast.Field(
+                        name="query",
+                        number=1,
+                        type="string",
+                        options=[],
+                    ),
+                ],
+            ),
+            ast.Service(
+                name="SearchService",
+                elements=[
+                    ast.Comment(text="// Do the search"),
+                    ast.Method(
+                        name="Search",
+                        input_type=ast.MessageType(type="SearchRequest"),
+                        output_type=ast.MessageType(type="SearchResponse"),
+                        elements=[
+                            ast.Option(
+                                name="(google.api.http)",
+                                value="""{\n                // some comment about the option\n                get: "/v1/search/{query}"\n            }"""
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+        ],
+    )
+
+    assert result == expected

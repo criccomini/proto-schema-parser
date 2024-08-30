@@ -94,7 +94,7 @@ specialFloatLiteral: MINUS INF | MINUS NAN;
 
 messageLiteralWithBraces: L_BRACE messageTextFormat R_BRACE;
 
-messageTextFormat: ( messageLiteralField ( COMMA | SEMICOLON )? )*;
+messageTextFormat: ( ( messageLiteralField ( COMMA | SEMICOLON )? ) | commentDecl ) *;
 
 messageLiteralField: messageLiteralFieldName COLON value |
                        messageLiteralFieldName messageValue;
