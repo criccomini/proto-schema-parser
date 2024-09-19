@@ -276,13 +276,21 @@ def test_generate_reserved():
                         ranges=["1 to 8", "10", "12"],
                         names=['"foo"', '"bar"'],
                     ),
+                    ast.Reserved(
+                        ranges=["13 to 17", "27", "54"],
+                        names=[],
+                    ),
+                    ast.Reserved(
+                        ranges=[],
+                        names=['"spam"', '"spamspam"'],
+                    ),
                 ],
             )
         ]
     )
 
     result = Generator().generate(file)
-    expected = "message MyMessage {\n" '  reserved 1 to 8, 10, 12, "foo", "bar";\n' "}"
+    expected = "message MyMessage {\n" '  reserved 1 to 8, 10, 12, "foo", "bar";\n  reserved 13 to 17, 27, 54;\n  reserved "spam", "spamspam";\n' "}"
 
     assert result == expected
 
