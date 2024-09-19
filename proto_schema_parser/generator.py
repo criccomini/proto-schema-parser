@@ -1,3 +1,5 @@
+import itertools
+
 from proto_schema_parser import ast
 
 
@@ -196,9 +198,8 @@ class Generator:
         return f"{'  ' * indent_level}extensions {ranges};"
 
     def _generate_reserved(self, reserved: ast.Reserved, indent_level: int = 0) -> str:
-        ranges = ", ".join(reserved.ranges)
-        names = ", ".join(reserved.names)
-        return f"{'  ' * indent_level}reserved {ranges}, {names};"
+        reserved_values = ", ".join(itertools.chain(reserved.ranges, reserved.names))
+        return f"{'  ' * indent_level}reserved {reserved_values};"
 
     @staticmethod
     def _indent(line: str, indent_level: int = 0) -> str:
