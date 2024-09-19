@@ -290,7 +290,11 @@ def test_generate_reserved():
     )
 
     result = Generator().generate(file)
-    expected = "message MyMessage {\n" '  reserved 1 to 8, 10, 12, "foo", "bar";\n  reserved 13 to 17, 27, 54;\n  reserved "spam", "spamspam";\n' "}"
+    expected = (
+        "message MyMessage {\n"
+        '  reserved 1 to 8, 10, 12, "foo", "bar";\n  reserved 13 to 17, 27, 54;\n  reserved "spam", "spamspam";\n'
+        "}"
+    )
 
     assert result == expected
 

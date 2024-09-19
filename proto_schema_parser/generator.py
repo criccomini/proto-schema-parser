@@ -1,5 +1,6 @@
-from proto_schema_parser import ast
 import itertools
+
+from proto_schema_parser import ast
 
 
 class Generator:
