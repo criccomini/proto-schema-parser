@@ -42,7 +42,7 @@ class Import:
 @dataclass
 class Option:
     name: str
-    value: str
+    value: str | int | float | bool
 
 
 # messageDecl: MESSAGE messageName L_BRACE messageElement* R_BRACE;

@@ -543,6 +543,8 @@ def test_parse_message_option():
 
     message Foo {
       option deprecated = true;
+      option some_num = 123;
+      option some_float = 123.3;
       string name = 1;
     }
     """
@@ -555,7 +557,15 @@ def test_parse_message_option():
                 elements=[
                     ast.Option(
                         name="deprecated",
-                        value="true",
+                        value=True,
+                    ),
+                    ast.Option(
+                        name="some_num",
+                        value=123,
+                    ),
+                    ast.Option(
+                        name="some_float",
+                        value=123.3,
                     ),
                     ast.Field(
                         name="name",
@@ -804,7 +814,7 @@ def test_parse_service():
                         input_type=ast.MessageType(type="RequestType"),
                         output_type=ast.MessageType(type="ResponseType"),
                         elements=[
-                            ast.Option(name="(my_method_option).foo", value="567"),
+                            ast.Option(name="(my_method_option).foo", value=567),
                             ast.Option(
                                 name="(my_method_option).bar", value="Some string"
                             ),
@@ -815,7 +825,7 @@ def test_parse_service():
                         input_type=ast.MessageType(type="RequestType"),
                         output_type=ast.MessageType(type="ResponseType"),
                         elements=[
-                            ast.Option(name="(my_method_option).foo", value="567"),
+                            ast.Option(name="(my_method_option).foo", value=567),
                             ast.Option(
                                 name="(my_method_option).bar", value="Some string"
                             ),
@@ -1000,7 +1010,7 @@ def test_parse_comments_in_service():
                         output_type=ast.MessageType(type="ExampleResponse"),
                         elements=[
                             ast.Comment(text="// comment in RPC"),
-                            ast.Option(name="(my_method_option).foo", value="567"),
+                            ast.Option(name="(my_method_option).foo", value=567),
                             ast.Comment(text="// comment in RPC on same line"),
                             ast.Comment(
                                 text="/* multi-line\n            comment\n            in RPC */"
