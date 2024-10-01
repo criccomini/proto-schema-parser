@@ -35,7 +35,7 @@ class ASTConstructor(ProtobufParserVisitor):
 
     def visitOptionDecl(self, ctx: ProtobufParser.OptionDeclContext):
         name = self._getText(ctx.optionName())
-        value = self._getText(ctx.optionValue())
+        value = self._stringToType(self._getText(ctx.optionValue()))
         return ast.Option(name=name, value=value)
 
     def visitMessageDecl(self, ctx: ProtobufParser.MessageDeclContext):
@@ -246,7 +246,9 @@ class ASTConstructor(ProtobufParserVisitor):
             raise AttributeError("invalid method element")
 
     # ctx: ParserRuleContext, but ANTLR generates untyped code
-    def _getText(self, ctx: Any, stripQuotes: bool = True):
+    def _getText(self, ctx: Any, strip_quotes: bool = True):
+        """ """
+
         token_source = (
             ctx.start.getTokenSource()
         )  # pyright: ignore [reportGeneralTypeIssues]
@@ -256,7 +258,31 @@ class ASTConstructor(ProtobufParserVisitor):
             ctx.stop.stop,
         )  # pyright: ignore [reportGeneralTypeIssues]
         text = input_stream.getText(start, stop)
-        return text.strip('"') if stripQuotes else text
+        text = text.strip('"') if strip_quotes else text
+        return text
+
+    def _stringToType(self, value: str):
+        """
+        Convert a string to a bool, int, or float if possible.
+
+        Args:
+            value: The string to convert.
+
+        Returns:
+            The converted value if possible, otherwise the original string.
+        """
+
+        if value.lower() in ["true", "false"]:
+            return value.lower() == "true"
+        try:
+            return int(value)
+        except ValueError:
+            pass
+        try:
+            return float(value)
+        except ValueError:
+            pass
+        return value
 
 
 class Parser:
