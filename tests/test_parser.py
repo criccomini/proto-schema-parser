@@ -1146,3 +1146,35 @@ def test_comments_on_service_and_options():
     )
 
     assert result == expected
+
+
+def test_comment_with_trailing_quote():
+    text = """
+    syntax = "proto3";
+
+    message ExampleMessage {
+        // This is a comment with a trailing quote"
+        string example_field = 1;
+    }
+    """
+    result = Parser().parse(text)
+
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Message(
+                name="ExampleMessage",
+                elements=[
+                    ast.Comment(text='// This is a comment with a trailing quote"'),
+                    ast.Field(
+                        name="example_field",
+                        number=1,
+                        type="string",
+                        options=[],
+                    ),
+                ],
+            ),
+        ],
+    )
+
+    assert result == expected

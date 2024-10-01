@@ -21,7 +21,7 @@ class ASTConstructor(ProtobufParserVisitor):
         return ast.File(syntax=syntax, file_elements=file_elements)
 
     def visitCommentDecl(self, ctx: ProtobufParser.CommentDeclContext):
-        return ast.Comment(text=self._getText(ctx))
+        return ast.Comment(text=self._getText(ctx, False))
 
     def visitPackageDecl(self, ctx: ProtobufParser.PackageDeclContext):
         name = self._getText(ctx.packageName())
