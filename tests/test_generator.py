@@ -550,3 +550,34 @@ def test_oneof_with_comments():
     )
 
     assert result == expected
+
+
+def test_generate_service_with_numeric_option():
+    file = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Package(name="test.v1.proto_1"),
+            ast.Service(
+                name="TestService",
+                elements=[
+                    ast.Option(
+                        name="test.options.v1.lifecycle",
+                        value=ast.Identifier("DEPRECATED"),
+                    ),
+                    ast.Option(name="test.options.v1.major_version", value=1),
+                ],
+            ),
+        ],
+    )
+    result = Generator().generate(file)
+
+    expected = (
+        'syntax = "proto3";\n'
+        "package test.v1.proto_1;\n"
+        "service TestService {\n"
+        "  option test.options.v1.lifecycle = DEPRECATED;\n"
+        "  option test.options.v1.major_version = 1;\n"
+        "}"
+    )
+
+    assert result == expected
