@@ -35,8 +35,14 @@ class ASTConstructor(ProtobufParserVisitor):
 
     def visitOptionDecl(self, ctx: ProtobufParser.OptionDeclContext):
         name = self._getText(ctx.optionName())
-        value = self._stringToType(self._getText(ctx.optionValue()))
+        value = self.visit(ctx.optionValue())
         return ast.Option(name=name, value=value)
+
+    def visitOptionValue(self, ctx: ProtobufParser.OptionValueContext | Any):
+        if ctx.scalarValue():
+            return self.visit(ctx.scalarValue())
+
+        return self._getText(ctx)
 
     def visitMessageDecl(self, ctx: ProtobufParser.MessageDeclContext):
         name = self._getText(ctx.messageName())
@@ -244,6 +250,30 @@ class ASTConstructor(ProtobufParserVisitor):
             return self.visit(commentDecl)
         else:
             raise AttributeError("invalid method element")
+
+    def visitScalarValue(self, ctx: ProtobufParser.ScalarValueContext):
+        if ctx.stringLiteral():
+            return self._getText(ctx.stringLiteral())
+        elif ctx.intLiteral() or ctx.floatLiteral():
+            return self._stringToType(self._getText(ctx))
+        elif ctx.specialFloatLiteral():
+            # TODO Handle specialFloatLiteral -inf, inf, nan properly
+            return self._getText(ctx)
+        elif ctx.identifier():
+            return self.visit(ctx.identifier())
+        # ctx.identifier()
+        return self.visit(ctx.identifier())
+
+    def visitAlwaysIdent(self, ctx: ProtobufParser.AlwaysIdentContext | Any):
+        if identifier := ctx.IDENTIFIER():
+            # Unlike string/int/float, bools are just reated as identiifers in
+            # the lexer, so we need to handle them here
+            identifier_text = identifier.getText().lower()
+            if identifier_text in ["true", "false"]:
+                return identifier_text == "true"
+            return ast.Identifier(name=identifier.getText())
+
+        return super().visitAlwaysIdent(ctx)
 
     # ctx: ParserRuleContext, but ANTLR generates untyped code
     def _getText(self, ctx: Any, strip_quotes: bool = True):

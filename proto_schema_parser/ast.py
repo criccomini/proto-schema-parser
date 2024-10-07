@@ -42,7 +42,7 @@ class Import:
 @dataclass
 class Option:
     name: str
-    value: str | int | float | bool
+    value: str | int | float | bool | Identifier
 
 
 # messageDecl: MESSAGE messageName L_BRACE messageElement* R_BRACE;
@@ -157,6 +157,18 @@ class Method:
 class MessageType:
     type: str
     stream: bool = False
+
+
+# IDENTIFIER: LETTER ( LETTER | DECIMAL_DIGIT )*;
+@dataclass
+class Identifier:
+    """
+    Identifier is a simple dataclass to represent an unquoted identifier (such
+    as an enumerator name). It's used as a value for scalar types that can't be
+    parsed into a string, int, float, or bool.
+    """
+
+    name: str
 
 
 # fileElement: importDecl |

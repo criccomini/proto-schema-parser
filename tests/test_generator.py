@@ -1,6 +1,5 @@
 from proto_schema_parser import ast
 from proto_schema_parser.generator import Generator
-from proto_schema_parser.parser import Parser
 
 
 def test_generate_simple_message():
@@ -554,24 +553,30 @@ def test_oneof_with_comments():
 
 
 def test_generate_service_with_numeric_option():
-    PROTO_TEXT = """
-    syntax = "proto3";
-    package test.v1.proto_1;
-    service TestService {
-        option (test.options.v1.lifecycle) = DEPRECATED;
-        option (test.options.v1.major_version) = 1;
-    }
-    """
-
-    parsed_ast = Parser().parse(PROTO_TEXT)
-    result = Generator().generate(parsed_ast)
+    file = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Package(name="test.v1.proto_1"),
+            ast.Service(
+                name="TestService",
+                elements=[
+                    ast.Option(
+                        name="test.options.v1.lifecycle",
+                        value=ast.Identifier("DEPRECATED"),
+                    ),
+                    ast.Option(name="test.options.v1.major_version", value=1),
+                ],
+            ),
+        ],
+    )
+    result = Generator().generate(file)
 
     expected = (
         'syntax = "proto3";\n'
         "package test.v1.proto_1;\n"
         "service TestService {\n"
-        '  option (test.options.v1.lifecycle) = "DEPRECATED";\n'
-        "  option (test.options.v1.major_version) = 1;\n"
+        "  option test.options.v1.lifecycle = DEPRECATED;\n"
+        "  option test.options.v1.major_version = 1;\n"
         "}"
     )
 

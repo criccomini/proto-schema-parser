@@ -808,7 +808,7 @@ def test_parse_service():
                         input_type=ast.MessageType(type="ExampleRequest", stream=True),
                         output_type=ast.MessageType(type="ExampleResponse"),
                     ),
-                    ast.Option(name="(my_service_option)", value="FOO"),
+                    ast.Option(name="(my_service_option)", value=ast.Identifier("FOO")),
                     ast.Method(
                         name="MyMethod",
                         input_type=ast.MessageType(type="RequestType"),

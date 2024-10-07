@@ -152,7 +152,7 @@ class Generator:
         return "\n".join(lines)
 
     def _generate_option(self, option: ast.Option, indent_level: int = 0) -> str:
-        value = f'"{option.value}"' if isinstance(option.value, str) else option.value
+        value = self._generate_scalar(option.value)
         return f"{'  ' * indent_level}option {option.name} = {value};"
 
     def _generate_extension(
@@ -201,6 +201,15 @@ class Generator:
     def _generate_reserved(self, reserved: ast.Reserved, indent_level: int = 0) -> str:
         reserved_values = ", ".join(itertools.chain(reserved.ranges, reserved.names))
         return f"{'  ' * indent_level}reserved {reserved_values};"
+
+    def _generate_scalar(
+        self, scalar: str | int | float | bool | ast.Identifier
+    ) -> str | int | float | bool:
+        if isinstance(scalar, str):
+            return f'"{scalar}"'
+        elif isinstance(scalar, ast.Identifier):
+            return scalar.name
+        return scalar
 
     @staticmethod
     def _indent(line: str, indent_level: int = 0) -> str:
