@@ -1,5 +1,6 @@
 from proto_schema_parser import ast
 from proto_schema_parser.generator import Generator
+from proto_schema_parser.parser import Parser
 
 
 def test_generate_simple_message():
@@ -546,6 +547,31 @@ def test_oneof_with_comments():
         "    /* multi-line\n"
         "    comment*/\n"
         "  }\n"
+        "}"
+    )
+
+    assert result == expected
+
+
+def test_generate_service_with_numeric_option():
+    PROTO_TEXT = """
+    syntax = "proto3";
+    package test.v1.proto_1;
+    service TestService {
+        option (test.options.v1.lifecycle) = DEPRECATED;
+        option (test.options.v1.major_version) = 1;
+    }
+    """
+
+    parsed_ast = Parser().parse(PROTO_TEXT)
+    result = Generator().generate(parsed_ast)
+
+    expected = (
+        'syntax = "proto3";\n'
+        "package test.v1.proto_1;\n"
+        "service TestService {\n"
+        '  option (test.options.v1.lifecycle) = "DEPRECATED";\n'
+        "  option (test.options.v1.major_version) = 1;\n"
         "}"
     )
 

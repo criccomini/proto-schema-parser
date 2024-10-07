@@ -152,7 +152,8 @@ class Generator:
         return "\n".join(lines)
 
     def _generate_option(self, option: ast.Option, indent_level: int = 0) -> str:
-        return f"{'  ' * indent_level}option {option.name} = \"{option.value}\";"
+        value = f'"{option.value}"' if isinstance(option.value, str) else option.value
+        return f"{'  ' * indent_level}option {option.name} = {value};"
 
     def _generate_extension(
         self, extension: ast.Extension, indent_level: int = 0
