@@ -1,4 +1,5 @@
 import itertools
+from typing import Union
 
 from proto_schema_parser import ast
 
@@ -203,8 +204,8 @@ class Generator:
         return f"{'  ' * indent_level}reserved {reserved_values};"
 
     def _generate_scalar(
-        self, scalar: str | int | float | bool | ast.Identifier
-    ) -> str | int | float | bool:
+        self, scalar: Union[str, int, float, bool, ast.Identifier]
+    ) -> Union[str, int, float, bool]:
         if isinstance(scalar, str):
             return f'"{scalar}"'
         elif isinstance(scalar, ast.Identifier):

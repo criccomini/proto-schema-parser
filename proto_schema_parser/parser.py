@@ -38,7 +38,7 @@ class ASTConstructor(ProtobufParserVisitor):
         value = self.visit(ctx.optionValue())
         return ast.Option(name=name, value=value)
 
-    def visitOptionValue(self, ctx: ProtobufParser.OptionValueContext | Any):
+    def visitOptionValue(self, ctx: ProtobufParser.OptionValueContext):
         if ctx.scalarValue():
             return self.visit(ctx.scalarValue())
 
@@ -264,7 +264,7 @@ class ASTConstructor(ProtobufParserVisitor):
         # ctx.identifier()
         return self.visit(ctx.identifier())
 
-    def visitAlwaysIdent(self, ctx: ProtobufParser.AlwaysIdentContext | Any):
+    def visitAlwaysIdent(self, ctx: ProtobufParser.AlwaysIdentContext):
         if ctx.IDENTIFIER():
             # Unlike string/int/float, bools are just reated as identiifers in
             # the lexer, so we need to handle them here

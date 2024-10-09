@@ -14,7 +14,7 @@ class FieldCardinality(str, PyEnum):
 # file: BYTE_ORDER_MARK? syntaxDecl? fileElement* EOF;
 @dataclass
 class File:
-    syntax: str | None = None
+    syntax: Union[str, None] = None
     file_elements: list[FileElement] = field(default_factory=list)
 
 
@@ -42,7 +42,7 @@ class Import:
 @dataclass
 class Option:
     name: str
-    value: str | int | float | bool | Identifier
+    value: Union[str, int, float, bool, Identifier]
 
 
 # messageDecl: MESSAGE messageName L_BRACE messageElement* R_BRACE;
@@ -60,7 +60,7 @@ class Field:
     name: str
     number: int
     type: str
-    cardinality: FieldCardinality | None = None
+    cardinality: Union[FieldCardinality, None] = None
     options: list[Option] = field(default_factory=list)
 
 
@@ -81,7 +81,7 @@ class MapField:
 class Group:
     name: str
     number: int
-    cardinality: FieldCardinality | None = None
+    cardinality: Union[FieldCardinality, None] = None
     elements: list[MessageElement] = field(default_factory=list)
 
 
