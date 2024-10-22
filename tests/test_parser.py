@@ -1146,7 +1146,14 @@ def test_comments_on_service_and_options():
                         elements=[
                             ast.Option(
                                 name="(google.api.http)",
-                                value="""{\n                // some comment about the option\n                get: "/v1/search/{query}"\n            }""",
+                                value=ast.MessageLiteral(
+                                    fields=[
+                                        ast.MessageLiteralField(
+                                            name="get",
+                                            value="/v1/search/{query}",
+                                        ),
+                                    ]
+                                ),
                             ),
                         ],
                     ),
@@ -1187,4 +1194,66 @@ def test_comment_with_trailing_quote():
         ],
     )
 
+    assert result == expected
+
+
+def test_parse_message_literal_with_braces():
+    text = """
+    syntax = "proto3";
+
+    message SearchRequest {
+        option (custom_option) = {
+            field1: "value1",
+            field2: 42,
+            nested_field: {
+                key1: "nested_value1",
+                key2: [1, 2, 3]
+            }
+        };
+        string query = 1;
+    }
+    """
+    result = Parser().parse(text)
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Message(
+                name="SearchRequest",
+                elements=[
+                    ast.Option(
+                        name="(custom_option)",
+                        value=ast.MessageLiteral(
+                            fields=[
+                                ast.MessageLiteralField(
+                                    name="field1", value="value1"
+                                ),
+                                ast.MessageLiteralField(
+                                    name="field2", value=42
+                                ),
+                                ast.MessageLiteralField(
+                                    name="nested_field",
+                                    value=ast.MessageLiteral(
+                                        fields=[
+                                            ast.MessageLiteralField(
+                                                name="key1", value="nested_value1"
+                                            ),
+                                            ast.MessageLiteralField(
+                                                name="key2", value=[1, 2, 3]
+                                            ),
+                                        ]
+                                    ),
+                                ),
+                            ]
+                        ),
+                    ),
+                    ast.Field(
+                        name="query",
+                        number=1,
+                        type="string",
+                        options=[],
+                    ),
+                ],
+            ),
+        ],
+    )
     assert result == expected

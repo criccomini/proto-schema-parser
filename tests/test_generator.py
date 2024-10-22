@@ -581,3 +581,64 @@ def test_generate_service_with_numeric_option():
     )
 
     assert result == expected
+
+
+def test_generate_message_literal_with_braces():
+    file = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Message(
+                name="SearchRequest",
+                elements=[
+                    ast.Option(
+                        name="(custom_option)",
+                        value=ast.MessageLiteral(
+                            fields=[
+                                ast.MessageLiteralField(
+                                    name="field1", value="value1"
+                                ),
+                                ast.MessageLiteralField(
+                                    name="field2", value=42
+                                ),
+                                ast.MessageLiteralField(
+                                    name="nested_field",
+                                    value=ast.MessageLiteral(
+                                        fields=[
+                                            ast.MessageLiteralField(
+                                                name="key1", value="nested_value1"
+                                            ),
+                                            ast.MessageLiteralField(
+                                                name="key2", value=[1, 2, 3]
+                                            ),
+                                        ]
+                                    ),
+                                ),
+                            ]
+                        ),
+                    ),
+                    ast.Field(
+                        name="query",
+                        number=1,
+                        type="string",
+                        options=[],
+                    ),
+                ],
+            ),
+        ],
+    )
+    result = Generator().generate(file)
+    expected = (
+        'syntax = "proto3";\n'
+        "message SearchRequest {\n"
+        "  option (custom_option) = {\n"
+        '    field1: "value1",\n'
+        "    field2: 42,\n"
+        "    nested_field: {\n"
+        '      key1: "nested_value1",\n'
+        "      key2: [1, 2, 3]\n"
+        "    }\n"
+        "  };\n"
+        "  string query = 1;\n"
+        "}"
+    )
+    assert result == expected

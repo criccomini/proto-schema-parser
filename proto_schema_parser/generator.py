@@ -1,5 +1,5 @@
 import itertools
-from typing import Union
+from typing import List
 
 from proto_schema_parser import ast
 
@@ -153,7 +153,7 @@ class Generator:
         return "\n".join(lines)
 
     def _generate_option(self, option: ast.Option, indent_level: int = 0) -> str:
-        value = self._generate_scalar(option.value)
+        value = self._generate_option_value(option.value, indent_level)
         return f"{'  ' * indent_level}option {option.name} = {value};"
 
     def _generate_extension(
@@ -203,14 +203,47 @@ class Generator:
         reserved_values = ", ".join(itertools.chain(reserved.ranges, reserved.names))
         return f"{'  ' * indent_level}reserved {reserved_values};"
 
-    def _generate_scalar(
-        self, scalar: Union[str, int, float, bool, ast.Identifier]
-    ) -> Union[str, int, float, bool]:
+    def _generate_message_literal(self, message_literal: ast.MessageLiteral, indent_level: int) -> str:
+        """Generate nested message literal with consistent indentation."""
+        lines = [f"{'  ' * indent_level}{{"]
+        for i, field in enumerate(message_literal.fields):
+            field_line = self._generate_message_literal_field(field, indent_level + 1)
+            lines.append(field_line)
+            if i < len(message_literal.fields) - 1:
+                lines[-1] += ","  # Add a comma except for the last field
+        lines.append(f"{'  ' * indent_level}}}")
+        return "\n".join(lines)
+
+    def _generate_message_literal_field(self, field: ast.MessageLiteralField, indent_level: int) -> str:
+        """Generate individual field with correct indentation."""
+        value = self._generate_option_value(field.value, indent_level)
+        return f"{'  ' * indent_level}{field.name}: {value}"
+
+    def _generate_option_value(self, value: ast.MessageValue, indent_level: int) -> str:
+        """Generate the correct value for an option."""
+        if isinstance(value, ast.MessageLiteral):
+            # strip() to remove leading/trailing whitespace since it's appended on the
+            # same line as the field name.
+            return self._generate_message_literal(value, indent_level).strip()
+        elif isinstance(value, list):
+            return self._generate_list_literal(value)
+        else:
+            return self._generate_scalar(value)
+
+    def _generate_list_literal(self, elements: list[ast.MessageValue]) -> str:
+        """Generate a list literal."""
+        element_strings = [self._generate_scalar(el) for el in elements]
+        return f"[{', '.join(element_strings)}]"
+
+    def _generate_scalar(self, scalar: ast.ScalarValue) -> str:
+        """Generate scalar values like strings, numbers, or identifiers."""
         if isinstance(scalar, str):
             return f'"{scalar}"'
         elif isinstance(scalar, ast.Identifier):
             return scalar.name
-        return scalar
+        elif isinstance(scalar, bool):
+            return "true" if scalar else "false"
+        return str(scalar)
 
     @staticmethod
     def _indent(line: str, indent_level: int = 0) -> str:

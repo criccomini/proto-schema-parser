@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum as PyEnum
-from typing import Optional, Union
+from typing import List, Union
 
 
 class FieldCardinality(str, PyEnum):
@@ -37,12 +37,23 @@ class Import:
     weak: bool = False
     public: bool = False
 
+@dataclass
+class MessageLiteralField:
+    name: str
+    value: MessageValue
+
+
+@dataclass
+class MessageLiteral:
+    fields: List[MessageLiteralField] = field(default_factory=list)
+
 
 # optionDecl: OPTION optionName EQUALS optionValue SEMICOLON;
 @dataclass
+@dataclass
 class Option:
     name: str
-    value: Union[str, int, float, bool, Identifier]
+    value: Union[ScalarValue, MessageLiteral]
 
 
 # messageDecl: MESSAGE messageName L_BRACE messageElement* R_BRACE;
@@ -223,7 +234,7 @@ EnumElement = Union[Option, EnumValue, EnumReserved, Comment]
 
 # extensionElement: extensionFieldDecl |
 #                     groupDecl;
-ExtensionElement = Union[Field, Group]
+ExtensionElement = Union[Field, Group, Comment]
 
 # serviceElement: optionDecl |
 #                   methodDecl |
@@ -235,3 +246,9 @@ ServiceElement = Union[Option, Method, Comment]
 #                 commentDecl |
 #                 emptyDecl;
 MethodElement = Union[Option, Comment]
+
+# Define a type alias for scalar values
+ScalarValue = Union[str, int, float, bool, Identifier]
+
+# Define a recursive type alias for message values
+MessageValue = Union[ScalarValue, MessageLiteral, List['MessageValue']]
