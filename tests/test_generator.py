@@ -642,3 +642,514 @@ def test_generate_message_literal_with_braces():
         "}"
     )
     assert result == expected
+
+
+def test_generate_option_with_simple_message_literal():
+    option = ast.Option(
+        name="my_option",
+        value=ast.MessageLiteral(
+            fields=[
+                ast.MessageLiteralField(name="field1", value="value1"),
+                ast.MessageLiteralField(name="field2", value=42),
+            ]
+        ),
+    )
+
+    result = Generator()._generate_option(option)
+    expected = (
+        "option my_option = {\n"
+        '  field1: "value1",\n'
+        "  field2: 42\n"
+        "};"
+    )
+
+    assert result == expected
+
+
+def test_generate_option_with_nested_message_literal():
+    option = ast.Option(
+        name="nested_option",
+        value=ast.MessageLiteral(
+            fields=[
+                ast.MessageLiteralField(
+                    name="outer_field",
+                    value=ast.MessageLiteral(
+                        fields=[
+                            ast.MessageLiteralField(name="inner_field", value=True)
+                        ]
+                    ),
+                )
+            ]
+        ),
+    )
+
+    result = Generator()._generate_option(option)
+    expected = (
+        "option nested_option = {\n"
+        "  outer_field: {\n"
+        "    inner_field: true\n"
+        "  }\n"
+        "};"
+    )
+
+    assert result == expected
+
+
+def test_generate_option_with_list_literal():
+    option = ast.Option(
+        name="list_option",
+        value=ast.MessageLiteral(
+            fields=[
+                ast.MessageLiteralField(
+                    name="field",
+                    value=[
+                        1,
+                        2,
+                        3,
+                    ],
+                )
+            ]
+        ),
+    )
+
+    result = Generator()._generate_option(option)
+    expected = (
+        "option list_option = {\n"
+        "  field: [1, 2, 3]\n"
+        "};"
+    )
+
+    assert result == expected
+
+
+def test_generate_option_with_empty_message_literal():
+    option = ast.Option(
+        name="empty_option",
+        value=ast.MessageLiteral(fields=[]),
+    )
+
+    result = Generator()._generate_option(option)
+    expected = "option empty_option = {};"
+
+    assert result == expected
+
+
+def test_generate_option_with_identifier():
+    option = ast.Option(
+        name="identifier_option",
+        value=ast.MessageLiteral(
+            fields=[
+                ast.MessageLiteralField(
+                    name="id", value=ast.Identifier(name="MyIdentifier")
+                )
+            ]
+        ),
+    )
+
+    result = Generator()._generate_option(option)
+    expected = (
+        "option identifier_option = {\n"
+        "  id: MyIdentifier\n"
+        "};"
+    )
+
+    assert result == expected
+
+
+def test_generate_option_with_complex_message_literal():
+    option = ast.Option(
+        name="complex_option",
+        value=ast.MessageLiteral(
+            fields=[
+                ast.MessageLiteralField(
+                    name="nested_field",
+                    value=ast.MessageLiteral(
+                        fields=[
+                            ast.MessageLiteralField(name="inner1", value="string"),
+                            ast.MessageLiteralField(name="inner2", value=False),
+                        ]
+                    ),
+                ),
+                ast.MessageLiteralField(name="scalar_field", value=123.45),
+                ast.MessageLiteralField(
+                    name="list_field",
+                    value=[
+                        "item1",
+                        "item2",
+                    ],
+                ),
+            ]
+        ),
+    )
+
+    result = Generator()._generate_option(option)
+    expected = (
+        "option complex_option = {\n"
+        "  nested_field: {\n"
+        '    inner1: "string",\n'
+        "    inner2: false\n"
+        "  },\n"
+        "  scalar_field: 123.45,\n"
+        '  list_field: ["item1", "item2"]\n'
+        "};"
+    )
+
+    assert result == expected
+
+
+def test_generate_option_with_inconsistent_indentation():
+    option = ast.Option(
+        name="indented_option",
+        value=ast.MessageLiteral(
+            fields=[
+                ast.MessageLiteralField(
+                    name="level1",
+                    value=ast.MessageLiteral(
+                        fields=[
+                            ast.MessageLiteralField(
+                                name="level2",
+                                value=ast.MessageLiteral(
+                                    fields=[
+                                        ast.MessageLiteralField(
+                                            name="field", value="deep_value"
+                                        )
+                                    ]
+                                ),
+                            )
+                        ]
+                    ),
+                )
+            ]
+        ),
+    )
+
+    result = Generator()._generate_option(option)
+    expected = (
+        "option indented_option = {\n"
+        "  level1: {\n"
+        "    level2: {\n"
+        '      field: "deep_value"\n'
+        "    }\n"
+        "  }\n"
+        "};"
+    )
+
+    assert result == expected
+
+
+def test_generate_option_with_message_literal_in_message():
+    file = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Message(
+                name="SearchRequest",
+                elements=[
+                    ast.Option(
+                        name="(custom_option)",
+                        value=ast.MessageLiteral(
+                            fields=[
+                                ast.MessageLiteralField(
+                                    name="field1", value="value1"
+                                ),
+                                ast.MessageLiteralField(
+                                    name="field2", value=42
+                                ),
+                                ast.MessageLiteralField(
+                                    name="nested_field",
+                                    value=ast.MessageLiteral(
+                                        fields=[
+                                            ast.MessageLiteralField(
+                                                name="key1", value="nested_value1"
+                                            ),
+                                            ast.MessageLiteralField(
+                                                name="key2", value=[1, 2, 3]
+                                            ),
+                                        ]
+                                    ),
+                                ),
+                            ]
+                        ),
+                    ),
+                    ast.Field(
+                        name="query",
+                        number=1,
+                        type="string",
+                        options=[],
+                    ),
+                ],
+            ),
+        ],
+    )
+
+    result = Generator().generate(file)
+    expected = (
+        'syntax = "proto3";\n'
+        "message SearchRequest {\n"
+        "  option (custom_option) = {\n"
+        '    field1: "value1",\n'
+        "    field2: 42,\n"
+        "    nested_field: {\n"
+        '      key1: "nested_value1",\n'
+        "      key2: [1, 2, 3]\n"
+        "    }\n"
+        "  };\n"
+        "  string query = 1;\n"
+        "}"
+    )
+
+    assert result == expected
+
+
+def test_generate_service_with_option_message_literal():
+    file = ast.File(
+        file_elements=[
+            ast.Service(
+                name="TestService",
+                elements=[
+                    ast.Option(
+                        name="service_option",
+                        value=ast.MessageLiteral(
+                            fields=[
+                                ast.MessageLiteralField(
+                                    name="bool_field", value=True
+                                ),
+                                ast.MessageLiteralField(
+                                    name="number_field", value=123
+                                ),
+                                ast.MessageLiteralField(
+                                    name="string_field", value="test"
+                                ),
+                                ast.MessageLiteralField(
+                                    name="list_field",
+                                    value=["a", "b"],
+                                ),
+                            ]
+                        ),
+                    ),
+                    ast.Method(
+                        name="TestMethod",
+                        input_type=ast.MessageType(type="TestRequest"),
+                        output_type=ast.MessageType(type="TestResponse"),
+                        elements=[
+                            ast.Option(
+                                name="method_option",
+                                value=ast.MessageLiteral(
+                                    fields=[
+                                        ast.MessageLiteralField(
+                                            name="inner_option",
+                                            value=ast.MessageLiteral(
+                                                fields=[
+                                                    ast.MessageLiteralField(
+                                                        name="enabled", value=False
+                                                    )
+                                                ]
+                                            ),
+                                        )
+                                    ]
+                                ),
+                            )
+                        ],
+                    ),
+                ],
+            )
+        ],
+    )
+
+    result = Generator().generate(file)
+    expected = (
+        "service TestService {\n"
+        "  option service_option = {\n"
+        "    bool_field: true,\n"
+        "    number_field: 123,\n"
+        '    string_field: "test",\n'
+        '    list_field: ["a", "b"]\n'
+        "  };\n"
+        "  rpc TestMethod (TestRequest) returns (TestResponse){\n"
+        "    option method_option = {\n"
+        "      inner_option: {\n"
+        "        enabled: false\n"
+        "      }\n"
+        "    };\n"
+        "  }\n"
+        "}"
+    )
+
+    assert result == expected
+
+
+def test_generate_option_with_list_of_messages():
+    option = ast.Option(
+        name="list_of_messages_option",
+        value=ast.MessageLiteral(
+            fields=[
+                ast.MessageLiteralField(
+                    name="messages",
+                    value=[
+                        ast.MessageLiteral(
+                            fields=[
+                                ast.MessageLiteralField(name="id", value=1),
+                                ast.MessageLiteralField(name="name", value="First"),
+                            ]
+                        ),
+                        ast.MessageLiteral(
+                            fields=[
+                                ast.MessageLiteralField(name="id", value=2),
+                                ast.MessageLiteralField(name="name", value="Second"),
+                            ]
+                        ),
+                    ],
+                )
+            ]
+        ),
+    )
+
+    result = Generator()._generate_option(option)
+    expected = (
+        "option list_of_messages_option = {\n"
+        "  messages: [{\n"
+        "    id: 1,\n"
+        '    name: "First"\n'
+        "  }, {\n"
+        "    id: 2,\n"
+        '    name: "Second"\n'
+        "  }]\n"
+        "};"
+    )
+    assert result == expected
+
+
+def test_generate_option_with_empty_list():
+    option = ast.Option(
+        name="empty_list_option",
+        value=ast.MessageLiteral(
+            fields=[
+                ast.MessageLiteralField(name="items", value=[])
+            ]
+        ),
+    )
+
+    result = Generator()._generate_option(option)
+    expected = (
+        "option empty_list_option = {\n"
+        "  items: []\n"
+        "};"
+    )
+
+    assert result == expected
+
+
+def test_generate_option_with_special_float_values():
+    option = ast.Option(
+        name="float_option",
+        value=ast.MessageLiteral(
+            fields=[
+                ast.MessageLiteralField(name="infinite", value=ast.Identifier("inf")),
+                ast.MessageLiteralField(name="negative_infinite", value=ast.Identifier("-inf")),
+                ast.MessageLiteralField(name="nan_value", value=ast.Identifier("nan")),
+            ]
+        ),
+    )
+
+    result = Generator()._generate_option(option)
+    expected = (
+        "option float_option = {\n"
+        "  infinite: inf,\n"
+        "  negative_infinite: -inf,\n"
+        "  nan_value: nan\n"
+        "};"
+    )
+
+    assert result == expected
+
+
+def test_generate_option_with_boolean_values():
+    option = ast.Option(
+        name="bool_option",
+        value=ast.MessageLiteral(
+            fields=[
+                ast.MessageLiteralField(name="flag_true", value=True),
+                ast.MessageLiteralField(name="flag_false", value=False),
+            ]
+        ),
+    )
+
+    result = Generator()._generate_option(option)
+    expected = (
+        "option bool_option = {\n"
+        "  flag_true: true,\n"
+        "  flag_false: false\n"
+        "};"
+    )
+
+    assert result == expected
+
+
+def test_generate_option_with_special_characters_in_string():
+    option = ast.Option(
+        name="string_option",
+        value=ast.MessageLiteral(
+            fields=[
+                ast.MessageLiteralField(
+                    name="special_string", value='This is a "quote" and a \\ backslash'
+                )
+            ]
+        ),
+    )
+
+    result = Generator()._generate_option(option)
+    expected = (
+        "option string_option = {\n"
+        '  special_string: "This is a \\"quote\\" and a \\\\ backslash"\n'
+        "};"
+    )
+
+    assert result == expected
+
+
+def test_generate_option_with_multiple_message_literals():
+    option1 = ast.Option(
+        name="option_one",
+        value=ast.MessageLiteral(
+            fields=[
+                ast.MessageLiteralField(name="field1", value="value1"),
+            ]
+        ),
+    )
+
+    option2 = ast.Option(
+        name="option_two",
+        value=ast.MessageLiteral(
+            fields=[
+                ast.MessageLiteralField(name="field2", value="value2"),
+            ]
+        ),
+    )
+
+    message = ast.Message(
+        name="MyMessage",
+        elements=[
+            option1,
+            option2,
+            ast.Field(
+                name="my_field",
+                type="string",
+                number=1,
+                cardinality=ast.FieldCardinality.OPTIONAL,
+            ),
+        ],
+    )
+
+    result = Generator()._generate_message(message)
+    expected = (
+        "message MyMessage {\n"
+        "  option option_one = {\n"
+        '    field1: "value1"\n'
+        "  };\n"
+        "  option option_two = {\n"
+        '    field2: "value2"\n'
+        "  };\n"
+        "  optional string my_field = 1;\n"
+        "}"
+    )
+
+    assert result == expected

@@ -212,6 +212,8 @@ class Generator:
             if i < len(message_literal.fields) - 1:
                 lines[-1] += ","  # Add a comma except for the last field
         lines.append(f"{'  ' * indent_level}}}")
+        if len(lines) == 2:
+            lines = ["{}"]  # Don't include a linebreak if there are no fields
         return "\n".join(lines)
 
     def _generate_message_literal_field(self, field: ast.MessageLiteralField, indent_level: int) -> str:
@@ -226,24 +228,42 @@ class Generator:
             # same line as the field name.
             return self._generate_message_literal(value, indent_level).strip()
         elif isinstance(value, list):
-            return self._generate_list_literal(value)
+            # No + 1 for indent_level since the list literal is on the same line as the field name.
+            return self._generate_list_literal(value, indent_level)
         else:
             return self._generate_scalar(value)
 
-    def _generate_list_literal(self, elements: list[ast.MessageValue]) -> str:
+    def _generate_list_literal(self, elements: list[ast.MessageValue], indent_level: int) -> str:
         """Generate a list literal."""
-        element_strings = [self._generate_scalar(el) for el in elements]
-        return f"[{', '.join(element_strings)}]"
+        message_values = [self._generate_option_value(element, indent_level) for element in elements]
+        return f"[{', '.join(message_values)}]"
 
     def _generate_scalar(self, scalar: ast.ScalarValue) -> str:
         """Generate scalar values like strings, numbers, or identifiers."""
         if isinstance(scalar, str):
-            return f'"{scalar}"'
+            return f'"{self._escape_string(scalar)}"'
         elif isinstance(scalar, ast.Identifier):
             return scalar.name
         elif isinstance(scalar, bool):
             return "true" if scalar else "false"
         return str(scalar)
+
+    def _escape_string(self, value: str) -> str:
+        """
+        Escapes a string so it is safe to use as a scalar string value
+        in a Protobuf definition.
+        """
+        # Define the escape mappings for special characters
+        escape_map = {
+            '\\': '\\\\',  # Backslash
+            '"': '\\"',    # Double quote
+            '\n': '\\n',   # Newline
+            '\t': '\\t',   # Tab
+            '\r': '\\r',   # Carriage return
+        }
+
+        # Use the escape map to replace special characters
+        return ''.join(escape_map.get(char, char) for char in value)
 
     @staticmethod
     def _indent(line: str, indent_level: int = 0) -> str:
