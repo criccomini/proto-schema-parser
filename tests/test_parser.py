@@ -1224,12 +1224,8 @@ def test_parse_message_literal_with_braces():
                         name="(custom_option)",
                         value=ast.MessageLiteral(
                             fields=[
-                                ast.MessageLiteralField(
-                                    name="field1", value="value1"
-                                ),
-                                ast.MessageLiteralField(
-                                    name="field2", value=42
-                                ),
+                                ast.MessageLiteralField(name="field1", value="value1"),
+                                ast.MessageLiteralField(name="field2", value=42),
                                 ast.MessageLiteralField(
                                     name="nested_field",
                                     value=ast.MessageLiteral(

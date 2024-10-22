@@ -203,7 +203,9 @@ class Generator:
         reserved_values = ", ".join(itertools.chain(reserved.ranges, reserved.names))
         return f"{'  ' * indent_level}reserved {reserved_values};"
 
-    def _generate_message_literal(self, message_literal: ast.MessageLiteral, indent_level: int) -> str:
+    def _generate_message_literal(
+        self, message_literal: ast.MessageLiteral, indent_level: int
+    ) -> str:
         """Generate nested message literal with consistent indentation."""
         lines = [f"{'  ' * indent_level}{{"]
         for i, field in enumerate(message_literal.fields):
@@ -216,7 +218,9 @@ class Generator:
             lines = ["{}"]  # Don't include a linebreak if there are no fields
         return "\n".join(lines)
 
-    def _generate_message_literal_field(self, field: ast.MessageLiteralField, indent_level: int) -> str:
+    def _generate_message_literal_field(
+        self, field: ast.MessageLiteralField, indent_level: int
+    ) -> str:
         """Generate individual field with correct indentation."""
         value = self._generate_option_value(field.value, indent_level)
         return f"{'  ' * indent_level}{field.name}: {value}"
@@ -233,9 +237,13 @@ class Generator:
         else:
             return self._generate_scalar(value)
 
-    def _generate_list_literal(self, elements: list[ast.MessageValue], indent_level: int) -> str:
+    def _generate_list_literal(
+        self, elements: list[ast.MessageValue], indent_level: int
+    ) -> str:
         """Generate a list literal."""
-        message_values = [self._generate_option_value(element, indent_level) for element in elements]
+        message_values = [
+            self._generate_option_value(element, indent_level) for element in elements
+        ]
         return f"[{', '.join(message_values)}]"
 
     def _generate_scalar(self, scalar: ast.ScalarValue) -> str:
@@ -255,15 +263,15 @@ class Generator:
         """
         # Define the escape mappings for special characters
         escape_map = {
-            '\\': '\\\\',  # Backslash
-            '"': '\\"',    # Double quote
-            '\n': '\\n',   # Newline
-            '\t': '\\t',   # Tab
-            '\r': '\\r',   # Carriage return
+            "\\": "\\\\",  # Backslash
+            '"': '\\"',  # Double quote
+            "\n": "\\n",  # Newline
+            "\t": "\\t",  # Tab
+            "\r": "\\r",  # Carriage return
         }
 
         # Use the escape map to replace special characters
-        return ''.join(escape_map.get(char, char) for char in value)
+        return "".join(escape_map.get(char, char) for char in value)
 
     @staticmethod
     def _indent(line: str, indent_level: int = 0) -> str:

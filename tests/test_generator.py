@@ -594,12 +594,8 @@ def test_generate_message_literal_with_braces():
                         name="(custom_option)",
                         value=ast.MessageLiteral(
                             fields=[
-                                ast.MessageLiteralField(
-                                    name="field1", value="value1"
-                                ),
-                                ast.MessageLiteralField(
-                                    name="field2", value=42
-                                ),
+                                ast.MessageLiteralField(name="field1", value="value1"),
+                                ast.MessageLiteralField(name="field2", value=42),
                                 ast.MessageLiteralField(
                                     name="nested_field",
                                     value=ast.MessageLiteral(
@@ -656,12 +652,7 @@ def test_generate_option_with_simple_message_literal():
     )
 
     result = Generator()._generate_option(option)
-    expected = (
-        "option my_option = {\n"
-        '  field1: "value1",\n'
-        "  field2: 42\n"
-        "};"
-    )
+    expected = "option my_option = {\n" '  field1: "value1",\n' "  field2: 42\n" "};"
 
     assert result == expected
 
@@ -674,9 +665,7 @@ def test_generate_option_with_nested_message_literal():
                 ast.MessageLiteralField(
                     name="outer_field",
                     value=ast.MessageLiteral(
-                        fields=[
-                            ast.MessageLiteralField(name="inner_field", value=True)
-                        ]
+                        fields=[ast.MessageLiteralField(name="inner_field", value=True)]
                     ),
                 )
             ]
@@ -713,11 +702,7 @@ def test_generate_option_with_list_literal():
     )
 
     result = Generator()._generate_option(option)
-    expected = (
-        "option list_option = {\n"
-        "  field: [1, 2, 3]\n"
-        "};"
-    )
+    expected = "option list_option = {\n" "  field: [1, 2, 3]\n" "};"
 
     assert result == expected
 
@@ -747,11 +732,7 @@ def test_generate_option_with_identifier():
     )
 
     result = Generator()._generate_option(option)
-    expected = (
-        "option identifier_option = {\n"
-        "  id: MyIdentifier\n"
-        "};"
-    )
+    expected = "option identifier_option = {\n" "  id: MyIdentifier\n" "};"
 
     assert result == expected
 
@@ -848,12 +829,8 @@ def test_generate_option_with_message_literal_in_message():
                         name="(custom_option)",
                         value=ast.MessageLiteral(
                             fields=[
-                                ast.MessageLiteralField(
-                                    name="field1", value="value1"
-                                ),
-                                ast.MessageLiteralField(
-                                    name="field2", value=42
-                                ),
+                                ast.MessageLiteralField(name="field1", value="value1"),
+                                ast.MessageLiteralField(name="field2", value=42),
                                 ast.MessageLiteralField(
                                     name="nested_field",
                                     value=ast.MessageLiteral(
@@ -910,12 +887,8 @@ def test_generate_service_with_option_message_literal():
                         name="service_option",
                         value=ast.MessageLiteral(
                             fields=[
-                                ast.MessageLiteralField(
-                                    name="bool_field", value=True
-                                ),
-                                ast.MessageLiteralField(
-                                    name="number_field", value=123
-                                ),
+                                ast.MessageLiteralField(name="bool_field", value=True),
+                                ast.MessageLiteralField(name="number_field", value=123),
                                 ast.MessageLiteralField(
                                     name="string_field", value="test"
                                 ),
@@ -1022,18 +995,12 @@ def test_generate_option_with_empty_list():
     option = ast.Option(
         name="empty_list_option",
         value=ast.MessageLiteral(
-            fields=[
-                ast.MessageLiteralField(name="items", value=[])
-            ]
+            fields=[ast.MessageLiteralField(name="items", value=[])]
         ),
     )
 
     result = Generator()._generate_option(option)
-    expected = (
-        "option empty_list_option = {\n"
-        "  items: []\n"
-        "};"
-    )
+    expected = "option empty_list_option = {\n" "  items: []\n" "};"
 
     assert result == expected
 
@@ -1044,7 +1011,9 @@ def test_generate_option_with_special_float_values():
         value=ast.MessageLiteral(
             fields=[
                 ast.MessageLiteralField(name="infinite", value=ast.Identifier("inf")),
-                ast.MessageLiteralField(name="negative_infinite", value=ast.Identifier("-inf")),
+                ast.MessageLiteralField(
+                    name="negative_infinite", value=ast.Identifier("-inf")
+                ),
                 ast.MessageLiteralField(name="nan_value", value=ast.Identifier("nan")),
             ]
         ),
@@ -1075,10 +1044,7 @@ def test_generate_option_with_boolean_values():
 
     result = Generator()._generate_option(option)
     expected = (
-        "option bool_option = {\n"
-        "  flag_true: true,\n"
-        "  flag_false: false\n"
-        "};"
+        "option bool_option = {\n" "  flag_true: true,\n" "  flag_false: false\n" "};"
     )
 
     assert result == expected

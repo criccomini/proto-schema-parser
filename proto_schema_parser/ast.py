@@ -37,6 +37,7 @@ class Import:
     weak: bool = False
     public: bool = False
 
+
 @dataclass
 class MessageLiteralField:
     name: str
@@ -251,4 +252,4 @@ MethodElement = Union[Option, Comment]
 ScalarValue = Union[str, int, float, bool, Identifier]
 
 # Define a recursive type alias for message values
-MessageValue = Union[ScalarValue, MessageLiteral, List['MessageValue']]
+MessageValue = Union[ScalarValue, MessageLiteral, List["MessageValue"]]

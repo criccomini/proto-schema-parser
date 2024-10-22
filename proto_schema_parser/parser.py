@@ -46,7 +46,9 @@ class ASTConstructor(ProtobufParserVisitor):
         else:
             return self._getText(ctx)
 
-    def visitMessageLiteralWithBraces(self, ctx: ProtobufParser.MessageLiteralWithBracesContext):
+    def visitMessageLiteralWithBraces(
+        self, ctx: ProtobufParser.MessageLiteralWithBracesContext
+    ):
         return self.visit(ctx.messageTextFormat())
 
     def visitMessageTextFormat(self, ctx: ProtobufParser.MessageTextFormatContext):
@@ -271,7 +273,9 @@ class ASTConstructor(ProtobufParserVisitor):
         else:
             return self._getText(ctx)
 
-    def visitScalarValue(self, ctx: ProtobufParser.ScalarValueContext) -> ast.ScalarValue:
+    def visitScalarValue(
+        self, ctx: ProtobufParser.ScalarValueContext
+    ) -> ast.ScalarValue:
         if ctx.stringLiteral():
             return self._getText(ctx.stringLiteral())
         elif ctx.intLiteral():
