@@ -1,6 +1,6 @@
 # pyright: reportOptionalMemberAccess=false, reportOptionalIterable=false
 
-from typing import Any
+from typing import Any, List
 
 from antlr4 import CommonTokenStream, InputStream
 
@@ -41,8 +41,30 @@ class ASTConstructor(ProtobufParserVisitor):
     def visitOptionValue(self, ctx: ProtobufParser.OptionValueContext):
         if ctx.scalarValue():
             return self.visit(ctx.scalarValue())
+        elif ctx.messageLiteralWithBraces():
+            return self.visit(ctx.messageLiteralWithBraces())
+        else:
+            return self._getText(ctx)
 
-        return self._getText(ctx)
+    def visitMessageLiteralWithBraces(
+        self, ctx: ProtobufParser.MessageLiteralWithBracesContext
+    ):
+        return self.visit(ctx.messageTextFormat())
+
+    def visitMessageTextFormat(self, ctx: ProtobufParser.MessageTextFormatContext):
+        if ctx.messageLiteralField():
+            fields = [self.visit(child) for child in ctx.messageLiteralField()]
+            return ast.MessageLiteral(fields=fields)
+        elif ctx.commentDecl():
+            return self.visit(ctx.commentDecl())
+        else:
+            return self._getText(ctx)
+
+    def visitMessageLiteralField(self, ctx: ProtobufParser.MessageLiteralFieldContext):
+        """Parse individual fields inside a message literal."""
+        name = self._getText(ctx.messageLiteralFieldName())
+        value = self.visit(ctx.value())
+        return ast.MessageLiteralField(name=name, value=value)
 
     def visitMessageDecl(self, ctx: ProtobufParser.MessageDeclContext):
         name = self._getText(ctx.messageName())
@@ -218,7 +240,7 @@ class ASTConstructor(ProtobufParserVisitor):
         elif commentDecl := ctx.commentDecl():
             return self.visit(commentDecl)
         else:
-            raise AttributeError("invalid service element")
+            return self._getText(ctx)
 
     def visitMethodDecl(self, ctx: ProtobufParser.MethodDeclContext):
         name = self._getText(ctx.methodName())
@@ -249,20 +271,45 @@ class ASTConstructor(ProtobufParserVisitor):
         elif commentDecl := ctx.commentDecl():
             return self.visit(commentDecl)
         else:
-            raise AttributeError("invalid method element")
+            return self._getText(ctx)
 
-    def visitScalarValue(self, ctx: ProtobufParser.ScalarValueContext):
+    def visitScalarValue(
+        self, ctx: ProtobufParser.ScalarValueContext
+    ) -> ast.ScalarValue:
         if ctx.stringLiteral():
             return self._getText(ctx.stringLiteral())
-        elif ctx.intLiteral() or ctx.floatLiteral():
-            return self._stringToType(self._getText(ctx))
+        elif ctx.intLiteral():
+            return self._stringToType(self._getText(ctx.intLiteral()))
+        elif ctx.floatLiteral():
+            return self._stringToType(self._getText(ctx.floatLiteral()))
         elif ctx.specialFloatLiteral():
-            # TODO Handle specialFloatLiteral -inf, inf, nan properly
-            return self._getText(ctx)
+            return self._stringToType(self._getText(ctx.specialFloatLiteral()))
         elif ctx.identifier():
-            return self.visit(ctx.identifier())
-        # ctx.identifier()
-        return self.visit(ctx.identifier())
+            identifier_text = self._getText(ctx.identifier())
+            if identifier_text in ["true", "false"]:
+                return identifier_text == "true"
+            else:
+                return ast.Identifier(name=identifier_text)
+        else:
+            return self._getText(ctx)
+
+    def visitIdentifier(self, ctx: ProtobufParser.IdentifierContext) -> ast.Identifier:
+        return ast.Identifier(name=self._getText(ctx))
+
+    def visitValue(self, ctx: ProtobufParser.ValueContext) -> ast.MessageValue:
+        if ctx.scalarValue():
+            return self.visit(ctx.scalarValue())
+        elif ctx.messageLiteral():
+            return self.visit(ctx.messageLiteral())
+        elif ctx.listLiteral():
+            return self.visit(ctx.listLiteral())
+        else:
+            return self._getText(ctx)
+
+    def visitListLiteral(self, ctx: ProtobufParser.ListLiteralContext):
+        """Parse list literals."""
+        elements = [self.visit(element) for element in ctx.listElement()]
+        return elements
 
     def visitAlwaysIdent(self, ctx: ProtobufParser.AlwaysIdentContext):
         if ctx.IDENTIFIER():

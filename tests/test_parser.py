@@ -1146,7 +1146,14 @@ def test_comments_on_service_and_options():
                         elements=[
                             ast.Option(
                                 name="(google.api.http)",
-                                value="""{\n                // some comment about the option\n                get: "/v1/search/{query}"\n            }""",
+                                value=ast.MessageLiteral(
+                                    fields=[
+                                        ast.MessageLiteralField(
+                                            name="get",
+                                            value="/v1/search/{query}",
+                                        ),
+                                    ]
+                                ),
                             ),
                         ],
                     ),
@@ -1184,6 +1191,246 @@ def test_comment_with_trailing_quote():
                     ),
                 ],
             ),
+        ],
+    )
+
+    assert result == expected
+
+
+def test_parse_message_literal_with_braces():
+    text = """
+    syntax = "proto3";
+
+    message SearchRequest {
+        option (custom_option) = {
+            field1: "value1",
+            field2: 42,
+            nested_field: {
+                key1: "nested_value1",
+                key2: [1, 2, 3]
+            }
+        };
+        string query = 1;
+    }
+    """
+    result = Parser().parse(text)
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Message(
+                name="SearchRequest",
+                elements=[
+                    ast.Option(
+                        name="(custom_option)",
+                        value=ast.MessageLiteral(
+                            fields=[
+                                ast.MessageLiteralField(name="field1", value="value1"),
+                                ast.MessageLiteralField(name="field2", value=42),
+                                ast.MessageLiteralField(
+                                    name="nested_field",
+                                    value=ast.MessageLiteral(
+                                        fields=[
+                                            ast.MessageLiteralField(
+                                                name="key1", value="nested_value1"
+                                            ),
+                                            ast.MessageLiteralField(
+                                                name="key2", value=[1, 2, 3]
+                                            ),
+                                        ]
+                                    ),
+                                ),
+                            ]
+                        ),
+                    ),
+                    ast.Field(
+                        name="query",
+                        number=1,
+                        type="string",
+                        options=[],
+                    ),
+                ],
+            ),
+        ],
+    )
+    assert result == expected
+
+
+def test_option_with_scalar_values():
+    text = """
+    syntax = "proto3";
+
+    service TestService {
+        rpc TestMethod (TestRequest) returns (TestResponse) {
+            option (test.option) = { int_field: 123 };
+            option (test.option) = { float_field: 45.67 };
+            option (test.option) = { bool_field: true };
+            option (test.option) = { string_field: "Hello" };
+        }
+    }
+    """
+    result = Parser().parse(text)
+
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Service(
+                name="TestService",
+                elements=[
+                    ast.Method(
+                        name="TestMethod",
+                        input_type=ast.MessageType(type="TestRequest"),
+                        output_type=ast.MessageType(type="TestResponse"),
+                        elements=[
+                            ast.Option(
+                                name="(test.option)",
+                                value=ast.MessageLiteral(
+                                    fields=[
+                                        ast.MessageLiteralField(
+                                            name="int_field", value=123
+                                        )
+                                    ]
+                                ),
+                            ),
+                            ast.Option(
+                                name="(test.option)",
+                                value=ast.MessageLiteral(
+                                    fields=[
+                                        ast.MessageLiteralField(
+                                            name="float_field", value=45.67
+                                        )
+                                    ]
+                                ),
+                            ),
+                            ast.Option(
+                                name="(test.option)",
+                                value=ast.MessageLiteral(
+                                    fields=[
+                                        ast.MessageLiteralField(
+                                            name="bool_field", value=True
+                                        )
+                                    ]
+                                ),
+                            ),
+                            ast.Option(
+                                name="(test.option)",
+                                value=ast.MessageLiteral(
+                                    fields=[
+                                        ast.MessageLiteralField(
+                                            name="string_field", value="Hello"
+                                        )
+                                    ]
+                                ),
+                            ),
+                        ],
+                    )
+                ],
+            )
+        ],
+    )
+
+    assert result == expected
+
+
+def test_option_with_nested_message_literal():
+    text = """
+    syntax = "proto3";
+
+    service NestedService {
+        rpc NestedMethod (Request) returns (Response) {
+            option (test.nested) = {
+                inner: { field1: "abc", field2: 42 }
+            };
+        }
+    }
+    """
+    result = Parser().parse(text)
+
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Service(
+                name="NestedService",
+                elements=[
+                    ast.Method(
+                        name="NestedMethod",
+                        input_type=ast.MessageType(type="Request"),
+                        output_type=ast.MessageType(type="Response"),
+                        elements=[
+                            ast.Option(
+                                name="(test.nested)",
+                                value=ast.MessageLiteral(
+                                    fields=[
+                                        ast.MessageLiteralField(
+                                            name="inner",
+                                            value=ast.MessageLiteral(
+                                                fields=[
+                                                    ast.MessageLiteralField(
+                                                        name="field1", value="abc"
+                                                    ),
+                                                    ast.MessageLiteralField(
+                                                        name="field2", value=42
+                                                    ),
+                                                ]
+                                            ),
+                                        )
+                                    ]
+                                ),
+                            )
+                        ],
+                    )
+                ],
+            )
+        ],
+    )
+
+    assert result == expected
+
+
+def test_option_with_comments_and_fields():
+    text = """
+    syntax = "proto3";
+
+    service CommentService {
+        rpc CommentMethod (Request) returns (Response) {
+            option (test.option) = {
+                // Comment about the field
+                field1: "value1";
+                field2: 99;
+                // Another comment
+            };
+        }
+    }
+    """
+    result = Parser().parse(text)
+
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Service(
+                name="CommentService",
+                elements=[
+                    ast.Method(
+                        name="CommentMethod",
+                        input_type=ast.MessageType(type="Request"),
+                        output_type=ast.MessageType(type="Response"),
+                        elements=[
+                            ast.Option(
+                                name="(test.option)",
+                                value=ast.MessageLiteral(
+                                    fields=[
+                                        ast.MessageLiteralField(
+                                            name="field1", value="value1"
+                                        ),
+                                        ast.MessageLiteralField(
+                                            name="field2", value=99
+                                        ),
+                                    ]
+                                ),
+                            )
+                        ],
+                    )
+                ],
+            )
         ],
     )
 
