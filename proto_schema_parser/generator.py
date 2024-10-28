@@ -238,7 +238,7 @@ class Generator:
             return self._generate_scalar(value)
 
     def _generate_list_literal(
-        self, elements: list[ast.MessageValue], indent_level: int
+        self, elements: List[ast.MessageValue], indent_level: int
     ) -> str:
         """Generate a list literal."""
         message_values = [

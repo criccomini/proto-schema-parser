@@ -15,7 +15,7 @@ class FieldCardinality(str, PyEnum):
 @dataclass
 class File:
     syntax: Union[str, None] = None
-    file_elements: list[FileElement] = field(default_factory=list)
+    file_elements: List[FileElement] = field(default_factory=list)
 
 
 # commentDecl: (LINE_COMMENT | BLOCK_COMMENT)
@@ -61,7 +61,7 @@ class Option:
 @dataclass
 class Message:
     name: str
-    elements: list[MessageElement] = field(default_factory=list)
+    elements: List[MessageElement] = field(default_factory=list)
 
 
 # messageFieldDecl: fieldDeclWithCardinality |
@@ -73,7 +73,7 @@ class Field:
     number: int
     type: str
     cardinality: Union[FieldCardinality, None] = None
-    options: list[Option] = field(default_factory=list)
+    options: List[Option] = field(default_factory=list)
 
 
 # mapFieldDecl: mapType fieldName EQUALS fieldNumber compactOptions? SEMICOLON;
@@ -84,7 +84,7 @@ class MapField:
     number: int
     key_type: str
     value_type: str
-    options: list[Option] = field(default_factory=list)
+    options: List[Option] = field(default_factory=list)
 
 
 # groupDecl: fieldCardinality? GROUP fieldName EQUALS fieldNumber
@@ -94,35 +94,35 @@ class Group:
     name: str
     number: int
     cardinality: Union[FieldCardinality, None] = None
-    elements: list[MessageElement] = field(default_factory=list)
+    elements: List[MessageElement] = field(default_factory=list)
 
 
 # oneofDecl: ONEOF oneofName L_BRACE oneofElement* R_BRACE;
 @dataclass
 class OneOf:
     name: str
-    elements: list[OneOfElement] = field(default_factory=list)
+    elements: List[OneOfElement] = field(default_factory=list)
 
 
 # extensionRangeDecl: EXTENSIONS tagRanges compactOptions? SEMICOLON;
 @dataclass
 class ExtensionRange:
-    ranges: list[str]
-    options: list[Option] = field(default_factory=list)
+    ranges: List[str]
+    options: List[Option] = field(default_factory=list)
 
 
 # messageReservedDecl: RESERVED ( tagRanges | names ) SEMICOLON;
 @dataclass
 class Reserved:
-    ranges: list[str] = field(default_factory=list)
-    names: list[str] = field(default_factory=list)
+    ranges: List[str] = field(default_factory=list)
+    names: List[str] = field(default_factory=list)
 
 
 # enumDecl: ENUM enumName L_BRACE enumElement* R_BRACE;
 @dataclass
 class Enum:
     name: str
-    elements: list[EnumElement] = field(default_factory=list)
+    elements: List[EnumElement] = field(default_factory=list)
 
 
 # enumValueDecl: enumValueName EQUALS enumValueNumber compactOptions? SEMICOLON;
@@ -130,28 +130,28 @@ class Enum:
 class EnumValue:
     name: str
     number: int
-    options: list[Option] = field(default_factory=list)
+    options: List[Option] = field(default_factory=list)
 
 
 # enumReservedDecl: RESERVED ( enumValueRanges | names ) SEMICOLON;
 @dataclass
 class EnumReserved:
-    ranges: list[str] = field(default_factory=list)
-    names: list[str] = field(default_factory=list)
+    ranges: List[str] = field(default_factory=list)
+    names: List[str] = field(default_factory=list)
 
 
 # extensionDecl: EXTEND extendedMessage L_BRACE extensionElement* R_BRACE;
 @dataclass
 class Extension:
     typeName: str
-    elements: list[ExtensionElement] = field(default_factory=list)
+    elements: List[ExtensionElement] = field(default_factory=list)
 
 
 # serviceDecl: SERVICE serviceName L_BRACE serviceElement* R_BRACE;
 @dataclass
 class Service:
     name: str
-    elements: list[ServiceElement] = field(default_factory=list)
+    elements: List[ServiceElement] = field(default_factory=list)
 
 
 # methodDecl: RPC methodName inputType RETURNS outputType SEMICOLON |
@@ -161,7 +161,7 @@ class Method:
     name: str
     input_type: MessageType
     output_type: MessageType
-    elements: list[MethodElement] = field(default_factory=list)
+    elements: List[MethodElement] = field(default_factory=list)
 
 
 # messageType: L_PAREN STREAM? methodDeclTypeName R_PAREN;
