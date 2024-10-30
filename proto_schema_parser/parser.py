@@ -34,7 +34,7 @@ class ASTConstructor(ProtobufParserVisitor):
         return ast.Import(name=name, weak=weak, public=public)
 
     def visitOptionDecl(self, ctx: ProtobufParser.OptionDeclContext):
-        name = self._getText(ctx.optionName())
+        name = ASTConstructor.normalize_option_name(self._getText(ctx.optionName()))
         value = self.visit(ctx.optionValue())
         return ast.Option(name=name, value=value)
 
@@ -360,6 +360,36 @@ class ASTConstructor(ProtobufParserVisitor):
         except ValueError:
             pass
         return value
+
+    @staticmethod
+    def normalize_option_name(s: str):
+        # Remove all spaces
+        s = s.replace(" ", "")
+
+        # If the name starts with '(', find the matching ')'
+        if s.startswith("("):
+            depth = 0
+            for i, c in enumerate(s):
+                if c == "(":
+                    depth += 1
+                elif c == ")":
+                    depth -= 1
+                    if depth == 0:
+                        break
+            else:
+                # No matching ')'
+                raise ValueError("No matching closing parenthesis")
+            # Extract content inside the outermost parentheses
+            inside = s[1:i]
+            rest = s[i + 1 :]
+            # Remove any nested parentheses inside 'inside'
+            inside = inside.replace("(", "").replace(")", "")
+            # Rebuild the normalized option name
+            option_name = f"({inside}){rest}"
+        else:
+            # If no starting '(', the option name is s
+            option_name = s
+        return option_name
 
 
 class Parser:

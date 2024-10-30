@@ -1,5 +1,5 @@
 from proto_schema_parser import ast
-from proto_schema_parser.parser import Parser
+from proto_schema_parser.parser import ASTConstructor, Parser
 
 
 def test_parse_person():
@@ -1435,3 +1435,61 @@ def test_option_with_comments_and_fields():
     )
 
     assert result == expected
+
+
+def test_normalize_option_name_simple():
+    assert ASTConstructor.normalize_option_name("option_name") == "option_name"
+
+
+def test_normalize_option_name_with_spaces():
+    assert ASTConstructor.normalize_option_name(" option . name ") == "option.name"
+
+
+def test_normalize_option_name_with_parentheses():
+    assert (
+        ASTConstructor.normalize_option_name(" ( option_name ) . field ")
+        == "(option_name).field"
+    )
+
+
+def test_normalize_option_name_nested_parentheses():
+    assert (
+        ASTConstructor.normalize_option_name(" ( ( nested ) . option ) . field ")
+        == "(nested.option).field"
+    )
+
+
+def test_normalize_option_name_no_space_parentheses():
+    assert (
+        ASTConstructor.normalize_option_name("(option_name).field")
+        == "(option_name).field"
+    )
+
+
+def test_normalize_option_name_mixed_case():
+    assert (
+        ASTConstructor.normalize_option_name("(Option_Name).Field")
+        == "(Option_Name).Field"
+    )
+
+
+def test_normalize_option_name_with_extra_parentheses():
+    assert (
+        ASTConstructor.normalize_option_name("( ( validate.rules ) ).double")
+        == "(validate.rules).double"
+    )
+
+
+def test_normalize_option_name_empty():
+    assert ASTConstructor.normalize_option_name("") == ""
+
+
+def test_normalize_option_name_only_parentheses():
+    assert ASTConstructor.normalize_option_name("(( ))") == "()"
+
+
+def test_normalize_option_name_with_symbols():
+    assert (
+        ASTConstructor.normalize_option_name("(validate.rules).$double_value")
+        == "(validate.rules).$double_value"
+    )
