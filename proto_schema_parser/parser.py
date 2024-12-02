@@ -110,7 +110,7 @@ class ASTConstructor(ProtobufParserVisitor):
 
     def visitCompactOption(self, ctx: ProtobufParser.CompactOptionContext):
         name = self._getText(ctx.optionName())
-        value = self._getText(ctx.optionValue())
+        value = self._stringToType(self._getText(ctx.optionValue()))
         return ast.Option(name=name, value=value)
 
     def visitCompactOptions(self, ctx: ProtobufParser.CompactOptionsContext):

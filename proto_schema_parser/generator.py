@@ -120,7 +120,10 @@ class Generator:
         options = ""
         if field.options:
             options = " ["
-            options += ", ".join(f'{opt.name} = "{opt.value}"' for opt in field.options)
+            options += ", ".join(
+                f'{opt.name} = {self._generate_scalar(opt.value)}'
+                for opt in field.options
+            )
             options += "]"
 
         return f"{'  ' * indent_level}{cardinality}{field.type} {field.name} = {field.number}{options};"
