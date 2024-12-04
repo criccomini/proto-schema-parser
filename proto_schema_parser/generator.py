@@ -1,5 +1,5 @@
 import itertools
-from typing import List
+from typing import List, cast
 
 from proto_schema_parser import ast
 
@@ -121,7 +121,7 @@ class Generator:
         if field.options:
             options = " ["
             options += ", ".join(
-                f"{opt.name} = {self._generate_scalar(opt.value)}"
+                f"{opt.name} = {self._generate_scalar(cast(ast.ScalarValue, opt.value))}"
                 for opt in field.options
             )
             options += "]"
