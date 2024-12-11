@@ -1493,3 +1493,103 @@ def test_normalize_option_name_with_symbols():
         ASTConstructor.normalize_option_name("(validate.rules).$double_value")
         == "(validate.rules).$double_value"
     )
+
+
+def test_parse_bool_options():
+    text = """
+    syntax = "proto3";
+
+    message TestMessage {
+        option (test.bool_option1) = true;
+        option (test.bool_option2) = false;
+        option bool_option3 = true;
+        option bool_option4 = false;
+        option (test.message_option) = {
+            bool_field1: true,
+            bool_field2: false
+        };
+
+        // Field level options
+        repeated int32 packed_field = 1 [packed = true];
+        repeated string unpacked_field = 2 [packed = false];
+        optional bool deprecated_field = 3 [deprecated = true];
+        required int64 field_with_multiple = 4 [packed = true, deprecated = false];
+    }
+    """
+    result = Parser().parse(text)
+
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Message(
+                name="TestMessage",
+                elements=[
+                    ast.Option(
+                        name="(test.bool_option1)",
+                        value=True,
+                    ),
+                    ast.Option(
+                        name="(test.bool_option2)",
+                        value=False,
+                    ),
+                    ast.Option(
+                        name="bool_option3",
+                        value=True,
+                    ),
+                    ast.Option(
+                        name="bool_option4",
+                        value=False,
+                    ),
+                    ast.Option(
+                        name="(test.message_option)",
+                        value=ast.MessageLiteral(
+                            fields=[
+                                ast.MessageLiteralField(
+                                    name="bool_field1",
+                                    value=True,
+                                ),
+                                ast.MessageLiteralField(
+                                    name="bool_field2",
+                                    value=False,
+                                ),
+                            ]
+                        ),
+                    ),
+                    ast.Comment(text="// Field level options"),
+                    ast.Field(
+                        name="packed_field",
+                        number=1,
+                        cardinality=ast.FieldCardinality.REPEATED,
+                        type="int32",
+                        options=[ast.Option(name="packed", value=True)],
+                    ),
+                    ast.Field(
+                        name="unpacked_field",
+                        number=2,
+                        cardinality=ast.FieldCardinality.REPEATED,
+                        type="string",
+                        options=[ast.Option(name="packed", value=False)],
+                    ),
+                    ast.Field(
+                        name="deprecated_field",
+                        number=3,
+                        cardinality=ast.FieldCardinality.OPTIONAL,
+                        type="bool",
+                        options=[ast.Option(name="deprecated", value=True)],
+                    ),
+                    ast.Field(
+                        name="field_with_multiple",
+                        number=4,
+                        cardinality=ast.FieldCardinality.REQUIRED,
+                        type="int64",
+                        options=[
+                            ast.Option(name="packed", value=True),
+                            ast.Option(name="deprecated", value=False),
+                        ],
+                    ),
+                ],
+            ),
+        ],
+    )
+
+    assert result == expected
