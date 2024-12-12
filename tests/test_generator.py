@@ -1119,3 +1119,44 @@ def test_generate_option_with_multiple_message_literals():
     )
 
     assert result == expected
+
+
+def test_generate_field_with_options_for_scalar_types():
+    generator = Generator()
+    test_cases = [
+        # Numeric types
+        ("double", 3.14, "double field_double = 1 [default = 3.14];"),
+        ("float", -1.23, "float field_float = 2 [default = -1.23];"),
+        ("int32", -42, "int32 field_int32 = 3 [default = -42];"),
+        ("int64", 9876543210, "int64 field_int64 = 4 [default = 9876543210];"),
+        ("uint32", 42, "uint32 field_uint32 = 5 [default = 42];"),
+        ("uint64", 1234567890, "uint64 field_uint64 = 6 [default = 1234567890];"),
+        ("sint32", -123, "sint32 field_sint32 = 7 [default = -123];"),
+        ("sint64", -9876543210, "sint64 field_sint64 = 8 [default = -9876543210];"),
+        ("fixed32", 456, "fixed32 field_fixed32 = 9 [default = 456];"),
+        ("fixed64", 1234567890, "fixed64 field_fixed64 = 10 [default = 1234567890];"),
+        ("sfixed32", -789, "sfixed32 field_sfixed32 = 11 [default = -789];"),
+        (
+            "sfixed64",
+            -1234567890,
+            "sfixed64 field_sfixed64 = 12 [default = -1234567890];",
+        ),
+        # Boolean type
+        ("bool", True, "bool field_bool = 13 [default = true];"),
+        # String types
+        (
+            "string",
+            "test string",
+            'string field_string = 14 [default = "test string"];',
+        ),
+    ]
+
+    for type_name, default_value, expected in test_cases:
+        field = ast.Field(
+            name=f"field_{type_name}",
+            type=type_name,
+            number=test_cases.index((type_name, default_value, expected)) + 1,
+            options=[ast.Option(name="default", value=default_value)],
+        )
+        result = generator._generate_field(field)
+        assert result == expected
