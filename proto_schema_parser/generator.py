@@ -1,5 +1,5 @@
 import itertools
-from typing import List
+from typing import List, cast
 
 from proto_schema_parser import ast
 
@@ -118,9 +118,13 @@ class Generator:
             cardinality = f"{field.cardinality.value.lower()} "
 
         options = ""
+        print(field.options)
         if field.options:
             options = " ["
-            options += ", ".join(f'{opt.name} = "{opt.value}"' for opt in field.options)
+            options += ", ".join(
+                f"{opt.name} = {self._generate_scalar(cast(ast.ScalarValue, opt.value))}"
+                for opt in field.options
+            )
             options += "]"
 
         return f"{'  ' * indent_level}{cardinality}{field.type} {field.name} = {field.number}{options};"
