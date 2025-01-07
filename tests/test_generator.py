@@ -1165,7 +1165,7 @@ def test_generate_field_with_options_for_scalar_types():
 def test_generate_service_with_additional_bindings():
     """Test that a service with additional_bindings in google.api.http option is generated correctly."""
     service = ast.Service(
-        name="LeaseService",
+        name="Lease",
         elements=[
             ast.Method(
                 name="LeaseRevoke",
@@ -1209,7 +1209,7 @@ def test_generate_service_with_additional_bindings():
 
     result = Generator()._generate_service(service)
     expected = (
-        "service LeaseService {\n"
+        "service Lease {\n"
         "  rpc LeaseRevoke (LeaseRevokeRequest) returns (LeaseRevokeResponse) {\n"
         '    option (google.api.http) = {\n'
         '      post: "/v3/lease/revoke",\n'

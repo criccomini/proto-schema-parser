@@ -1593,3 +1593,71 @@ def test_parse_bool_options():
     )
 
     assert result == expected
+
+
+def test_parse_service_with_additional_bindings():
+    """Test parsing a service with additional_bindings in google.api.http option."""
+    text = '''
+    service Lease {
+        rpc LeaseRevoke(LeaseRevokeRequest) returns (LeaseRevokeResponse) {
+            option (google.api.http) = {
+                post: "/v3/lease/revoke"
+                body: "*"
+                additional_bindings {
+                    post: "/v3/kv/lease/revoke"
+                    body: "*"
+                }
+            };
+        }
+    }
+    '''
+    result = Parser().parse(text)
+    expected = ast.File(
+        syntax=None,
+        file_elements=[
+            ast.Service(
+                name="Lease",
+                elements=[
+                    ast.Method(
+                        name="LeaseRevoke",
+                        input_type=ast.MessageType(type="LeaseRevokeRequest", stream=False),
+                        output_type=ast.MessageType(type="LeaseRevokeResponse", stream=False),
+                        elements=[
+                            ast.Option(
+                                name="(google.api.http)",
+                                value=ast.MessageLiteral(
+                                    fields=[
+                                        ast.MessageLiteralField(
+                                            name="post",
+                                            value="/v3/lease/revoke"
+                                        ),
+                                        ast.MessageLiteralField(
+                                            name="body",
+                                            value="*"
+                                        ),
+                                        ast.MessageLiteralField(
+                                            name="additional_bindings",
+                                            value=ast.MessageLiteral(
+                                                fields=[
+                                                    ast.MessageLiteralField(
+                                                        name="post",
+                                                        value="/v3/kv/lease/revoke"
+                                                    ),
+                                                    ast.MessageLiteralField(
+                                                        name="body",
+                                                        value="*"
+                                                    )
+                                                ]
+                                            )
+                                        )
+                                    ]
+                                )
+                            )
+                        ]
+                    )
+                ]
+            )
+        ]
+    )
+
+    assert result == expected
