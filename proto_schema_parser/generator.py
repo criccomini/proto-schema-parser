@@ -97,7 +97,7 @@ class Generator:
             isinstance(element, ast.Option) for element in method.elements
         )
         lines = [
-            f"{'  ' * indent_level}rpc {method.name} ({input_type_str}) returns ({output_type_str}){'{' if has_options else ';'}"
+            f"{'  ' * indent_level}rpc {method.name} ({input_type_str}) returns ({output_type_str}){' {' if has_options else ';'}"
         ]
         if has_options:
             for element in method.elements:
