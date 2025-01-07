@@ -1177,44 +1177,38 @@ def test_generate_service_with_additional_bindings():
                         value=ast.MessageLiteral(
                             fields=[
                                 ast.MessageLiteralField(
-                                    name="post",
-                                    value="/v3/lease/revoke"
+                                    name="post", value="/v3/lease/revoke"
                                 ),
-                                ast.MessageLiteralField(
-                                    name="body",
-                                    value="*"
-                                ),
+                                ast.MessageLiteralField(name="body", value="*"),
                                 ast.MessageLiteralField(
                                     name="additional_bindings",
                                     value=ast.MessageLiteral(
                                         fields=[
                                             ast.MessageLiteralField(
-                                                name="post",
-                                                value="/v3/kv/lease/revoke"
+                                                name="post", value="/v3/kv/lease/revoke"
                                             ),
                                             ast.MessageLiteralField(
-                                                name="body",
-                                                value="*"
-                                            )
+                                                name="body", value="*"
+                                            ),
                                         ]
-                                    )
-                                )
+                                    ),
+                                ),
                             ]
-                        )
+                        ),
                     )
-                ]
+                ],
             )
-        ]
+        ],
     )
 
     result = Generator()._generate_service(service)
     expected = (
         "service Lease {\n"
         "  rpc LeaseRevoke (LeaseRevokeRequest) returns (LeaseRevokeResponse) {\n"
-        '    option (google.api.http) = {\n'
+        "    option (google.api.http) = {\n"
         '      post: "/v3/lease/revoke",\n'
         '      body: "*",\n'
-        '      additional_bindings: {\n'
+        "      additional_bindings: {\n"
         '        post: "/v3/kv/lease/revoke",\n'
         '        body: "*"\n'
         "      }\n"

@@ -63,7 +63,10 @@ class ASTConstructor(ProtobufParserVisitor):
     def visitMessageLiteralField(self, ctx: ProtobufParser.MessageLiteralFieldContext):
         """Parse individual fields inside a message literal."""
         name = self._getText(ctx.messageLiteralFieldName())
-        value = self.visit(ctx.value())
+        if ctx.value():
+            value = self.visit(ctx.value())
+        else:
+            value = self.visit(ctx.messageValue())
         return ast.MessageLiteralField(name=name, value=value)
 
     def visitMessageDecl(self, ctx: ProtobufParser.MessageDeclContext):
@@ -296,20 +299,35 @@ class ASTConstructor(ProtobufParserVisitor):
     def visitIdentifier(self, ctx: ProtobufParser.IdentifierContext) -> ast.Identifier:
         return ast.Identifier(name=self._getText(ctx))
 
-    def visitValue(self, ctx: ProtobufParser.ValueContext) -> ast.MessageValue:
+    def visitValue(self, ctx: ProtobufParser.ValueContext):
+        """Parse a value, which can be a scalar, message literal, or list literal."""
         if ctx.scalarValue():
             return self.visit(ctx.scalarValue())
         elif ctx.messageLiteral():
             return self.visit(ctx.messageLiteral())
-        elif ctx.listLiteral():
+        else:  # listLiteral
             return self.visit(ctx.listLiteral())
-        else:
-            return self._getText(ctx)
+
+    def visitMessageValue(self, ctx: ProtobufParser.MessageValueContext):
+        """Parse a message value, which can be a message literal or list of message literals."""
+        if ctx.messageLiteral():
+            return self.visit(ctx.messageLiteral())
+        else:  # listOfMessagesLiteral
+            return self.visit(ctx.listOfMessagesLiteral())
 
     def visitListLiteral(self, ctx: ProtobufParser.ListLiteralContext):
-        """Parse list literals."""
-        elements = [self.visit(element) for element in ctx.listElement()]
-        return elements
+        """Parse a list literal, which can contain scalar values or message literals."""
+        if not ctx.listElement():
+            return []
+        return [self.visit(element) for element in ctx.listElement()]
+
+    def visitListOfMessagesLiteral(
+        self, ctx: ProtobufParser.ListOfMessagesLiteralContext
+    ):
+        """Parse a list of message literals."""
+        if not ctx.messageLiteral():
+            return []
+        return [self.visit(msg) for msg in ctx.messageLiteral()]
 
     def visitAlwaysIdent(self, ctx: ProtobufParser.AlwaysIdentContext):
         if ctx.IDENTIFIER():
