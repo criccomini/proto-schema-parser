@@ -392,7 +392,7 @@ def test_generate_service():
         "service MyService {\n"
         "  rpc MyRpc (MyRequest) returns (MyResponse);\n"
         "  rpc MyRpcWithStream (stream MyRequest) returns (MyResponse);\n"
-        "  rpc MyRpcWithOption (MyRequest) returns (MyResponse){\n"
+        "  rpc MyRpcWithOption (MyRequest) returns (MyResponse) {\n"
         '    option deprecated = "true";\n'
         "  }\n"
         '  option MyOption = "foo";\n'
@@ -937,7 +937,7 @@ def test_generate_service_with_option_message_literal():
         '    string_field: "test",\n'
         '    list_field: ["a", "b"]\n'
         "  };\n"
-        "  rpc TestMethod (TestRequest) returns (TestResponse){\n"
+        "  rpc TestMethod (TestRequest) returns (TestResponse) {\n"
         "    option method_option = {\n"
         "      inner_option: {\n"
         "        enabled: false\n"
@@ -1160,3 +1160,61 @@ def test_generate_field_with_options_for_scalar_types():
         )
         result = generator._generate_field(field)
         assert result == expected
+
+
+def test_generate_service_with_additional_bindings():
+    """Test that a service with additional_bindings in google.api.http option is generated correctly."""
+    service = ast.Service(
+        name="Lease",
+        elements=[
+            ast.Method(
+                name="LeaseRevoke",
+                input_type=ast.MessageType(type="LeaseRevokeRequest", stream=False),
+                output_type=ast.MessageType(type="LeaseRevokeResponse", stream=False),
+                elements=[
+                    ast.Option(
+                        name="(google.api.http)",
+                        value=ast.MessageLiteral(
+                            fields=[
+                                ast.MessageLiteralField(
+                                    name="post", value="/v3/lease/revoke"
+                                ),
+                                ast.MessageLiteralField(name="body", value="*"),
+                                ast.MessageLiteralField(
+                                    name="additional_bindings",
+                                    value=ast.MessageLiteral(
+                                        fields=[
+                                            ast.MessageLiteralField(
+                                                name="post", value="/v3/kv/lease/revoke"
+                                            ),
+                                            ast.MessageLiteralField(
+                                                name="body", value="*"
+                                            ),
+                                        ]
+                                    ),
+                                ),
+                            ]
+                        ),
+                    )
+                ],
+            )
+        ],
+    )
+
+    result = Generator()._generate_service(service)
+    expected = (
+        "service Lease {\n"
+        "  rpc LeaseRevoke (LeaseRevokeRequest) returns (LeaseRevokeResponse) {\n"
+        "    option (google.api.http) = {\n"
+        '      post: "/v3/lease/revoke",\n'
+        '      body: "*",\n'
+        "      additional_bindings: {\n"
+        '        post: "/v3/kv/lease/revoke",\n'
+        '        body: "*"\n'
+        "      }\n"
+        "    };\n"
+        "  }\n"
+        "}"
+    )
+
+    assert result == expected
