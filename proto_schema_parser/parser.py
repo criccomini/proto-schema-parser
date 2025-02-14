@@ -1,6 +1,6 @@
 # pyright: reportOptionalMemberAccess=false, reportOptionalIterable=false
 
-from typing import Any, List
+from typing import Any, Optional, Callable
 
 from antlr4 import CommonTokenStream, InputStream
 
@@ -8,6 +8,9 @@ from proto_schema_parser import ast
 from proto_schema_parser.antlr.ProtobufLexer import ProtobufLexer
 from proto_schema_parser.antlr.ProtobufParser import ProtobufParser
 from proto_schema_parser.antlr.ProtobufParserVisitor import ProtobufParserVisitor
+
+SetupLexelCb = Callable[[ProtobufLexer], None]
+SetupParserCb = Callable[[ProtobufParser], None]
 
 
 class ASTConstructor(ProtobufParserVisitor):
@@ -411,11 +414,26 @@ class ASTConstructor(ProtobufParserVisitor):
 
 
 class Parser:
+    def __init__(
+        self,
+        *,
+        setup_lexel: Optional[SetupLexelCb] = None,
+        setup_parser: Optional[SetupParserCb] = None,
+    ) -> None:
+        self.setup_lexel: Optional[SetupLexelCb] = setup_lexel
+        self.setup_parser: Optional[SetupParserCb] = setup_parser
+
     def parse(self, text: str) -> ast.File:
         input_stream = InputStream(text)
         lexer = ProtobufLexer(input_stream)
+        if self.setup_lexel:
+            self.setup_lexel(lexer)
+
         token_stream = CommonTokenStream(lexer)
         parser = ProtobufParser(token_stream)
+        if self.setup_parser:
+            self.setup_parser(parser)
+
         parse_tree = parser.file_()
         visitor = ASTConstructor()
         return visitor.visit(parse_tree)  # pyright: ignore [reportGeneralTypeIssues]
