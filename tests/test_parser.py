@@ -1,8 +1,8 @@
-from proto_schema_parser import ast
-import proto_schema_parser.antlr.ProtobufParser
-from proto_schema_parser.parser import ASTConstructor, Parser
-
 import pytest
+
+import proto_schema_parser.antlr.ProtobufParser
+from proto_schema_parser import ast
+from proto_schema_parser.parser import ASTConstructor, Parser
 
 
 def test_parse_person():
@@ -1675,6 +1675,7 @@ def test_syntax_error():
     """
 
     import antlr4.error.ErrorListener as antlr4_el
+
     import proto_schema_parser.antlr.ProtobufParser as psp_antlr
 
     class _ErrorListener(antlr4_el.ErrorListener):

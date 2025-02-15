@@ -1,6 +1,6 @@
 # pyright: reportOptionalMemberAccess=false, reportOptionalIterable=false
 
-from typing import Any, Optional, Callable
+from typing import Any, Callable, Optional
 
 from antlr4 import CommonTokenStream, InputStream
 
