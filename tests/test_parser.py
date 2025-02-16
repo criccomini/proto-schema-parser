@@ -1,6 +1,5 @@
 import pytest
 
-import proto_schema_parser.antlr.ProtobufParser
 from proto_schema_parser import ast
 from proto_schema_parser.parser import ASTConstructor, Parser
 

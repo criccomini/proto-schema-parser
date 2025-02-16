@@ -9,8 +9,21 @@ from proto_schema_parser.antlr.ProtobufLexer import ProtobufLexer
 from proto_schema_parser.antlr.ProtobufParser import ProtobufParser
 from proto_schema_parser.antlr.ProtobufParserVisitor import ProtobufParserVisitor
 
-SetupLexelCb = Callable[[ProtobufLexer], None]
+SetupLexerCb = Callable[[ProtobufLexer], None]
+"""
+Callback function to modify the lexer during parsing.
+
+Args:
+    lexer (ProtobufLexer): The lexer instance being modified.
+"""
+
 SetupParserCb = Callable[[ProtobufParser], None]
+"""
+Callback function to modify the parser during parsing.
+
+Args:
+    parser (ProtobufParser): The parser instance being modified.
+"""
 
 
 class ASTConstructor(ProtobufParserVisitor):
@@ -417,17 +430,17 @@ class Parser:
     def __init__(
         self,
         *,
-        setup_lexel: Optional[SetupLexelCb] = None,
+        setup_lexer: Optional[SetupLexerCb] = None,
         setup_parser: Optional[SetupParserCb] = None,
     ) -> None:
-        self.setup_lexel: Optional[SetupLexelCb] = setup_lexel
-        self.setup_parser: Optional[SetupParserCb] = setup_parser
+        self.setup_lexer = setup_lexer
+        self.setup_parser = setup_parser
 
     def parse(self, text: str) -> ast.File:
         input_stream = InputStream(text)
         lexer = ProtobufLexer(input_stream)
-        if self.setup_lexel:
-            self.setup_lexel(lexer)
+        if self.setup_lexer:
+            self.setup_lexer(lexer)
 
         token_stream = CommonTokenStream(lexer)
         parser = ProtobufParser(token_stream)
