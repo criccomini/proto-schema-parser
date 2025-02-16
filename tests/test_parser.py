@@ -1,3 +1,5 @@
+import pytest
+
 from proto_schema_parser import ast
 from proto_schema_parser.parser import ASTConstructor, Parser
 
@@ -1660,3 +1662,32 @@ def test_parse_service_with_additional_bindings():
     )
 
     assert result == expected
+
+
+def test_syntax_error():
+    text = """
+    syntax = "proto3";
+
+    message SearchRequest {
+      string query = 1
+    }
+    """
+
+    import antlr4.error.ErrorListener as antlr4_el
+
+    import proto_schema_parser.antlr.ProtobufParser as psp_antlr
+
+    class _ErrorListener(antlr4_el.ErrorListener):
+        def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
+            raise Exception(f"Failed to parse: line {line}:{column}: {msg}")
+
+    def _setup_parser(parser: psp_antlr.ProtobufParser) -> None:
+        parser.addErrorListener(_ErrorListener())
+
+    with pytest.raises(Exception) as exc_info:
+        Parser(setup_parser=_setup_parser).parse(text)
+
+    assert (
+        exc_info.value.args[0]
+        == r"Failed to parse: line 6:4: mismatched input '}' expecting {';', '['}"
+    )

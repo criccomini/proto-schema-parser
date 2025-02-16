@@ -1,6 +1,6 @@
 # pyright: reportOptionalMemberAccess=false, reportOptionalIterable=false
 
-from typing import Any, List
+from typing import Any, Callable, Optional
 
 from antlr4 import CommonTokenStream, InputStream
 
@@ -8,6 +8,22 @@ from proto_schema_parser import ast
 from proto_schema_parser.antlr.ProtobufLexer import ProtobufLexer
 from proto_schema_parser.antlr.ProtobufParser import ProtobufParser
 from proto_schema_parser.antlr.ProtobufParserVisitor import ProtobufParserVisitor
+
+SetupLexerCb = Callable[[ProtobufLexer], None]
+"""
+Callback function to modify the lexer during parsing.
+
+Args:
+    lexer (ProtobufLexer): The lexer instance being modified.
+"""
+
+SetupParserCb = Callable[[ProtobufParser], None]
+"""
+Callback function to modify the parser during parsing.
+
+Args:
+    parser (ProtobufParser): The parser instance being modified.
+"""
 
 
 class ASTConstructor(ProtobufParserVisitor):
@@ -411,11 +427,26 @@ class ASTConstructor(ProtobufParserVisitor):
 
 
 class Parser:
+    def __init__(
+        self,
+        *,
+        setup_lexer: Optional[SetupLexerCb] = None,
+        setup_parser: Optional[SetupParserCb] = None,
+    ) -> None:
+        self.setup_lexer = setup_lexer
+        self.setup_parser = setup_parser
+
     def parse(self, text: str) -> ast.File:
         input_stream = InputStream(text)
         lexer = ProtobufLexer(input_stream)
+        if self.setup_lexer:
+            self.setup_lexer(lexer)
+
         token_stream = CommonTokenStream(lexer)
         parser = ProtobufParser(token_stream)
+        if self.setup_parser:
+            self.setup_parser(parser)
+
         parse_tree = parser.file_()
         visitor = ASTConstructor()
         return visitor.visit(parse_tree)  # pyright: ignore [reportGeneralTypeIssues]
