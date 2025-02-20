@@ -43,7 +43,7 @@ jobs:
         run: |
           pip install python-docstring-markdown
           mkdir -p docs_tmp
-          cp -r src/proto_schema_parser docs_tmp
+          cp -r proto_schema_parser docs_tmp
           rm -rf docs_tmp/proto_schema_parser/antlr
           python -m python_docstring_markdown docs_tmp/proto_schema_parser DOCUMENTATION.md
           rm -rf docs_tmp
