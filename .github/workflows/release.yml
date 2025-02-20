@@ -1,0 +1,69 @@
+name: Publish Release
+
+on:
+  # Allow manual triggering of the workflow
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version of the release (e.g., 1.0.0)"
+        required: true
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  release:
+    name: Release proto-schema-parser
+    runs-on: ubuntu-latest
+
+    steps:
+      # Verify the version is a valid SemVer version
+      - name: Verify version
+        id: semver
+        uses: matt-usurp/validate-semver@v2
+        with:
+          version: ${{ github.event.inputs.version }}
+
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Set up PDM stable
+      - name: Install pdm
+        run: pip install pdm
+
+      # Set up TOML updater
+      - name: Install tomlkit
+        run: pip install update-toml
+
+      # Set up self
+      - name: Install proto-schema-parser
+        run: pip install .
+
+      # Generate documentation
+      - name: Generate documentation
+        run: python -m python_docstring_markdown src/proto_schema_parser DOCUMENTATION.md
+
+      # Set pyproject.toml version using pdm
+      - name: Set version
+        run: update-toml update --path project.version --value ${{ github.event.inputs.version }} --file pyproject.toml
+
+      # Commit changes
+      - name: Commit config version bump
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: "Bump version to ${{ github.event.inputs.version }}"
+          push: true
+
+      # Publish a git release that creates a new "X.Y.Z" release tag and includes generated notes
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.event.inputs.version }}
+          name: ${{ github.event.inputs.version }}
+          generateReleaseNotes: true
+
+      # Publish the package to pypi
+      - name: Publish to PyPI
+        run: pdm publish
