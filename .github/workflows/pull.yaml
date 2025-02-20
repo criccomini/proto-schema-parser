@@ -1,4 +1,4 @@
-name: proto_schema_parser
+name: Run Tests
 
 on:
   push:
