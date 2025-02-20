@@ -39,7 +39,7 @@ jobs:
 
       # Set up self
       - name: Install proto-schema-parser
-        run: pip install .
+        run: pip install .[dev]
 
       # Generate documentation
       - name: Generate documentation
