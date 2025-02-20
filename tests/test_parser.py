@@ -1,7 +1,7 @@
 import pytest
 
 from proto_schema_parser import ast
-from proto_schema_parser.parser import _ASTConstructor, Parser
+from proto_schema_parser.parser import Parser, _ASTConstructor
 
 
 def test_parse_person():
