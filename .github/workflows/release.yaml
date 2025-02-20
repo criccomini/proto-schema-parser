@@ -38,10 +38,15 @@ jobs:
         run: pip install update-toml
 
       # Generate documentation
+      # Have to copy into a separate folder to remove `antlr` dir to exclude auto-generated code
       - name: Generate documentation
         run: |
           pip install python-docstring-markdown
-          python -m python_docstring_markdown src/proto_schema_parser DOCUMENTATION.md
+          mkdir -p docs_tmp
+          cp -r src/proto_schema_parser docs_tmp
+          rm -rf docs_tmp/proto_schema_parser/antlr
+          python -m python_docstring_markdown docs_tmp/proto_schema_parser DOCUMENTATION.md
+          rm -rf docs_tmp
 
       # Set pyproject.toml version using pdm
       - name: Set version
