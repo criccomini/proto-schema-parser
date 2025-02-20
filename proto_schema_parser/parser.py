@@ -26,7 +26,7 @@ Args:
 """
 
 
-class ASTConstructor(ProtobufParserVisitor):
+class _ASTConstructor(ProtobufParserVisitor):
     def visitFile(self, ctx: ProtobufParser.FileContext):
         syntax = (
             self._getText(ctx.syntaxDecl().syntaxLevel()) if ctx.syntaxDecl() else None
@@ -50,7 +50,7 @@ class ASTConstructor(ProtobufParserVisitor):
         return ast.Import(name=name, weak=weak, public=public)
 
     def visitOptionDecl(self, ctx: ProtobufParser.OptionDeclContext):
-        name = ASTConstructor.normalize_option_name(self._getText(ctx.optionName()))
+        name = _ASTConstructor.normalize_option_name(self._getText(ctx.optionName()))
         value = self.visit(ctx.optionValue())
         return ast.Option(name=name, value=value)
 
@@ -471,5 +471,5 @@ class Parser:
             self.setup_parser(parser)
 
         parse_tree = parser.file_()
-        visitor = ASTConstructor()
+        visitor = _ASTConstructor()
         return visitor.visit(parse_tree)  # pyright: ignore [reportGeneralTypeIssues]
