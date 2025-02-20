@@ -427,16 +427,39 @@ class ASTConstructor(ProtobufParserVisitor):
 
 
 class Parser:
+    """
+    Parser class that takes a string representing a protobuf schema and returns an
+    abstract syntax tree (AST).
+    """
+
     def __init__(
         self,
         *,
         setup_lexer: Optional[SetupLexerCb] = None,
         setup_parser: Optional[SetupParserCb] = None,
     ) -> None:
+        """
+        Initializes a new instance of the Parser class.
+
+        Args:
+            setup_lexer (Optional[SetupLexerCb], optional): A callback function to
+                modify the lexer during parsing. Defaults to None.
+            setup_parser (Optional[SetupParserCb], optional): A callback function
+                to modify the parser during parsing. Defaults to None.
+        """
         self.setup_lexer = setup_lexer
         self.setup_parser = setup_parser
 
     def parse(self, text: str) -> ast.File:
+        """
+        Parses a string representing a protobuf schema and returns an abstract syntax tree (AST).
+
+        Args:
+            text (str): The string representing the protobuf schema.
+
+        Returns:
+            ast.File: The abstract syntax tree representation of the protobuf schema.
+        """
         input_stream = InputStream(text)
         lexer = ProtobufLexer(input_stream)
         if self.setup_lexer:

@@ -5,7 +5,21 @@ from proto_schema_parser import ast
 
 
 class Generator:
+    """
+    Generator class that takes an abstract syntax tree (AST) and
+    generates a protobuf schema string.
+    """
+
     def generate(self, file: ast.File) -> str:
+        """
+        Generates a protobuf schema string from an abstract syntax tree (AST).
+
+        Args:
+            file (ast.File): The abstract syntax tree of the .proto file.
+
+        Returns:
+            str: The generated protobuf schema string.
+        """
         lines = []
 
         # Syntax
