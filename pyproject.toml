@@ -8,24 +8,13 @@ authors = [
 dependencies = [
     "antlr4-python3-runtime>=4.13.0",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 readme = "README.md"
 license = {text = "MIT"}
 
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
-
-[tool.pdm.dev-dependencies]
-tests = [
-    "pytest>=7.3.2",
-]
-style = [
-    "black>=23.3.0",
-    "isort>=5.12.0",
-    "pylint>=2.17.4",
-    "pyright>=1.1.314",
-]
 
 [tool.pdm.scripts]
 antlr = "java -Xmx500M -cp antlr/antlr-4.13.0-complete.jar org.antlr.v4.Tool -Dlanguage=Python3 -visitor -o proto_schema_parser -lib proto_schema_parser/antlr antlr/ProtobufLexer.g4 antlr/ProtobufParser.g4"
@@ -55,4 +44,17 @@ pythonPlatform = "All"
 exclude = [
     "**/__pycache__",
     "proto_schema_parser/antlr"
+]
+
+[dependency-groups]
+style = [
+    "black>=23.3.0",
+    "isort>=5.12.0",
+    "pylint>=2.17.4",
+    "pyright>=1.1.314",
+    "python-docstring-markdown",
+]
+tests = [
+    "pytest>=7.3.2",
+    "python-docstring-markdown>=0.2.1",
 ]
