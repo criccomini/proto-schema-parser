@@ -37,10 +37,6 @@ jobs:
       - name: Install tomlkit
         run: pip install update-toml
 
-      # Set up self
-      - name: Install proto-schema-parser
-        run: pip install
-
       # Generate documentation
       - name: Generate documentation
         run: |
