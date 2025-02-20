@@ -56,6 +56,3 @@ style = [
 tests = [
     "pytest>=7.3.2",
 ]
-dev = [
-    "python-docstring-markdown>=0.2.1",
-]

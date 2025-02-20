@@ -39,11 +39,13 @@ jobs:
 
       # Set up self
       - name: Install proto-schema-parser
-        run: pip install .[dev]
+        run: pip install
 
       # Generate documentation
       - name: Generate documentation
-        run: python -m python_docstring_markdown src/proto_schema_parser DOCUMENTATION.md
+        run: |
+          pip install python-docstring-markdown
+          python -m python_docstring_markdown src/proto_schema_parser DOCUMENTATION.md
 
       # Set pyproject.toml version using pdm
       - name: Set version
