@@ -132,7 +132,6 @@ class Generator:
             cardinality = f"{field.cardinality.value.lower()} "
 
         options = ""
-        print(field.options)
         if field.options:
             options = " ["
             options += ", ".join(
