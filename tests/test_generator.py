@@ -1218,3 +1218,205 @@ def test_generate_service_with_additional_bindings():
     )
 
     assert result == expected
+
+
+def test_generate_option_with_complex_nested_message_literal_swagger():
+    """Test that a complex message literal with nested security definitions is generated correctly."""
+    file = ast.File(
+        file_elements=[
+            ast.Option(
+                name="(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger)",
+                value=ast.MessageLiteral(
+                    fields=[
+                        ast.MessageLiteralField(
+                            name="security_definitions",
+                            value=ast.MessageLiteral(
+                                fields=[
+                                    ast.MessageLiteralField(
+                                        name="security",
+                                        value=ast.MessageLiteral(
+                                            fields=[
+                                                ast.MessageLiteralField(
+                                                    name="key", value="ApiKey"
+                                                ),
+                                                ast.MessageLiteralField(
+                                                    name="value",
+                                                    value=ast.MessageLiteral(
+                                                        fields=[
+                                                            ast.MessageLiteralField(
+                                                                name="type",
+                                                                value=ast.Identifier(
+                                                                    name="TYPE_API_KEY"
+                                                                ),
+                                                            ),
+                                                            ast.MessageLiteralField(
+                                                                name="in",
+                                                                value=ast.Identifier(
+                                                                    name="IN_HEADER"
+                                                                ),
+                                                            ),
+                                                            ast.MessageLiteralField(
+                                                                name="name",
+                                                                value="Authorization",
+                                                            ),
+                                                        ]
+                                                    ),
+                                                ),
+                                            ]
+                                        ),
+                                    )
+                                ]
+                            ),
+                        ),
+                        ast.MessageLiteralField(
+                            name="security",
+                            value=ast.MessageLiteral(
+                                fields=[
+                                    ast.MessageLiteralField(
+                                        name="security_requirement",
+                                        value=ast.MessageLiteral(
+                                            fields=[
+                                                ast.MessageLiteralField(
+                                                    name="key", value="ApiKey"
+                                                ),
+                                                ast.MessageLiteralField(
+                                                    name="value",
+                                                    value=ast.MessageLiteral(fields=[]),
+                                                ),
+                                            ]
+                                        ),
+                                    )
+                                ]
+                            ),
+                        ),
+                    ]
+                ),
+            )
+        ]
+    )
+
+    result = Generator().generate(file)
+    expected = """option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  security_definitions: {
+    security: {
+      key: "ApiKey",
+      value: {
+        type: TYPE_API_KEY,
+        in: IN_HEADER,
+        name: "Authorization"
+      }
+    }
+  },
+  security: {
+    security_requirement: {
+      key: "ApiKey",
+      value: {}
+    }
+  }
+};"""
+
+    assert result == expected
+
+
+def test_generate_multiple_options_with_complex_message_literals():
+    """Test that multiple options with complex message literals are generated correctly."""
+    file = ast.File(
+        file_elements=[
+            ast.Option(name="go_package", value="go.etcd.io/etcd/api/v3/etcdserverpb"),
+            ast.Option(name="(gogoproto.marshaler_all)", value=True),
+            ast.Option(name="(gogoproto.unmarshaler_all)", value=True),
+            ast.Option(
+                name="(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger)",
+                value=ast.MessageLiteral(
+                    fields=[
+                        ast.MessageLiteralField(
+                            name="security_definitions",
+                            value=ast.MessageLiteral(
+                                fields=[
+                                    ast.MessageLiteralField(
+                                        name="security",
+                                        value=ast.MessageLiteral(
+                                            fields=[
+                                                ast.MessageLiteralField(
+                                                    name="key", value="ApiKey"
+                                                ),
+                                                ast.MessageLiteralField(
+                                                    name="value",
+                                                    value=ast.MessageLiteral(
+                                                        fields=[
+                                                            ast.MessageLiteralField(
+                                                                name="type",
+                                                                value=ast.Identifier(
+                                                                    name="TYPE_API_KEY"
+                                                                ),
+                                                            ),
+                                                            ast.MessageLiteralField(
+                                                                name="in",
+                                                                value=ast.Identifier(
+                                                                    name="IN_HEADER"
+                                                                ),
+                                                            ),
+                                                            ast.MessageLiteralField(
+                                                                name="name",
+                                                                value="Authorization",
+                                                            ),
+                                                        ]
+                                                    ),
+                                                ),
+                                            ]
+                                        ),
+                                    )
+                                ]
+                            ),
+                        ),
+                        ast.MessageLiteralField(
+                            name="security",
+                            value=ast.MessageLiteral(
+                                fields=[
+                                    ast.MessageLiteralField(
+                                        name="security_requirement",
+                                        value=ast.MessageLiteral(
+                                            fields=[
+                                                ast.MessageLiteralField(
+                                                    name="key", value="ApiKey"
+                                                ),
+                                                ast.MessageLiteralField(
+                                                    name="value",
+                                                    value=ast.MessageLiteral(fields=[]),
+                                                ),
+                                            ]
+                                        ),
+                                    )
+                                ]
+                            ),
+                        ),
+                    ]
+                ),
+            ),
+        ]
+    )
+
+    result = Generator().generate(file)
+    expected = """option go_package = "go.etcd.io/etcd/api/v3/etcdserverpb";
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  security_definitions: {
+    security: {
+      key: "ApiKey",
+      value: {
+        type: TYPE_API_KEY,
+        in: IN_HEADER,
+        name: "Authorization"
+      }
+    }
+  },
+  security: {
+    security_requirement: {
+      key: "ApiKey",
+      value: {}
+    }
+  }
+};"""
+
+    assert result == expected
