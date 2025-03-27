@@ -1691,3 +1691,90 @@ def test_syntax_error():
         exc_info.value.args[0]
         == r"Failed to parse: line 6:4: mismatched input '}' expecting {';', '['}"
     )
+
+
+def test_parse_example_with_email():
+    """
+    Test that demonstrates a bug with parsing example directives containing email addresses.
+    The parser fails when the example value contains an email address with @ symbol.
+    """
+    # This proto definition fails to parse due to the email address in the example
+    text_with_email = """
+    syntax = "proto3";
+
+    message Foo {
+      string bar = 4 [
+        (oompa.loompa) = {
+          example: "\"mini@mouse.com\"";
+        }
+      ];
+    }
+    """
+    
+    result = Parser().parse(text_with_email)
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Message(
+                name="Foo",
+                elements=[
+                    ast.Field(
+                        name="bar",
+                        number=4,
+                        type="string",
+                        options=[
+                            ast.Option(
+                                name="(oompa.loompa)",
+                                value={"example": '"mini@mouse.com"'},
+                            )
+                        ],
+                    ),
+                ],
+            ),
+        ],
+    )
+    assert result == expected
+
+
+def test_parse_description_with_email():
+    """
+    Test that demonstrates a bug with parsing description directives containing email addresses.
+    The parser fails when the description value contains an email address with @ symbol.
+    """
+    # This proto definition fails to parse due to the email address in the description
+    text_with_email = """
+    syntax = "proto3";
+
+    message Foo {
+      string bar = 4 [
+        (oompa.loompa) = {
+          description: "\"Contact us at mini@mouse.com\"";
+        }
+      ];
+    }
+    """
+
+    # This parses successfully
+    result = Parser().parse(text_with_email)
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Message(
+                name="Foo",
+                elements=[
+                    ast.Field(
+                        name="bar",
+                        number=4,
+                        type="string",
+                        options=[
+                            ast.Option(
+                                name="(oompa.loompa)",
+                                value={"description": '"Contact us at mini@mouse.com"'},
+                            )
+                        ],
+                    ),
+                ],
+            ),
+        ],
+    )
+    assert result == expected
