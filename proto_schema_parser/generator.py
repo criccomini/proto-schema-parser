@@ -43,6 +43,9 @@ class Generator:
                         lines.append(f"option {element.name} = true;")
                     else:
                         lines.append(f"option {element.name} = false;")
+                elif isinstance(element.value, ast.MessageLiteral):
+                    value = self._generate_option_value(element.value, 0)
+                    lines.append(f"option {element.name} = {value};")
                 else:
                     lines.append(f'option {element.name} = "{element.value}";')
             elif isinstance(element, ast.Message):
