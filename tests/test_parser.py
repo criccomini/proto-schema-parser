@@ -1703,11 +1703,6 @@ def test_syntax_error():
 
 
 def test_parse_complex_compact_option():
-    """
-    Test that demonstrates a bug with parsing example directives containing email addresses.
-    The parser fails when the example value contains an email address with @ symbol.
-    """
-    # This proto definition fails to parse due to the email address in the example
     text_with_email = """
     syntax = "proto3";
 
@@ -1738,6 +1733,51 @@ def test_parse_complex_compact_option():
                                     fields=[
                                         ast.MessageLiteralField(
                                             name="example", value="mini@mouse.com"
+                                        )
+                                    ]
+                                ),
+                            )
+                        ],
+                    ),
+                ],
+            ),
+        ],
+    )
+    assert result == expected
+
+
+def test_parse_complex_compact_option_with_escaped_string():
+    text_with_email = """
+    syntax = "proto3";
+
+    message Foo {
+      string bar = 4 [
+        (oompa.loompa) = {
+          example: "\"blah\"";
+        }
+      ];
+    }
+    """
+
+    result = Parser().parse(text_with_email)
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Message(
+                name="Foo",
+                elements=[
+                    ast.Field(
+                        name="bar",
+                        number=4,
+                        type="string",
+                        options=[
+                            ast.Option(
+                                name="(oompa.loompa)",
+                                value=ast.MessageLiteral(
+                                    fields=[
+                                        ast.MessageLiteralField(
+                                            name="example",
+                                            value='"blah"',
                                         )
                                     ]
                                 ),
