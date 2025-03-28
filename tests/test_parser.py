@@ -98,7 +98,11 @@ def test_parse_person():
                                 number=2,
                                 cardinality=ast.FieldCardinality.OPTIONAL,
                                 type="PhoneType",
-                                options=[ast.Option(name="default", value="HOME")],
+                                options=[
+                                    ast.Option(
+                                        name="default", value=ast.Identifier("HOME")
+                                    )
+                                ],
                             ),
                         ],
                     ),
@@ -142,7 +146,12 @@ def test_parse_search_request():
                         options=[
                             ast.Option(
                                 name="(validate.rules).double",
-                                value="{gte: -90,  lte: 90}",
+                                value=ast.MessageLiteral(
+                                    fields=[
+                                        ast.MessageLiteralField(name="gte", value=-90),
+                                        ast.MessageLiteralField(name="lte", value=90),
+                                    ]
+                                ),
                             )
                         ],
                     ),
@@ -1725,7 +1734,13 @@ def test_parse_complex_compact_option():
                         options=[
                             ast.Option(
                                 name="(oompa.loompa)",
-                                value={"example": "mini@mouse.com"},
+                                value=ast.MessageLiteral(
+                                    fields=[
+                                        ast.MessageLiteralField(
+                                            name="example", value="mini@mouse.com"
+                                        )
+                                    ]
+                                ),
                             )
                         ],
                     ),

@@ -128,8 +128,8 @@ class _ASTConstructor(ProtobufParserVisitor):
         )
 
     def visitCompactOption(self, ctx: ProtobufParser.CompactOptionContext):
-        name = self._getText(ctx.optionName())
-        value = self._stringToType(self._getText(ctx.optionValue()))
+        name = _ASTConstructor.normalize_option_name(self._getText(ctx.optionName()))
+        value = self.visit(ctx.optionValue())
         return ast.Option(name=name, value=value)
 
     def visitCompactOptions(self, ctx: ProtobufParser.CompactOptionsContext):
