@@ -347,7 +347,7 @@ class _ASTConstructor(ProtobufParserVisitor):
 
     def visitAlwaysIdent(self, ctx: ProtobufParser.AlwaysIdentContext):
         if ctx.IDENTIFIER():
-            # Unlike string/int/float, bools are just reated as identiifers in
+            # Unlike string/int/float, bools are just treated as identifiers in
             # the lexer, so we need to handle them here
             identifier_text = self._getText(ctx)
             if identifier_text in ["true", "false"]:
