@@ -1794,7 +1794,6 @@ def test_parse_complex_compact_option_with_escaped_string():
     assert result == expected
 
 
-
 def test_parse_email_compact_option_with_escaped_string():
     text_with_email = """
     syntax = "proto3";
