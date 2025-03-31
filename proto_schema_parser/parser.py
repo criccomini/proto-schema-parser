@@ -128,8 +128,8 @@ class _ASTConstructor(ProtobufParserVisitor):
         )
 
     def visitCompactOption(self, ctx: ProtobufParser.CompactOptionContext):
-        name = self._getText(ctx.optionName())
-        value = self._stringToType(self._getText(ctx.optionValue()))
+        name = _ASTConstructor.normalize_option_name(self._getText(ctx.optionName()))
+        value = self.visit(ctx.optionValue())
         return ast.Option(name=name, value=value)
 
     def visitCompactOptions(self, ctx: ProtobufParser.CompactOptionsContext):
@@ -347,7 +347,7 @@ class _ASTConstructor(ProtobufParserVisitor):
 
     def visitAlwaysIdent(self, ctx: ProtobufParser.AlwaysIdentContext):
         if ctx.IDENTIFIER():
-            # Unlike string/int/float, bools are just reated as identiifers in
+            # Unlike string/int/float, bools are just treated as identifiers in
             # the lexer, so we need to handle them here
             identifier_text = self._getText(ctx)
             if identifier_text in ["true", "false"]:
@@ -369,7 +369,12 @@ class _ASTConstructor(ProtobufParserVisitor):
             ctx.stop.stop,
         )  # pyright: ignore [reportGeneralTypeIssues]
         text = input_stream.getText(start, stop)
-        text = text.strip('"') if strip_quotes else text
+        if (
+            strip_quotes
+            and (text.startswith('"') and text.endswith('"'))
+            or (text.startswith("'") and text.endswith("'"))
+        ):
+            text = text[1:-1]
         return text
 
     def _stringToType(self, value: str):

@@ -98,7 +98,11 @@ def test_parse_person():
                                 number=2,
                                 cardinality=ast.FieldCardinality.OPTIONAL,
                                 type="PhoneType",
-                                options=[ast.Option(name="default", value="HOME")],
+                                options=[
+                                    ast.Option(
+                                        name="default", value=ast.Identifier("HOME")
+                                    )
+                                ],
                             ),
                         ],
                     ),
@@ -142,7 +146,12 @@ def test_parse_search_request():
                         options=[
                             ast.Option(
                                 name="(validate.rules).double",
-                                value="{gte: -90,  lte: 90}",
+                                value=ast.MessageLiteral(
+                                    fields=[
+                                        ast.MessageLiteralField(name="gte", value=-90),
+                                        ast.MessageLiteralField(name="lte", value=90),
+                                    ]
+                                ),
                             )
                         ],
                     ),
@@ -1691,3 +1700,142 @@ def test_syntax_error():
         exc_info.value.args[0]
         == r"Failed to parse: line 6:4: mismatched input '}' expecting {';', '['}"
     )
+
+
+def test_parse_complex_compact_option():
+    text_with_email = """
+    syntax = "proto3";
+
+    message Foo {
+      string bar = 4 [
+        (oompa.loompa) = {
+          example: "mini@mouse.com";
+        }
+      ];
+    }
+    """
+
+    result = Parser().parse(text_with_email)
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Message(
+                name="Foo",
+                elements=[
+                    ast.Field(
+                        name="bar",
+                        number=4,
+                        type="string",
+                        options=[
+                            ast.Option(
+                                name="(oompa.loompa)",
+                                value=ast.MessageLiteral(
+                                    fields=[
+                                        ast.MessageLiteralField(
+                                            name="example",
+                                            value="mini@mouse.com",
+                                        )
+                                    ]
+                                ),
+                            )
+                        ],
+                    ),
+                ],
+            ),
+        ],
+    )
+    assert result == expected
+
+
+def test_parse_complex_compact_option_with_escaped_string():
+    text_with_email = """
+    syntax = "proto3";
+
+    message Foo {
+      string bar = 4 [
+        (oompa.loompa) = {
+          example: "\\"blah\\"";
+        }
+      ];
+    }
+    """
+
+    print(text_with_email)
+
+    result = Parser().parse(text_with_email)
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Message(
+                name="Foo",
+                elements=[
+                    ast.Field(
+                        name="bar",
+                        number=4,
+                        type="string",
+                        options=[
+                            ast.Option(
+                                name="(oompa.loompa)",
+                                value=ast.MessageLiteral(
+                                    fields=[
+                                        ast.MessageLiteralField(
+                                            name="example",
+                                            value='\\"blah\\"',
+                                        )
+                                    ]
+                                ),
+                            )
+                        ],
+                    ),
+                ],
+            ),
+        ],
+    )
+    assert result == expected
+
+
+def test_parse_email_compact_option_with_escaped_string():
+    text_with_email = """
+    syntax = "proto3";
+
+    message Foo {
+      string bar = 4 [
+        (oompa.loompa) = {
+          example: "\\"mini@mouse.com\\"";
+        }
+      ];
+    }
+    """
+
+    print(text_with_email)
+
+    result = Parser().parse(text_with_email)
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Message(
+                name="Foo",
+                elements=[
+                    ast.Field(
+                        name="bar",
+                        number=4,
+                        type="string",
+                        options=[
+                            ast.Option(
+                                name="(oompa.loompa)",
+                                value=ast.MessageLiteral(
+                                    fields=[
+                                        ast.MessageLiteralField(
+                                            name="example",
+                                            value='\\"mini@mouse.com\\"',
+                                        )
+                                    ]
+                                ),
+                            )
+                        ],
+                    ),
+                ],
+            ),
+        ],
+    )
+    assert result == expected
