@@ -369,7 +369,12 @@ class _ASTConstructor(ProtobufParserVisitor):
             ctx.stop.stop,
         )  # pyright: ignore [reportGeneralTypeIssues]
         text = input_stream.getText(start, stop)
-        text = text.strip('"') if strip_quotes else text
+        if (
+            strip_quotes
+            and (text.startswith('"') and text.endswith('"'))
+            or (text.startswith("'") and text.endswith("'"))
+        ):
+            text = text[1:-1]
         return text
 
     def _stringToType(self, value: str):

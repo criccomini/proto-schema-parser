@@ -1732,7 +1732,8 @@ def test_parse_complex_compact_option():
                                 value=ast.MessageLiteral(
                                     fields=[
                                         ast.MessageLiteralField(
-                                            name="example", value="mini@mouse.com"
+                                            name="example",
+                                            value="mini@mouse.com",
                                         )
                                     ]
                                 ),
@@ -1753,11 +1754,13 @@ def test_parse_complex_compact_option_with_escaped_string():
     message Foo {
       string bar = 4 [
         (oompa.loompa) = {
-          example: "\"blah\"";
+          example: "\\"blah\\"";
         }
       ];
     }
     """
+
+    print(text_with_email)
 
     result = Parser().parse(text_with_email)
     expected = ast.File(
@@ -1777,7 +1780,55 @@ def test_parse_complex_compact_option_with_escaped_string():
                                     fields=[
                                         ast.MessageLiteralField(
                                             name="example",
-                                            value='"blah"',
+                                            value='\\"blah\\"',
+                                        )
+                                    ]
+                                ),
+                            )
+                        ],
+                    ),
+                ],
+            ),
+        ],
+    )
+    assert result == expected
+
+
+
+def test_parse_email_compact_option_with_escaped_string():
+    text_with_email = """
+    syntax = "proto3";
+
+    message Foo {
+      string bar = 4 [
+        (oompa.loompa) = {
+          example: "\\"mini@mouse.com\\"";
+        }
+      ];
+    }
+    """
+
+    print(text_with_email)
+
+    result = Parser().parse(text_with_email)
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Message(
+                name="Foo",
+                elements=[
+                    ast.Field(
+                        name="bar",
+                        number=4,
+                        type="string",
+                        options=[
+                            ast.Option(
+                                name="(oompa.loompa)",
+                                value=ast.MessageLiteral(
+                                    fields=[
+                                        ast.MessageLiteralField(
+                                            name="example",
+                                            value='\\"mini@mouse.com\\"',
                                         )
                                     ]
                                 ),
