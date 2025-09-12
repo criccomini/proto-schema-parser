@@ -246,6 +246,21 @@ class _ASTConstructor(ProtobufParserVisitor):
         elements = [self.visit(child) for child in ctx.extensionElement()]
         return ast.Extension(typeName=typeName, elements=elements)
 
+    def visitExtensionFieldDecl(self, ctx: ProtobufParser.ExtensionFieldDeclContext):
+        if fieldWithCardinality := ctx.fieldDeclWithCardinality():
+            return self.visit(fieldWithCardinality)
+        else:
+            name = self._getText(ctx.fieldName())
+            number = int(self._getText(ctx.fieldNumber()))
+            type = self._getText(ctx.extensionFieldDeclTypeName())
+            options = self.visit(ctx.compactOptions()) if ctx.compactOptions() else []
+            return ast.Field(
+                name=name,
+                number=number,
+                type=type,
+                options=options,
+            )
+
     def visitServiceDecl(self, ctx: ProtobufParser.ServiceDeclContext):
         name = self._getText(ctx.serviceName())
         elements = [self.visit(child) for child in ctx.serviceElement()]
