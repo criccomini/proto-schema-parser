@@ -436,6 +436,80 @@ def test_parse_extension():
     assert result == expected
 
 
+def test_parse_option_extension_with_message():
+    text = """
+    syntax = "proto3";
+    package test.options.v1;
+
+    message Version
+    {
+        required uint32 major = 1;
+        required uint32 minor = 2;
+    }
+
+    message ServiceOptions {
+        extensions 1000 to max;
+    }
+
+    extend ServiceOptions
+    {
+        Version version = 1001;
+    }
+    """
+    result = Parser().parse(text)
+    expected = ast.File(
+        syntax="proto3",
+        file_elements=[
+            ast.Package(
+                name="test.options.v1",
+            ),
+            ast.Message(
+                name="Version",
+                elements=[
+                    ast.Field(
+                        name="major",
+                        number=1,
+                        type="uint32",
+                        cardinality=ast.FieldCardinality.REQUIRED,
+                        options=[],
+                    ),
+                    ast.Field(
+                        name="minor",
+                        number=2,
+                        type="uint32",
+                        cardinality=ast.FieldCardinality.REQUIRED,
+                        options=[],
+                    ),
+                ],
+            ),
+            ast.Message(
+                name="ServiceOptions",
+                elements=[
+                    ast.ExtensionRange(
+                        ranges=[
+                            "1000 to max",
+                        ],
+                        options=[],
+                    ),
+                ],
+            ),
+            ast.Extension(
+                typeName="ServiceOptions",
+                elements=[
+                    ast.Field(
+                        name="version",
+                        number=1001,
+                        cardinality=None,
+                        type="Version",
+                        options=[],
+                    ),
+                ],
+            ),
+        ],
+    )
+    assert result == expected
+
+
 def test_parse_imports():
     text = """
     syntax = "proto3";

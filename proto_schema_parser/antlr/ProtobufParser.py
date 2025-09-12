@@ -6729,7 +6729,7 @@ class ProtobufParser ( Parser ):
         def R_BRACE(self):
             return self.getToken(ProtobufParser.R_BRACE, 0)
 
-        def extensionElement(self, i:int=None):
+        def extensionElement(self, i:int|None=None):
             if i is None:
                 return self.getTypedRuleContexts(ProtobufParser.ExtensionElementContext)
             else:
