@@ -75,7 +75,7 @@ fullyQualifiedIdentifier: DOT qualifiedIdentifier;
 
 optionDecl: OPTION optionName EQUALS optionValue SEMICOLON;
 
-compactOptions: L_BRACKET compactOption ( COMMA compactOption )* R_BRACKET;
+compactOptions: L_BRACKET compactOption ( COMMA compactOption )* COMMA? R_BRACKET;
 
 compactOption : optionName EQUALS optionValue;
 

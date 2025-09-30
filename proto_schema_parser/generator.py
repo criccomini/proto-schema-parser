@@ -1,5 +1,5 @@
 import itertools
-from typing import List, cast
+from typing import List
 
 from proto_schema_parser import ast
 
@@ -138,7 +138,7 @@ class Generator:
         if field.options:
             options = " ["
             options += ", ".join(
-                f"{opt.name} = {self._generate_scalar(cast(ast.ScalarValue, opt.value))}"
+                f"{opt.name} = {self._generate_option_value(opt.value, indent_level, inline=True)}"
                 for opt in field.options
             )
             options += "]"
@@ -224,9 +224,23 @@ class Generator:
         return f"{'  ' * indent_level}reserved {reserved_values};"
 
     def _generate_message_literal(
-        self, message_literal: ast.MessageLiteral, indent_level: int
+        self,
+        message_literal: ast.MessageLiteral,
+        indent_level: int,
+        inline: bool = False,
     ) -> str:
         """Generate nested message literal with consistent indentation."""
+        if inline:
+            if not message_literal.fields:
+                return "{}"
+            field_strings = []
+            for field in message_literal.fields:
+                value = self._generate_option_value(
+                    field.value, indent_level, inline=True
+                )
+                field_strings.append(f"{field.name}: {value}")
+            return "{ " + ", ".join(field_strings) + " }"
+
         lines = [f"{'  ' * indent_level}{{"]
         for i, field in enumerate(message_literal.fields):
             field_line = self._generate_message_literal_field(field, indent_level + 1)
@@ -245,24 +259,31 @@ class Generator:
         value = self._generate_option_value(field.value, indent_level)
         return f"{'  ' * indent_level}{field.name}: {value}"
 
-    def _generate_option_value(self, value: ast.MessageValue, indent_level: int) -> str:
+    def _generate_option_value(
+        self, value: ast.MessageValue, indent_level: int, inline: bool = False
+    ) -> str:
         """Generate the correct value for an option."""
         if isinstance(value, ast.MessageLiteral):
             # strip() to remove leading/trailing whitespace since it's appended on the
             # same line as the field name.
-            return self._generate_message_literal(value, indent_level).strip()
+            literal = self._generate_message_literal(value, indent_level, inline=inline)
+            return literal.strip()
         elif isinstance(value, list):
             # No + 1 for indent_level since the list literal is on the same line as the field name.
-            return self._generate_list_literal(value, indent_level)
+            return self._generate_list_literal(value, indent_level, inline=inline)
         else:
             return self._generate_scalar(value)
 
     def _generate_list_literal(
-        self, elements: List[ast.MessageValue], indent_level: int
+        self,
+        elements: List[ast.MessageValue],
+        indent_level: int,
+        inline: bool = False,
     ) -> str:
         """Generate a list literal."""
         message_values = [
-            self._generate_option_value(element, indent_level) for element in elements
+            self._generate_option_value(element, indent_level, inline=inline)
+            for element in elements
         ]
         return f"[{', '.join(message_values)}]"
 

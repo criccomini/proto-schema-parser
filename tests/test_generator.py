@@ -1,5 +1,6 @@
 from proto_schema_parser import ast
 from proto_schema_parser.generator import Generator
+from proto_schema_parser.parser import Parser
 
 
 def test_generate_simple_message():
@@ -577,6 +578,47 @@ def test_generate_service_with_numeric_option():
         "service TestService {\n"
         "  option test.options.v1.lifecycle = DEPRECATED;\n"
         "  option test.options.v1.major_version = 1;\n"
+        "}"
+    )
+
+    assert result == expected
+
+
+def test_generate_field_option_with_message_literal():
+    schema = """message FieldAttr {
+  string text = 1;
+}
+
+message FieldAttributes {
+  optional FieldAttr attr = 1;
+}
+
+extend google.protobuf.FieldOptions {
+  optional FieldAttributes field_attributes = 50001;
+}
+
+message MyMessage {
+  string title = 1 [
+    (field_attributes).attr = { text: "a" },
+  ];
+}
+"""
+
+    file = Parser().parse(schema)
+
+    result = Generator().generate(file)
+    expected = (
+        "message FieldAttr {\n"
+        "  string text = 1;\n"
+        "}\n"
+        "message FieldAttributes {\n"
+        "  optional FieldAttr attr = 1;\n"
+        "}\n"
+        "extend google.protobuf.FieldOptions {\n"
+        "  optional FieldAttributes field_attributes = 50001;\n"
+        "}\n"
+        "message MyMessage {\n"
+        '  string title = 1 [(field_attributes).attr = { text: "a" }];\n'
         "}"
     )
 
