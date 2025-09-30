@@ -138,7 +138,7 @@ class Generator:
         if field.options:
             options = " ["
             options += ", ".join(
-                f"{opt.name} = {self._generate_scalar(cast(ast.ScalarValue, opt.value))}"
+                f"{opt.name} = {self._generate_field_option_value(opt.value)}"
                 for opt in field.options
             )
             options += "]"
@@ -238,6 +238,18 @@ class Generator:
             lines = ["{}"]  # Don't include a linebreak if there are no fields
         return "\n".join(lines)
 
+    def _generate_compact_message_literal(self, message_literal: ast.MessageLiteral) -> str:
+        """Generate message literal in compact format for field options."""
+        if not message_literal.fields:
+            return "{}"
+        
+        field_strings = []
+        for field in message_literal.fields:
+            value = self._generate_field_option_value(field.value)
+            field_strings.append(f"{field.name}: {value}")
+        
+        return "{ " + ", ".join(field_strings) + " }"
+
     def _generate_message_literal_field(
         self, field: ast.MessageLiteralField, indent_level: int
     ) -> str:
@@ -254,6 +266,15 @@ class Generator:
         elif isinstance(value, list):
             # No + 1 for indent_level since the list literal is on the same line as the field name.
             return self._generate_list_literal(value, indent_level)
+        else:
+            return self._generate_scalar(value)
+
+    def _generate_field_option_value(self, value: ast.MessageValue) -> str:
+        """Generate the correct value for a field option (compact format)."""
+        if isinstance(value, ast.MessageLiteral):
+            return self._generate_compact_message_literal(value)
+        elif isinstance(value, list):
+            return self._generate_list_literal(value, 0)
         else:
             return self._generate_scalar(value)
 

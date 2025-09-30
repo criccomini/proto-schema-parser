@@ -1162,6 +1162,64 @@ def test_generate_field_with_options_for_scalar_types():
         assert result == expected
 
 
+def test_generate_field_with_message_literal_option():
+    """Test that field options with MessageLiteral values are generated in compact format."""
+    field = ast.Field(
+        name="title",
+        type="string",
+        number=1,
+        options=[
+            ast.Option(
+                name="(field_attributes).attr",
+                value=ast.MessageLiteral(
+                    fields=[
+                        ast.MessageLiteralField(name="text", value="a")
+                    ]
+                )
+            )
+        ]
+    )
+    
+    generator = Generator()
+    result = generator._generate_field(field)
+    expected = 'string title = 1 [(field_attributes).attr = { text: "a" }];'
+    
+    assert result == expected
+
+
+def test_generate_field_with_nested_message_literal_option():
+    """Test that field options with nested MessageLiteral values are generated correctly."""
+    field = ast.Field(
+        name="description",
+        type="string", 
+        number=2,
+        options=[
+            ast.Option(
+                name="(custom_option)",
+                value=ast.MessageLiteral(
+                    fields=[
+                        ast.MessageLiteralField(
+                            name="nested",
+                            value=ast.MessageLiteral(
+                                fields=[
+                                    ast.MessageLiteralField(name="inner", value="value"),
+                                    ast.MessageLiteralField(name="count", value=42)
+                                ]
+                            )
+                        )
+                    ]
+                )
+            )
+        ]
+    )
+    
+    generator = Generator()
+    result = generator._generate_field(field)
+    expected = 'string description = 2 [(custom_option) = { nested: { inner: "value", count: 42 } }];'
+    
+    assert result == expected
+
+
 def test_generate_service_with_additional_bindings():
     """Test that a service with additional_bindings in google.api.http option is generated correctly."""
     service = ast.Service(
