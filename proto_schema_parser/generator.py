@@ -148,7 +148,16 @@ class Generator:
     def _generate_map_field(
         self, map_field: ast.MapField, indent_level: int = 0
     ) -> str:
-        return f"{'  ' * indent_level}map<{map_field.key_type}, {map_field.value_type}> {map_field.name} = {map_field.number};"
+        options = ""
+        if map_field.options:
+            options = " ["
+            options += ", ".join(
+                f"{opt.name} = {self._generate_field_option_value(opt.value)}"
+                for opt in map_field.options
+            )
+            options += "]"
+
+        return f"{'  ' * indent_level}map<{map_field.key_type}, {map_field.value_type}> {map_field.name} = {map_field.number}{options};"
 
     def _generate_group(self, group: ast.Group, indent_level: int = 0) -> str:
         lines = [f"{'  ' * indent_level}group {group.name} = {group.number} {{"]

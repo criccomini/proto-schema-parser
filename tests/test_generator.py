@@ -1220,6 +1220,32 @@ def test_generate_field_with_nested_message_literal_option():
     assert result == expected
 
 
+def test_generate_map_field_with_message_literal_option():
+    """Test that map field options with MessageLiteral values are generated correctly."""
+    map_field = ast.MapField(
+        name="my_map",
+        key_type="string",
+        value_type="int32",
+        number=1,
+        options=[
+            ast.Option(
+                name="(map_option)",
+                value=ast.MessageLiteral(
+                    fields=[
+                        ast.MessageLiteralField(name="deprecated", value=True)
+                    ]
+                )
+            )
+        ]
+    )
+    
+    generator = Generator()
+    result = generator._generate_map_field(map_field)
+    expected = 'map<string, int32> my_map = 1 [(map_option) = { deprecated: true }];'
+    
+    assert result == expected
+
+
 def test_generate_service_with_additional_bindings():
     """Test that a service with additional_bindings in google.api.http option is generated correctly."""
     service = ast.Service(
