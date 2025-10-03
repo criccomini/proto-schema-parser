@@ -74,7 +74,7 @@ class _ASTConstructor(ProtobufParserVisitor):
         elif ctx.commentDecl():
             return self.visit(ctx.commentDecl())
         else:
-            return self._getText(ctx)
+            return ast.MessageLiteral(fields=[])
 
     def visitMessageLiteralField(self, ctx: ProtobufParser.MessageLiteralFieldContext):
         """Parse individual fields inside a message literal."""

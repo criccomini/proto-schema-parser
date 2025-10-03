@@ -1340,6 +1340,54 @@ def test_parse_message_literal_with_braces():
     assert result == expected
 
 
+def test_parse_nested_empty_message_literal_option():
+    text = """
+    message FieldAttr {
+      message Nested {
+        string text = 1;
+      }
+
+      Nested nested = 1;
+    }
+
+    message FieldAttributes {
+      optional FieldAttr attr = 1;
+    }
+
+    extend google.protobuf.FieldOptions {
+      optional FieldAttributes field_attributes = 50001;
+    }
+
+    message MyMessage {
+      string title = 1 [
+        (field_attributes).attr = { nested: {} },
+      ];
+    }
+    """
+
+    file = Parser().parse(text)
+
+    my_message = next(
+        element
+        for element in file.file_elements
+        if isinstance(element, ast.Message) and element.name == "MyMessage"
+    )
+
+    title_field = next(
+        element
+        for element in my_message.elements
+        if isinstance(element, ast.Field) and element.name == "title"
+    )
+
+    option = title_field.options[0]
+    assert isinstance(option.value, ast.MessageLiteral)
+
+    nested_field = option.value.fields[0]
+    assert nested_field.name == "nested"
+    assert isinstance(nested_field.value, ast.MessageLiteral)
+    assert nested_field.value.fields == []
+
+
 def test_option_with_scalar_values():
     text = """
     syntax = "proto3";
