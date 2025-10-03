@@ -625,6 +625,77 @@ message MyMessage {
     assert result == expected
 
 
+def test_generate_field_option_with_nested_empty_message_literal():
+    schema = """message FieldAttr {
+  message Nested {
+    string text = 1;
+  }
+
+  Nested nested = 1;
+}
+
+message FieldAttributes {
+  optional FieldAttr attr = 1;
+}
+
+extend google.protobuf.FieldOptions {
+  optional FieldAttributes field_attributes = 50001;
+}
+
+message MyMessage {
+  string title = 1 [
+    (field_attributes).attr = { nested: {} },
+  ];
+}
+"""
+
+    file = Parser().parse(schema)
+
+    my_message = next(
+        element
+        for element in file.file_elements
+        if isinstance(element, ast.Message) and element.name == "MyMessage"
+    )
+
+    title_field = next(
+        element
+        for element in my_message.elements
+        if isinstance(element, ast.Field) and element.name == "title"
+    )
+
+    option = title_field.options[0]
+    assert isinstance(option.value, ast.MessageLiteral)
+
+    nested_field = option.value.fields[0]
+    assert nested_field.name == "nested"
+    assert isinstance(nested_field.value, ast.MessageLiteral)
+    assert nested_field.value.fields == []
+
+    result = Generator().generate(file)
+    expected = (
+        "message FieldAttr {\n"
+        "  message Nested {\n"
+        "    string text = 1;\n"
+        "  }\n"
+        "  Nested nested = 1;\n"
+        "}\n"
+        "message FieldAttributes {\n"
+        "  optional FieldAttr attr = 1;\n"
+        "}\n"
+        "extend google.protobuf.FieldOptions {\n"
+        "  optional FieldAttributes field_attributes = 50001;\n"
+        "}\n"
+        "message MyMessage {\n"
+        "  string title = 1 [(field_attributes).attr = { nested: {} }];\n"
+        "}"
+    )
+
+    assert result == expected
+
+    round_trip = Parser().parse(result)
+    assert round_trip == file
+
+
 def test_generate_message_literal_with_braces():
     file = ast.File(
         syntax="proto3",
