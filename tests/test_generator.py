@@ -778,7 +778,9 @@ def test_generate_option_with_nested_message_literal():
                 ast.MessageLiteralField(
                     name="outer_field",
                     value=ast.MessageLiteral(
-                        elements=[ast.MessageLiteralField(name="inner_field", value=True)]
+                        elements=[
+                            ast.MessageLiteralField(name="inner_field", value=True)
+                        ]
                     ),
                 )
             ]
@@ -1394,7 +1396,9 @@ def test_generate_option_with_complex_nested_message_literal_swagger():
                                                 ),
                                                 ast.MessageLiteralField(
                                                     name="value",
-                                                    value=ast.MessageLiteral(elements=[]),
+                                                    value=ast.MessageLiteral(
+                                                        elements=[]
+                                                    ),
                                                 ),
                                             ]
                                         ),
@@ -1495,7 +1499,9 @@ def test_generate_multiple_options_with_complex_message_literals():
                                                 ),
                                                 ast.MessageLiteralField(
                                                     name="value",
-                                                    value=ast.MessageLiteral(elements=[]),
+                                                    value=ast.MessageLiteral(
+                                                        elements=[]
+                                                    ),
                                                 ),
                                             ]
                                         ),

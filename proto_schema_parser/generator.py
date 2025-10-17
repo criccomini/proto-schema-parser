@@ -231,8 +231,12 @@ class Generator:
     ) -> str:
         """Generate nested message literal with consistent indentation."""
         # Filter to get only fields (not comments) for inline mode
-        fields = [elem for elem in message_literal.elements if isinstance(elem, ast.MessageLiteralField)]
-        
+        fields = [
+            elem
+            for elem in message_literal.elements
+            if isinstance(elem, ast.MessageLiteralField)
+        ]
+
         if inline:
             # For inline mode, we don't include comments
             if not fields:
@@ -247,22 +251,25 @@ class Generator:
 
         # Non-inline mode: include both fields and comments in order
         lines = [f"{'  ' * indent_level}{{"]
-        
+
         # Process all elements in order
         for i, element in enumerate(message_literal.elements):
             if isinstance(element, ast.Comment):
                 lines.append(self._generate_comment(element, indent_level + 1))
             elif isinstance(element, ast.MessageLiteralField):
-                field_line = self._generate_message_literal_field(element, indent_level + 1)
+                field_line = self._generate_message_literal_field(
+                    element, indent_level + 1
+                )
                 # Add comma if there are more fields after this one
                 remaining_fields = [
-                    e for e in message_literal.elements[i+1:]
+                    e
+                    for e in message_literal.elements[i + 1 :]
                     if isinstance(e, ast.MessageLiteralField)
                 ]
                 if remaining_fields:
                     field_line += ","
                 lines.append(field_line)
-        
+
         lines.append(f"{'  ' * indent_level}}}")
         if len(lines) == 2:
             lines = ["{}"]  # Don't include a linebreak if there are no elements
