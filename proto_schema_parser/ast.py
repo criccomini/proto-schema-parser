@@ -98,11 +98,11 @@ class MessageLiteral:
     Represents a message literal.
 
     Attributes:
-        fields: List[MessageLiteralField]
-            The fields of the message literal.
+        elements: List[MessageLiteralElement]
+            The elements (fields and comments) of the message literal.
     """
 
-    fields: List[MessageLiteralField] = field(default_factory=list)
+    elements: List[MessageLiteralElement] = field(default_factory=list)
 
 
 # optionDecl: OPTION optionName EQUALS optionValue SEMICOLON;
@@ -481,6 +481,10 @@ ServiceElement = Union[Option, Method, Comment]
 #                 emptyDecl;
 MethodElement = Union[Option, Comment]
 """Represents a method element in a .proto file."""
+
+# messageLiteralElement: messageLiteralField | commentDecl
+MessageLiteralElement = Union[MessageLiteralField, Comment]
+"""Represents an element in a message literal."""
 
 # Define a type alias for scalar values
 ScalarValue = Union[str, int, float, bool, Identifier]

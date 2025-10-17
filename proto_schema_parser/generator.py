@@ -230,26 +230,42 @@ class Generator:
         inline: bool = False,
     ) -> str:
         """Generate nested message literal with consistent indentation."""
+        # Filter to get only fields (not comments) for inline mode
+        fields = [elem for elem in message_literal.elements if isinstance(elem, ast.MessageLiteralField)]
+        
         if inline:
-            if not message_literal.fields:
+            # For inline mode, we don't include comments
+            if not fields:
                 return "{}"
             field_strings = []
-            for field in message_literal.fields:
+            for field in fields:
                 value = self._generate_option_value(
                     field.value, indent_level, inline=True
                 )
                 field_strings.append(f"{field.name}: {value}")
             return "{ " + ", ".join(field_strings) + " }"
 
+        # Non-inline mode: include both fields and comments in order
         lines = [f"{'  ' * indent_level}{{"]
-        for i, field in enumerate(message_literal.fields):
-            field_line = self._generate_message_literal_field(field, indent_level + 1)
-            lines.append(field_line)
-            if i < len(message_literal.fields) - 1:
-                lines[-1] += ","  # Add a comma except for the last field
+        
+        # Process all elements in order
+        for i, element in enumerate(message_literal.elements):
+            if isinstance(element, ast.Comment):
+                lines.append(self._generate_comment(element, indent_level + 1))
+            elif isinstance(element, ast.MessageLiteralField):
+                field_line = self._generate_message_literal_field(element, indent_level + 1)
+                # Add comma if there are more fields after this one
+                remaining_fields = [
+                    e for e in message_literal.elements[i+1:]
+                    if isinstance(e, ast.MessageLiteralField)
+                ]
+                if remaining_fields:
+                    field_line += ","
+                lines.append(field_line)
+        
         lines.append(f"{'  ' * indent_level}}}")
         if len(lines) == 2:
-            lines = ["{}"]  # Don't include a linebreak if there are no fields
+            lines = ["{}"]  # Don't include a linebreak if there are no elements
         return "\n".join(lines)
 
     def _generate_message_literal_field(
