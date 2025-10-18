@@ -68,8 +68,8 @@ class _ASTConstructor(ProtobufParserVisitor):
         return self.visit(ctx.messageTextFormat())
 
     def visitMessageTextFormat(self, ctx: ProtobufParser.MessageTextFormatContext):
-        # Collect all elements (fields and comments) to preserve order
-        elements = []
+        # Collect all fields (including comments) to preserve order
+        fields = []
 
         # Iterate through all children to maintain order
         for child in ctx.getChildren():
@@ -78,15 +78,15 @@ class _ASTConstructor(ProtobufParserVisitor):
                 hasattr(child, "getRuleIndex")
                 and child.getRuleIndex() == ProtobufParser.RULE_messageLiteralField
             ):
-                elements.append(self.visit(child))
+                fields.append(self.visit(child))
             # Check if child is a commentDecl
             elif (
                 hasattr(child, "getRuleIndex")
                 and child.getRuleIndex() == ProtobufParser.RULE_commentDecl
             ):
-                elements.append(self.visit(child))
+                fields.append(self.visit(child))
 
-        return ast.MessageLiteral(elements=elements)
+        return ast.MessageLiteral(fields=fields)
 
     def visitMessageLiteralField(self, ctx: ProtobufParser.MessageLiteralFieldContext):
         """Parse individual fields inside a message literal."""

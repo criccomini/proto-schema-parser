@@ -146,8 +146,7 @@ def test_parse_search_request():
                         options=[
                             ast.Option(
                                 name="(validate.rules).double",
-                                value=ast.MessageLiteral(
-                                    elements=[
+                                value=ast.MessageLiteral(fields=[
                                         ast.MessageLiteralField(name="gte", value=-90),
                                         ast.MessageLiteralField(name="lte", value=90),
                                     ]
@@ -1231,8 +1230,7 @@ def test_comments_on_service_and_options():
                         elements=[
                             ast.Option(
                                 name="(google.api.http)",
-                                value=ast.MessageLiteral(
-                                    elements=[
+                                value=ast.MessageLiteral(fields=[
                                         ast.Comment(text="// some comment about the option"),
                                         ast.MessageLiteralField(
                                             name="get",
@@ -1308,14 +1306,12 @@ def test_parse_message_literal_with_braces():
                 elements=[
                     ast.Option(
                         name="(custom_option)",
-                        value=ast.MessageLiteral(
-                            elements=[
+                        value=ast.MessageLiteral(fields=[
                                 ast.MessageLiteralField(name="field1", value="value1"),
                                 ast.MessageLiteralField(name="field2", value=42),
                                 ast.MessageLiteralField(
                                     name="nested_field",
-                                    value=ast.MessageLiteral(
-                                        elements=[
+                                    value=ast.MessageLiteral(fields=[
                                             ast.MessageLiteralField(
                                                 name="key1", value="nested_value1"
                                             ),
@@ -1383,10 +1379,10 @@ def test_parse_nested_empty_message_literal_option():
     option = title_field.options[0]
     assert isinstance(option.value, ast.MessageLiteral)
 
-    nested_field = option.value.elements[0]
+    nested_field = option.value.fields[0]
     assert nested_field.name == "nested"
     assert isinstance(nested_field.value, ast.MessageLiteral)
-    assert nested_field.value.elements == []
+    assert nested_field.value.fields == []
 
 
 def test_option_with_scalar_values():
@@ -1417,8 +1413,7 @@ def test_option_with_scalar_values():
                         elements=[
                             ast.Option(
                                 name="(test.option)",
-                                value=ast.MessageLiteral(
-                                    elements=[
+                                value=ast.MessageLiteral(fields=[
                                         ast.MessageLiteralField(
                                             name="int_field", value=123
                                         )
@@ -1427,8 +1422,7 @@ def test_option_with_scalar_values():
                             ),
                             ast.Option(
                                 name="(test.option)",
-                                value=ast.MessageLiteral(
-                                    elements=[
+                                value=ast.MessageLiteral(fields=[
                                         ast.MessageLiteralField(
                                             name="float_field", value=45.67
                                         )
@@ -1437,8 +1431,7 @@ def test_option_with_scalar_values():
                             ),
                             ast.Option(
                                 name="(test.option)",
-                                value=ast.MessageLiteral(
-                                    elements=[
+                                value=ast.MessageLiteral(fields=[
                                         ast.MessageLiteralField(
                                             name="bool_field", value=True
                                         )
@@ -1447,8 +1440,7 @@ def test_option_with_scalar_values():
                             ),
                             ast.Option(
                                 name="(test.option)",
-                                value=ast.MessageLiteral(
-                                    elements=[
+                                value=ast.MessageLiteral(fields=[
                                         ast.MessageLiteralField(
                                             name="string_field", value="Hello"
                                         )
@@ -1492,12 +1484,10 @@ def test_option_with_nested_message_literal():
                         elements=[
                             ast.Option(
                                 name="(test.nested)",
-                                value=ast.MessageLiteral(
-                                    elements=[
+                                value=ast.MessageLiteral(fields=[
                                         ast.MessageLiteralField(
                                             name="inner",
-                                            value=ast.MessageLiteral(
-                                                elements=[
+                                            value=ast.MessageLiteral(fields=[
                                                     ast.MessageLiteralField(
                                                         name="field1", value="abc"
                                                     ),
@@ -1550,8 +1540,7 @@ def test_option_with_comments_and_fields():
                         elements=[
                             ast.Option(
                                 name="(test.option)",
-                                value=ast.MessageLiteral(
-                                    elements=[
+                                value=ast.MessageLiteral(fields=[
                                         ast.Comment(text="// Comment about the field"),
                                         ast.MessageLiteralField(
                                             name="field1", value="value1"
@@ -1678,8 +1667,7 @@ def test_parse_bool_options():
                     ),
                     ast.Option(
                         name="(test.message_option)",
-                        value=ast.MessageLiteral(
-                            elements=[
+                        value=ast.MessageLiteral(fields=[
                                 ast.MessageLiteralField(
                                     name="bool_field1",
                                     value=True,
@@ -1765,16 +1753,14 @@ def test_parse_service_with_additional_bindings():
                         elements=[
                             ast.Option(
                                 name="(google.api.http)",
-                                value=ast.MessageLiteral(
-                                    elements=[
+                                value=ast.MessageLiteral(fields=[
                                         ast.MessageLiteralField(
                                             name="post", value="/v3/lease/revoke"
                                         ),
                                         ast.MessageLiteralField(name="body", value="*"),
                                         ast.MessageLiteralField(
                                             name="additional_bindings",
-                                            value=ast.MessageLiteral(
-                                                elements=[
+                                            value=ast.MessageLiteral(fields=[
                                                     ast.MessageLiteralField(
                                                         name="post",
                                                         value="/v3/kv/lease/revoke",
@@ -1854,8 +1840,7 @@ def test_parse_complex_compact_option():
                         options=[
                             ast.Option(
                                 name="(oompa.loompa)",
-                                value=ast.MessageLiteral(
-                                    elements=[
+                                value=ast.MessageLiteral(fields=[
                                         ast.MessageLiteralField(
                                             name="example",
                                             value="mini@mouse.com",
@@ -1901,8 +1886,7 @@ def test_parse_complex_compact_option_with_escaped_string():
                         options=[
                             ast.Option(
                                 name="(oompa.loompa)",
-                                value=ast.MessageLiteral(
-                                    elements=[
+                                value=ast.MessageLiteral(fields=[
                                         ast.MessageLiteralField(
                                             name="example",
                                             value='\\"blah\\"',
@@ -1948,8 +1932,7 @@ def test_parse_email_compact_option_with_escaped_string():
                         options=[
                             ast.Option(
                                 name="(oompa.loompa)",
-                                value=ast.MessageLiteral(
-                                    elements=[
+                                value=ast.MessageLiteral(fields=[
                                         ast.MessageLiteralField(
                                             name="example",
                                             value='\\"mini@mouse.com\\"',

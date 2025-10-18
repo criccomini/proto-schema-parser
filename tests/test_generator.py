@@ -666,10 +666,10 @@ message MyMessage {
     option = title_field.options[0]
     assert isinstance(option.value, ast.MessageLiteral)
 
-    nested_field = option.value.elements[0]
+    nested_field = option.value.fields[0]
     assert nested_field.name == "nested"
     assert isinstance(nested_field.value, ast.MessageLiteral)
-    assert nested_field.value.elements == []
+    assert nested_field.value.fields == []
 
     result = Generator().generate(file)
     expected = (
@@ -705,14 +705,12 @@ def test_generate_message_literal_with_braces():
                 elements=[
                     ast.Option(
                         name="(custom_option)",
-                        value=ast.MessageLiteral(
-                            elements=[
+                        value=ast.MessageLiteral(fields=[
                                 ast.MessageLiteralField(name="field1", value="value1"),
                                 ast.MessageLiteralField(name="field2", value=42),
                                 ast.MessageLiteralField(
                                     name="nested_field",
-                                    value=ast.MessageLiteral(
-                                        elements=[
+                                    value=ast.MessageLiteral(fields=[
                                             ast.MessageLiteralField(
                                                 name="key1", value="nested_value1"
                                             ),
@@ -756,8 +754,7 @@ def test_generate_message_literal_with_braces():
 def test_generate_option_with_simple_message_literal():
     option = ast.Option(
         name="my_option",
-        value=ast.MessageLiteral(
-            elements=[
+        value=ast.MessageLiteral(fields=[
                 ast.MessageLiteralField(name="field1", value="value1"),
                 ast.MessageLiteralField(name="field2", value=42),
             ]
@@ -773,12 +770,10 @@ def test_generate_option_with_simple_message_literal():
 def test_generate_option_with_nested_message_literal():
     option = ast.Option(
         name="nested_option",
-        value=ast.MessageLiteral(
-            elements=[
+        value=ast.MessageLiteral(fields=[
                 ast.MessageLiteralField(
                     name="outer_field",
-                    value=ast.MessageLiteral(
-                        elements=[
+                    value=ast.MessageLiteral(fields=[
                             ast.MessageLiteralField(name="inner_field", value=True)
                         ]
                     ),
@@ -802,8 +797,7 @@ def test_generate_option_with_nested_message_literal():
 def test_generate_option_with_list_literal():
     option = ast.Option(
         name="list_option",
-        value=ast.MessageLiteral(
-            elements=[
+        value=ast.MessageLiteral(fields=[
                 ast.MessageLiteralField(
                     name="field",
                     value=[
@@ -825,7 +819,7 @@ def test_generate_option_with_list_literal():
 def test_generate_option_with_empty_message_literal():
     option = ast.Option(
         name="empty_option",
-        value=ast.MessageLiteral(elements=[]),
+        value=ast.MessageLiteral(fields=[]),
     )
 
     result = Generator()._generate_option(option)
@@ -837,8 +831,7 @@ def test_generate_option_with_empty_message_literal():
 def test_generate_option_with_identifier():
     option = ast.Option(
         name="identifier_option",
-        value=ast.MessageLiteral(
-            elements=[
+        value=ast.MessageLiteral(fields=[
                 ast.MessageLiteralField(
                     name="id", value=ast.Identifier(name="MyIdentifier")
                 )
@@ -855,12 +848,10 @@ def test_generate_option_with_identifier():
 def test_generate_option_with_complex_message_literal():
     option = ast.Option(
         name="complex_option",
-        value=ast.MessageLiteral(
-            elements=[
+        value=ast.MessageLiteral(fields=[
                 ast.MessageLiteralField(
                     name="nested_field",
-                    value=ast.MessageLiteral(
-                        elements=[
+                    value=ast.MessageLiteral(fields=[
                             ast.MessageLiteralField(name="inner1", value="string"),
                             ast.MessageLiteralField(name="inner2", value=False),
                         ]
@@ -896,16 +887,13 @@ def test_generate_option_with_complex_message_literal():
 def test_generate_option_with_inconsistent_indentation():
     option = ast.Option(
         name="indented_option",
-        value=ast.MessageLiteral(
-            elements=[
+        value=ast.MessageLiteral(fields=[
                 ast.MessageLiteralField(
                     name="level1",
-                    value=ast.MessageLiteral(
-                        elements=[
+                    value=ast.MessageLiteral(fields=[
                             ast.MessageLiteralField(
                                 name="level2",
-                                value=ast.MessageLiteral(
-                                    elements=[
+                                value=ast.MessageLiteral(fields=[
                                         ast.MessageLiteralField(
                                             name="field", value="deep_value"
                                         )
@@ -942,14 +930,12 @@ def test_generate_option_with_message_literal_in_message():
                 elements=[
                     ast.Option(
                         name="(custom_option)",
-                        value=ast.MessageLiteral(
-                            elements=[
+                        value=ast.MessageLiteral(fields=[
                                 ast.MessageLiteralField(name="field1", value="value1"),
                                 ast.MessageLiteralField(name="field2", value=42),
                                 ast.MessageLiteralField(
                                     name="nested_field",
-                                    value=ast.MessageLiteral(
-                                        elements=[
+                                    value=ast.MessageLiteral(fields=[
                                             ast.MessageLiteralField(
                                                 name="key1", value="nested_value1"
                                             ),
@@ -1000,8 +986,7 @@ def test_generate_service_with_option_message_literal():
                 elements=[
                     ast.Option(
                         name="service_option",
-                        value=ast.MessageLiteral(
-                            elements=[
+                        value=ast.MessageLiteral(fields=[
                                 ast.MessageLiteralField(name="bool_field", value=True),
                                 ast.MessageLiteralField(name="number_field", value=123),
                                 ast.MessageLiteralField(
@@ -1021,12 +1006,10 @@ def test_generate_service_with_option_message_literal():
                         elements=[
                             ast.Option(
                                 name="method_option",
-                                value=ast.MessageLiteral(
-                                    elements=[
+                                value=ast.MessageLiteral(fields=[
                                         ast.MessageLiteralField(
                                             name="inner_option",
-                                            value=ast.MessageLiteral(
-                                                elements=[
+                                            value=ast.MessageLiteral(fields=[
                                                     ast.MessageLiteralField(
                                                         name="enabled", value=False
                                                     )
@@ -1068,19 +1051,16 @@ def test_generate_service_with_option_message_literal():
 def test_generate_option_with_list_of_messages():
     option = ast.Option(
         name="list_of_messages_option",
-        value=ast.MessageLiteral(
-            elements=[
+        value=ast.MessageLiteral(fields=[
                 ast.MessageLiteralField(
                     name="messages",
                     value=[
-                        ast.MessageLiteral(
-                            elements=[
+                        ast.MessageLiteral(fields=[
                                 ast.MessageLiteralField(name="id", value=1),
                                 ast.MessageLiteralField(name="name", value="First"),
                             ]
                         ),
-                        ast.MessageLiteral(
-                            elements=[
+                        ast.MessageLiteral(fields=[
                                 ast.MessageLiteralField(name="id", value=2),
                                 ast.MessageLiteralField(name="name", value="Second"),
                             ]
@@ -1109,8 +1089,7 @@ def test_generate_option_with_list_of_messages():
 def test_generate_option_with_empty_list():
     option = ast.Option(
         name="empty_list_option",
-        value=ast.MessageLiteral(
-            elements=[ast.MessageLiteralField(name="items", value=[])]
+        value=ast.MessageLiteral(fields=[ast.MessageLiteralField(name="items", value=[])]
         ),
     )
 
@@ -1123,8 +1102,7 @@ def test_generate_option_with_empty_list():
 def test_generate_option_with_special_float_values():
     option = ast.Option(
         name="float_option",
-        value=ast.MessageLiteral(
-            elements=[
+        value=ast.MessageLiteral(fields=[
                 ast.MessageLiteralField(name="infinite", value=ast.Identifier("inf")),
                 ast.MessageLiteralField(
                     name="negative_infinite", value=ast.Identifier("-inf")
@@ -1149,8 +1127,7 @@ def test_generate_option_with_special_float_values():
 def test_generate_option_with_boolean_values():
     option = ast.Option(
         name="bool_option",
-        value=ast.MessageLiteral(
-            elements=[
+        value=ast.MessageLiteral(fields=[
                 ast.MessageLiteralField(name="flag_true", value=True),
                 ast.MessageLiteralField(name="flag_false", value=False),
             ]
@@ -1168,8 +1145,7 @@ def test_generate_option_with_boolean_values():
 def test_generate_option_with_special_characters_in_string():
     option = ast.Option(
         name="string_option",
-        value=ast.MessageLiteral(
-            elements=[
+        value=ast.MessageLiteral(fields=[
                 ast.MessageLiteralField(
                     name="special_string", value='This is a "quote" and a \\ backslash'
                 )
@@ -1190,8 +1166,7 @@ def test_generate_option_with_special_characters_in_string():
 def test_generate_option_with_multiple_message_literals():
     option1 = ast.Option(
         name="option_one",
-        value=ast.MessageLiteral(
-            elements=[
+        value=ast.MessageLiteral(fields=[
                 ast.MessageLiteralField(name="field1", value="value1"),
             ]
         ),
@@ -1199,8 +1174,7 @@ def test_generate_option_with_multiple_message_literals():
 
     option2 = ast.Option(
         name="option_two",
-        value=ast.MessageLiteral(
-            elements=[
+        value=ast.MessageLiteral(fields=[
                 ast.MessageLiteralField(name="field2", value="value2"),
             ]
         ),
@@ -1289,16 +1263,14 @@ def test_generate_service_with_additional_bindings():
                 elements=[
                     ast.Option(
                         name="(google.api.http)",
-                        value=ast.MessageLiteral(
-                            elements=[
+                        value=ast.MessageLiteral(fields=[
                                 ast.MessageLiteralField(
                                     name="post", value="/v3/lease/revoke"
                                 ),
                                 ast.MessageLiteralField(name="body", value="*"),
                                 ast.MessageLiteralField(
                                     name="additional_bindings",
-                                    value=ast.MessageLiteral(
-                                        elements=[
+                                    value=ast.MessageLiteral(fields=[
                                             ast.MessageLiteralField(
                                                 name="post", value="/v3/kv/lease/revoke"
                                             ),
@@ -1341,23 +1313,19 @@ def test_generate_option_with_complex_nested_message_literal_swagger():
         file_elements=[
             ast.Option(
                 name="(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger)",
-                value=ast.MessageLiteral(
-                    elements=[
+                value=ast.MessageLiteral(fields=[
                         ast.MessageLiteralField(
                             name="security_definitions",
-                            value=ast.MessageLiteral(
-                                elements=[
+                            value=ast.MessageLiteral(fields=[
                                     ast.MessageLiteralField(
                                         name="security",
-                                        value=ast.MessageLiteral(
-                                            elements=[
+                                        value=ast.MessageLiteral(fields=[
                                                 ast.MessageLiteralField(
                                                     name="key", value="ApiKey"
                                                 ),
                                                 ast.MessageLiteralField(
                                                     name="value",
-                                                    value=ast.MessageLiteral(
-                                                        elements=[
+                                                    value=ast.MessageLiteral(fields=[
                                                             ast.MessageLiteralField(
                                                                 name="type",
                                                                 value=ast.Identifier(
@@ -1385,19 +1353,16 @@ def test_generate_option_with_complex_nested_message_literal_swagger():
                         ),
                         ast.MessageLiteralField(
                             name="security",
-                            value=ast.MessageLiteral(
-                                elements=[
+                            value=ast.MessageLiteral(fields=[
                                     ast.MessageLiteralField(
                                         name="security_requirement",
-                                        value=ast.MessageLiteral(
-                                            elements=[
+                                        value=ast.MessageLiteral(fields=[
                                                 ast.MessageLiteralField(
                                                     name="key", value="ApiKey"
                                                 ),
                                                 ast.MessageLiteralField(
                                                     name="value",
-                                                    value=ast.MessageLiteral(
-                                                        elements=[]
+                                                    value=ast.MessageLiteral(fields=[]
                                                     ),
                                                 ),
                                             ]
@@ -1444,23 +1409,19 @@ def test_generate_multiple_options_with_complex_message_literals():
             ast.Option(name="(gogoproto.unmarshaler_all)", value=True),
             ast.Option(
                 name="(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger)",
-                value=ast.MessageLiteral(
-                    elements=[
+                value=ast.MessageLiteral(fields=[
                         ast.MessageLiteralField(
                             name="security_definitions",
-                            value=ast.MessageLiteral(
-                                elements=[
+                            value=ast.MessageLiteral(fields=[
                                     ast.MessageLiteralField(
                                         name="security",
-                                        value=ast.MessageLiteral(
-                                            elements=[
+                                        value=ast.MessageLiteral(fields=[
                                                 ast.MessageLiteralField(
                                                     name="key", value="ApiKey"
                                                 ),
                                                 ast.MessageLiteralField(
                                                     name="value",
-                                                    value=ast.MessageLiteral(
-                                                        elements=[
+                                                    value=ast.MessageLiteral(fields=[
                                                             ast.MessageLiteralField(
                                                                 name="type",
                                                                 value=ast.Identifier(
@@ -1488,19 +1449,16 @@ def test_generate_multiple_options_with_complex_message_literals():
                         ),
                         ast.MessageLiteralField(
                             name="security",
-                            value=ast.MessageLiteral(
-                                elements=[
+                            value=ast.MessageLiteral(fields=[
                                     ast.MessageLiteralField(
                                         name="security_requirement",
-                                        value=ast.MessageLiteral(
-                                            elements=[
+                                        value=ast.MessageLiteral(fields=[
                                                 ast.MessageLiteralField(
                                                     name="key", value="ApiKey"
                                                 ),
                                                 ast.MessageLiteralField(
                                                     name="value",
-                                                    value=ast.MessageLiteral(
-                                                        elements=[]
+                                                    value=ast.MessageLiteral(fields=[]
                                                     ),
                                                 ),
                                             ]

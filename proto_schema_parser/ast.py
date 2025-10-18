@@ -98,11 +98,11 @@ class MessageLiteral:
     Represents a message literal.
 
     Attributes:
-        elements: List[MessageLiteralElement]
-            The elements (fields and comments) of the message literal.
+        fields: List[MessageLiteralElement]
+            The fields (and comments) of the message literal.
     """
 
-    elements: List[MessageLiteralElement] = field(default_factory=list)
+    fields: List[MessageLiteralElement] = field(default_factory=list)
 
 
 # optionDecl: OPTION optionName EQUALS optionValue SEMICOLON;
