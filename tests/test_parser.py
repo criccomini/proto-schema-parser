@@ -1250,6 +1250,183 @@ def test_comments_on_service_and_options():
     assert result == expected
 
 
+def test_trailing_comments_exhaustive_complex_schema_parser():
+    """
+    Exhaustive trailing-comment validation across a very complex schema.
+
+    Notes:
+    - Every meaningful line ends with a trailing comment marker of the form
+      "// TC#<n> <desc>" to validate ordering and presence.
+    - Some contexts (e.g., inside message literals) may currently drop comments
+      in the AST. We expect failures here and will fix later.
+    """
+
+    schema = """
+    syntax = "proto3"; // TC#1 syntax
+    package very.complex.schema.v1; // TC#2 package
+
+    import "google/protobuf/descriptor.proto"; // TC#3 import1
+    import public "company/common.proto"; // TC#4 import public
+    import weak "company/weak.proto"; // TC#5 import weak
+
+    option (company.file_opt).enabled = true; // TC#6 file option bool
+    option java_package = "com.company.schema"; // TC#7 file option string
+    option (company.file_opt_msg) = { // TC#8 option msg begin
+      inner: { // TC#9 inner begin
+        a: 1, // TC#10 inner field a
+        b: [1, 2, 3], // TC#11 inner field b list
+        c: { x: "y" } // TC#12 inner inline message
+      }, // TC#13 inner end with comma
+      list_of_msgs: [ {i: 1}, {i: 2} ] // TC#14 list of messages
+    }; // TC#15 option msg end
+
+    message Outer { // TC#16 message open
+      option deprecated = true; // TC#17 message option
+      required string name = 1; // TC#18 field required
+      optional int32 id = 2 [packed = true]; // TC#19 field with compact options
+      map<string, int64> attrs = 3; // TC#20 map field
+      group InnerGroup = 4 { // TC#21 group open
+        optional bool flag = 1; // TC#22 group field
+      } // TC#23 group close
+      oneof choice { // TC#24 oneof open
+        string a = 5; // TC#25 oneof field a
+        group G = 6 { // TC#26 oneof group open
+          int32 v = 1; // TC#27 oneof group field
+        } // TC#28 oneof group close
+      } // TC#29 oneof close
+      extensions 100 to 199, 500 to max; // TC#30 extensions
+      reserved 8, 9 to 11, "foo", "bar"; // TC#31 reserved
+      message Nested { // TC#32 nested message open
+        optional bytes data = 1; // TC#33 nested field
+      } // TC#34 nested message close
+      enum Status { // TC#35 enum open
+        UNKNOWN = 0; // TC#36 enum value
+        READY = 1; // TC#37 enum value
+        reserved 2 to 4, "OLD"; // TC#38 enum reserved
+      } // TC#39 enum close
+    } // TC#40 message close
+
+    extend Outer { // TC#41 extension decl open
+      optional string ext_f = 1000; // TC#42 extension field
+      group ExtG = 1001 { // TC#43 extension group open
+        int32 ev = 1; // TC#44 extension group field
+      } // TC#45 extension group close
+    } // TC#46 extension decl close
+
+    service Svc { // TC#47 service open
+      option (company.svc_opt) = { // TC#48 service option open
+        get: "/v1/x", // TC#49 service opt field get
+        additional_bindings { // TC#50 nested msg literal open
+          post: "/v1/y" // TC#51 nested field post
+        } // TC#52 nested msg literal close
+      }; // TC#53 service option close
+      rpc Unary (Outer) returns (Nested); // TC#54 rpc simple
+      rpc Bidi (stream Outer) returns (stream Outer) { // TC#55 rpc block open
+        option (company.mtd_opt).num = 7; // TC#56 method option
+      } // TC#57 rpc block close
+    } // TC#58 service close
+    """
+
+    expected_markers = [
+        "// TC#1 syntax",
+        "// TC#2 package",
+        "// TC#3 import1",
+        "// TC#4 import public",
+        "// TC#5 import weak",
+        "// TC#6 file option bool",
+        "// TC#7 file option string",
+        "// TC#8 option msg begin",
+        "// TC#9 inner begin",
+        "// TC#10 inner field a",
+        "// TC#11 inner field b list",
+        "// TC#12 inner inline message",
+        "// TC#13 inner end with comma",
+        "// TC#14 list of messages",
+        "// TC#15 option msg end",
+        "// TC#16 message open",
+        "// TC#17 message option",
+        "// TC#18 field required",
+        "// TC#19 field with compact options",
+        "// TC#20 map field",
+        "// TC#21 group open",
+        "// TC#22 group field",
+        "// TC#23 group close",
+        "// TC#24 oneof open",
+        "// TC#25 oneof field a",
+        "// TC#26 oneof group open",
+        "// TC#27 oneof group field",
+        "// TC#28 oneof group close",
+        "// TC#29 oneof close",
+        "// TC#30 extensions",
+        "// TC#31 reserved",
+        "// TC#32 nested message open",
+        "// TC#33 nested field",
+        "// TC#34 nested message close",
+        "// TC#35 enum open",
+        "// TC#36 enum value",
+        "// TC#37 enum value",
+        "// TC#38 enum reserved",
+        "// TC#39 enum close",
+        "// TC#40 message close",
+        "// TC#41 extension decl open",
+        "// TC#42 extension field",
+        "// TC#43 extension group open",
+        "// TC#44 extension group field",
+        "// TC#45 extension group close",
+        "// TC#46 extension decl close",
+        "// TC#47 service open",
+        "// TC#48 service option open",
+        "// TC#49 service opt field get",
+        "// TC#50 nested msg literal open",
+        "// TC#51 nested field post",
+        "// TC#52 nested msg literal close",
+        "// TC#53 service option close",
+        "// TC#54 rpc simple",
+        "// TC#55 rpc block open",
+        "// TC#56 method option",
+        "// TC#57 rpc block close",
+        "// TC#58 service close",
+    ]
+
+    file = Parser().parse(schema)
+
+    def extract_comments(node):
+        out = []
+
+        def rec(n):
+            if isinstance(n, ast.Comment):
+                out.append(n.text)
+                return
+            # Containers
+            if isinstance(n, ast.File):
+                for e in n.file_elements:
+                    rec(e)
+            elif isinstance(n, ast.Message):
+                for e in n.elements:
+                    rec(e)
+            elif isinstance(n, ast.Enum):
+                for e in n.elements:
+                    rec(e)
+            elif isinstance(n, ast.Extension):
+                for e in n.elements:
+                    rec(e)
+            elif isinstance(n, (ast.Group, ast.OneOf, ast.Service)):
+                for e in n.elements:
+                    rec(e)
+            elif isinstance(n, ast.Method):
+                for e in n.elements:
+                    rec(e)
+            # Fields/options don't contain comments directly in the AST.
+
+        rec(node)
+        return out
+
+    actual = extract_comments(file)
+
+    # Strict equality on order and content to validate trailing comment presence.
+    assert actual == expected_markers
+
+
 def test_comment_with_trailing_quote():
     text = """
     syntax = "proto3";
