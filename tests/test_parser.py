@@ -1233,6 +1233,7 @@ def test_comments_on_service_and_options():
                                 name="(google.api.http)",
                                 value=ast.MessageLiteral(
                                     elements=[
+                                        ast.Comment(text="// some comment about the option"),
                                         ast.MessageLiteralField(
                                             name="get",
                                             value="/v1/search/{query}",
