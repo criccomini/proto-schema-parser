@@ -147,7 +147,7 @@ def test_parse_search_request():
                             ast.Option(
                                 name="(validate.rules).double",
                                 value=ast.MessageLiteral(
-                                    fields=[
+                                    elements=[
                                         ast.MessageLiteralField(name="gte", value=-90),
                                         ast.MessageLiteralField(name="lte", value=90),
                                     ]
@@ -1232,7 +1232,10 @@ def test_comments_on_service_and_options():
                             ast.Option(
                                 name="(google.api.http)",
                                 value=ast.MessageLiteral(
-                                    fields=[
+                                    elements=[
+                                        ast.Comment(
+                                            text="// some comment about the option"
+                                        ),
                                         ast.MessageLiteralField(
                                             name="get",
                                             value="/v1/search/{query}",
@@ -1750,13 +1753,17 @@ def test_option_with_comments_and_fields():
                             ast.Option(
                                 name="(test.option)",
                                 value=ast.MessageLiteral(
-                                    fields=[
+                                    elements=[
+                                        ast.Comment(
+                                            text="// Comment about the field"
+                                        ),
                                         ast.MessageLiteralField(
                                             name="field1", value="value1"
                                         ),
                                         ast.MessageLiteralField(
                                             name="field2", value=99
                                         ),
+                                        ast.Comment(text="// Another comment"),
                                     ]
                                 ),
                             )

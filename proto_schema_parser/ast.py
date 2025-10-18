@@ -92,21 +92,39 @@ class MessageLiteralField:
     value: MessageValue
 
 
-@dataclass
+@dataclass(init=False)
 class MessageLiteral:
     """
     Represents a message literal.
 
     Attributes:
-        fields: List[MessageLiteralField]
-            The fields of the message literal.
         elements: List[MessageTextElement]
             The ordered elements (fields and comments) inside the literal.
             This preserves inline/trailing comments within braces.
     """
 
-    fields: List[MessageLiteralField] = field(default_factory=list)
-    elements: List["MessageTextElement"] = field(default_factory=list, compare=False)
+    elements: List["MessageTextElement"] = field(default_factory=list)
+
+    def __init__(
+        self,
+        *,
+        elements: List["MessageTextElement"] | None = None,
+        fields: List["MessageLiteralField"] | None = None,
+    ) -> None:
+        if elements is not None:
+            self.elements = elements
+        elif fields is not None:
+            # Backward-compat constructor arg; store only in elements
+            self.elements = list(fields)
+        else:
+            self.elements = []
+
+    @property
+    def fields(self) -> List["MessageLiteralField"]:
+        """Convenience view of only the field elements (read-only)."""
+        return [
+            e for e in self.elements if isinstance(e, MessageLiteralField)
+        ]
 
 
 # optionDecl: OPTION optionName EQUALS optionValue SEMICOLON;

@@ -757,7 +757,7 @@ def test_generate_option_with_simple_message_literal():
     option = ast.Option(
         name="my_option",
         value=ast.MessageLiteral(
-            fields=[
+            elements=[
                 ast.MessageLiteralField(name="field1", value="value1"),
                 ast.MessageLiteralField(name="field2", value=42),
             ]
@@ -823,7 +823,7 @@ def test_generate_option_with_list_literal():
 def test_generate_option_with_empty_message_literal():
     option = ast.Option(
         name="empty_option",
-        value=ast.MessageLiteral(fields=[]),
+        value=ast.MessageLiteral(elements=[]),
     )
 
     result = Generator()._generate_option(option)
@@ -1540,7 +1540,7 @@ def test_generate_option_with_complex_nested_message_literal_swagger():
                                                 ),
                                                 ast.MessageLiteralField(
                                                     name="value",
-                                                    value=ast.MessageLiteral(fields=[]),
+                                                    value=ast.MessageLiteral(elements=[]),
                                                 ),
                                             ]
                                         ),
@@ -1641,7 +1641,7 @@ def test_generate_multiple_options_with_complex_message_literals():
                                                 ),
                                                 ast.MessageLiteralField(
                                                     name="value",
-                                                    value=ast.MessageLiteral(fields=[]),
+                                                    value=ast.MessageLiteral(elements=[]),
                                                 ),
                                             ]
                                         ),

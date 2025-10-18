@@ -78,9 +78,7 @@ class _ASTConstructor(ProtobufParserVisitor):
                 elif isinstance(child, ProtobufParser.CommentDeclContext):
                     elements.append(self.visit(child))  # ast.Comment
 
-        # Backward compatibility: still populate 'fields'
-        only_fields = [e for e in elements if isinstance(e, ast.MessageLiteralField)]
-        return ast.MessageLiteral(fields=only_fields, elements=elements)
+        return ast.MessageLiteral(elements=elements)
 
     def visitMessageLiteralField(self, ctx: ProtobufParser.MessageLiteralFieldContext):
         """Parse individual fields inside a message literal."""

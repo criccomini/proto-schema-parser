@@ -235,11 +235,7 @@ class Generator:
     ) -> str:
         """Generate nested message literal with consistent indentation."""
         # Prefer ordered elements if present; fall back to fields
-        elems = (
-            message_literal.elements
-            if getattr(message_literal, "elements", None)
-            else list(message_literal.fields)
-        )
+        elems = message_literal.elements
 
         # Fallback to fields-only inline generation if no comments are present
         if inline:
@@ -249,12 +245,12 @@ class Generator:
                 inline = False  # degrade to multi-line to retain comments
             else:
                 field_strings = []
-                for field in elems:  # type: ignore[assignment]
-                    assert isinstance(field, ast.MessageLiteralField)
+                for element in elems:
+                    assert isinstance(element, ast.MessageLiteralField)
                     value = self._generate_option_value(
-                        field.value, indent_level, inline=True
+                        element.value, indent_level, inline=True
                     )
-                    field_strings.append(f"{field.name}: {value}")
+                    field_strings.append(f"{element.name}: {value}")
                 return "{ " + ", ".join(field_strings) + " }"
 
         lines = [f"{'  ' * indent_level}{{"]
