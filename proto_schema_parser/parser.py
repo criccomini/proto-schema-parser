@@ -68,13 +68,19 @@ class _ASTConstructor(ProtobufParserVisitor):
         return self.visit(ctx.messageTextFormat())
 
     def visitMessageTextFormat(self, ctx: ProtobufParser.MessageTextFormatContext):
-        if ctx.messageLiteralField():
-            fields = [self.visit(child) for child in ctx.messageLiteralField()]
-            return ast.MessageLiteral(fields=fields)
-        elif ctx.commentDecl():
-            return self.visit(ctx.commentDecl())
-        else:
-            return ast.MessageLiteral(fields=[])
+        elements: list[ast.MessageTextElement] = []
+        # Preserve order of fields and comments as they appear
+        children = getattr(ctx, "children", None)
+        if children:
+            for child in children:
+                if isinstance(child, ProtobufParser.MessageLiteralFieldContext):
+                    elements.append(self.visit(child))  # MessageLiteralField
+                elif isinstance(child, ProtobufParser.CommentDeclContext):
+                    elements.append(self.visit(child))  # ast.Comment
+
+        # Backward compatibility: still populate 'fields'
+        only_fields = [e for e in elements if isinstance(e, ast.MessageLiteralField)]
+        return ast.MessageLiteral(fields=only_fields, elements=elements)
 
     def visitMessageLiteralField(self, ctx: ProtobufParser.MessageLiteralFieldContext):
         """Parse individual fields inside a message literal."""

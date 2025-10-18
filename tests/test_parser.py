@@ -1295,14 +1295,16 @@ def test_trailing_comments_exhaustive_complex_schema_parser():
         } // TC#28 oneof group close
       } // TC#29 oneof close
       extensions 100 to 199, 500 to max; // TC#30 extensions
-      reserved 8, 9 to 11, "foo", "bar"; // TC#31 reserved
+      reserved 8, 9 to 11; // TC#31 reserved tags
+      reserved "foo", "bar"; // TC#31b reserved names
       message Nested { // TC#32 nested message open
         optional bytes data = 1; // TC#33 nested field
       } // TC#34 nested message close
       enum Status { // TC#35 enum open
         UNKNOWN = 0; // TC#36 enum value
         READY = 1; // TC#37 enum value
-        reserved 2 to 4, "OLD"; // TC#38 enum reserved
+        reserved 2 to 4; // TC#38 enum reserved tags
+        reserved "OLD"; // TC#38b enum reserved names
       } // TC#39 enum close
     } // TC#40 message close
 
@@ -1358,14 +1360,16 @@ def test_trailing_comments_exhaustive_complex_schema_parser():
         "// TC#28 oneof group close",
         "// TC#29 oneof close",
         "// TC#30 extensions",
-        "// TC#31 reserved",
+        "// TC#31 reserved tags",
+        "// TC#31b reserved names",
         "// TC#32 nested message open",
         "// TC#33 nested field",
         "// TC#34 nested message close",
         "// TC#35 enum open",
         "// TC#36 enum value",
         "// TC#37 enum value",
-        "// TC#38 enum reserved",
+        "// TC#38 enum reserved tags",
+        "// TC#38b enum reserved names",
         "// TC#39 enum close",
         "// TC#40 message close",
         "// TC#41 extension decl open",
@@ -1397,6 +1401,7 @@ def test_trailing_comments_exhaustive_complex_schema_parser():
             if isinstance(n, ast.Comment):
                 out.append(n.text)
                 return
+
             # Containers
             if isinstance(n, ast.File):
                 for e in n.file_elements:
@@ -1416,7 +1421,25 @@ def test_trailing_comments_exhaustive_complex_schema_parser():
             elif isinstance(n, ast.Method):
                 for e in n.elements:
                     rec(e)
-            # Fields/options don't contain comments directly in the AST.
+
+            # Options -> values (message literals) -> elements (fields/comments)
+            if isinstance(n, ast.Option):
+                rec(n.value)
+
+            # Inside a message literal, walk ordered elements and nested values
+            if isinstance(n, ast.MessageLiteral):
+                # Prefer ordered 'elements' if present
+                elements = n.elements if getattr(n, "elements", None) else n.fields
+                for el in elements:
+                    rec(el)
+
+            if isinstance(n, ast.MessageLiteralField):
+                rec(n.value)
+
+            # Lists of values inside message literals (e.g., list of messages)
+            if isinstance(n, list):
+                for el in n:
+                    rec(el)
 
         rec(node)
         return out

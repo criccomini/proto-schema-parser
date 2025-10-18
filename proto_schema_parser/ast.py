@@ -100,9 +100,13 @@ class MessageLiteral:
     Attributes:
         fields: List[MessageLiteralField]
             The fields of the message literal.
+        elements: List[MessageTextElement]
+            The ordered elements (fields and comments) inside the literal.
+            This preserves inline/trailing comments within braces.
     """
 
     fields: List[MessageLiteralField] = field(default_factory=list)
+    elements: List["MessageTextElement"] = field(default_factory=list, compare=False)
 
 
 # optionDecl: OPTION optionName EQUALS optionValue SEMICOLON;
@@ -481,6 +485,10 @@ ServiceElement = Union[Option, Method, Comment]
 #                 emptyDecl;
 MethodElement = Union[Option, Comment]
 """Represents a method element in a .proto file."""
+
+# Elements that can appear inside a message literal (text format): fields and comments
+MessageTextElement = Union[MessageLiteralField, Comment]
+"""Represents an element inside a message literal (field or comment)."""
 
 # Define a type alias for scalar values
 ScalarValue = Union[str, int, float, bool, Identifier]

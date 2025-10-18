@@ -157,6 +157,8 @@ class Generator:
                 lines.append(self._generate_field(element, indent_level + 1))
             elif isinstance(element, ast.Option):
                 lines.append(self._generate_option(element, indent_level + 1))
+            elif isinstance(element, ast.Comment):
+                lines.append(self._generate_comment(element, indent_level + 1))
         lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
 
@@ -165,6 +167,8 @@ class Generator:
         for element in one_of.elements:
             if isinstance(element, ast.Field):
                 lines.append(self._generate_field(element, indent_level + 1))
+            elif isinstance(element, ast.Group):
+                lines.append(self._generate_group(element, indent_level + 1))
             elif isinstance(element, ast.Option):
                 lines.append(self._generate_option(element, indent_level + 1))
             elif isinstance(element, ast.Comment):
@@ -230,26 +234,50 @@ class Generator:
         inline: bool = False,
     ) -> str:
         """Generate nested message literal with consistent indentation."""
+        # Prefer ordered elements if present; fall back to fields
+        elems = (
+            message_literal.elements
+            if getattr(message_literal, "elements", None)
+            else list(message_literal.fields)
+        )
+
+        # Fallback to fields-only inline generation if no comments are present
         if inline:
-            if not message_literal.fields:
+            if not elems:
                 return "{}"
-            field_strings = []
-            for field in message_literal.fields:
-                value = self._generate_option_value(
-                    field.value, indent_level, inline=True
-                )
-                field_strings.append(f"{field.name}: {value}")
-            return "{ " + ", ".join(field_strings) + " }"
+            if any(isinstance(e, ast.Comment) for e in elems):
+                inline = False  # degrade to multi-line to retain comments
+            else:
+                field_strings = []
+                for field in elems:  # type: ignore[assignment]
+                    assert isinstance(field, ast.MessageLiteralField)
+                    value = self._generate_option_value(
+                        field.value, indent_level, inline=True
+                    )
+                    field_strings.append(f"{field.name}: {value}")
+                return "{ " + ", ".join(field_strings) + " }"
 
         lines = [f"{'  ' * indent_level}{{"]
-        for i, field in enumerate(message_literal.fields):
-            field_line = self._generate_message_literal_field(field, indent_level + 1)
-            lines.append(field_line)
-            if i < len(message_literal.fields) - 1:
-                lines[-1] += ","  # Add a comma except for the last field
+        # Determine the last field index (ignoring comments) to place commas correctly
+        field_positions = [
+            idx for idx, e in enumerate(elems) if isinstance(e, ast.MessageLiteralField)
+        ]
+        last_field_pos = field_positions[-1] if field_positions else None
+
+        for idx, element in enumerate(elems):
+            if isinstance(element, ast.MessageLiteralField):
+                field_line = self._generate_message_literal_field(
+                    element, indent_level + 1
+                )
+                if last_field_pos is not None and idx != last_field_pos:
+                    field_line += ","
+                lines.append(field_line)
+            elif isinstance(element, ast.Comment):
+                lines.append(self._generate_comment(element, indent_level + 1))
+
         lines.append(f"{'  ' * indent_level}}}")
-        if len(lines) == 2:
-            lines = ["{}"]  # Don't include a linebreak if there are no fields
+        if len(elems) == 0:
+            return "{}"
         return "\n".join(lines)
 
     def _generate_message_literal_field(
