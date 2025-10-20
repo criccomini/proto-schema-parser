@@ -1137,9 +1137,15 @@ option (company.file_opt_msg) = { // TC#8 option msg begin
   inner: { // TC#9 inner begin
     a: 1, // TC#10 inner field a
     b: [1, 2, 3], // TC#11 inner field b list
-    c: { x: "y" } // TC#12 inner inline message
+    c: { // TC#12a inner inline message
+      x: "y" // TC#12b inner inline message
+    } // TC#12c inner inline message
   }, // TC#13 inner end with comma
-  list_of_msgs: [ {i: 1}, {i: 2} ] // TC#14 list of messages
+  list_of_msgs: [{ // TC#14a list of messages
+    i: 1 // TC#14b list of messages
+  }, { // TC#14c list of messages
+    i: 2 // TC#14d list of messages
+  }] // TC#14e list of messages
 }; // TC#15 option msg end
 message Outer { // TC#16 message open
   option deprecated = true; // TC#17 message option
