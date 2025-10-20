@@ -1371,7 +1371,13 @@ def test_trailing_comments_exhaustive_complex_schema_parser():
                     ]
                 ),
             ),
-            # Comments TC#8-14 inside message literals are dropped by parser
+            ast.Comment(text="// TC#8 option msg begin"),
+            ast.Comment(text="// TC#9 inner begin"),
+            ast.Comment(text="// TC#10 inner field a"),
+            ast.Comment(text="// TC#11 inner field b list"),
+            ast.Comment(text="// TC#12 inner inline message"),
+            ast.Comment(text="// TC#13 inner end with comma"),
+            ast.Comment(text="// TC#14 list of messages"),
             ast.Comment(text="// TC#15 option msg end"),
             ast.Message(
                 name="Outer",
@@ -1454,8 +1460,8 @@ def test_trailing_comments_exhaustive_complex_schema_parser():
                     ),
                     ast.Comment(text="// TC#30 extensions"),
                     ast.Reserved(
-                        ranges=["8", "9 to 11", "foo", "bar"],
-                        names=[],
+                        ranges=["8", "9 to 11"],
+                        names=["foo", "bar"],
                     ),
                     ast.Comment(text="// TC#31 reserved"),
                     ast.Message(
@@ -1482,8 +1488,8 @@ def test_trailing_comments_exhaustive_complex_schema_parser():
                             ast.EnumValue(name="READY", number=1, options=[]),
                             ast.Comment(text="// TC#37 enum value"),
                             ast.EnumReserved(
-                                ranges=["2 to 4", "OLD"],
-                                names=[],
+                                ranges=["2 to 4"],
+                                names=["OLD"],
                             ),
                             ast.Comment(text="// TC#38 enum reserved"),
                         ],
@@ -1540,7 +1546,11 @@ def test_trailing_comments_exhaustive_complex_schema_parser():
                             ]
                         ),
                     ),
-                    # Comments TC#48-52 inside message literals are dropped by parser
+                    ast.Comment(text="// TC#48 service option open"),
+                    ast.Comment(text="// TC#49 service opt field get"),
+                    ast.Comment(text="// TC#50 nested msg literal open"),
+                    ast.Comment(text="// TC#51 nested field post"),
+                    ast.Comment(text="// TC#52 nested msg literal close"),
                     ast.Comment(text="// TC#53 service option close"),
                     ast.Method(
                         name="Unary",
