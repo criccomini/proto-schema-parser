@@ -57,7 +57,10 @@ class Generator:
             elif isinstance(element, ast.Service):
                 lines.append(self._generate_service(element))
             elif isinstance(element, ast.Comment):
-                lines.append(self._generate_comment(element))
+                if element.inline:
+                    lines[-1] = f"{lines[-1]} {element.text}"
+                else:
+                    lines.append(self._generate_comment(element))
 
         return "\n".join(lines)
 
@@ -85,7 +88,10 @@ class Generator:
             elif isinstance(element, ast.Extension):  # Extension
                 lines.append(self._generate_extension(element, indent_level + 1))
             elif isinstance(element, ast.Comment):
-                lines.append(self._generate_comment(element, indent_level + 1))
+                if element.inline:
+                    lines[-1] = f"{lines[-1]} {element.text}"
+                else:
+                    lines.append(self._generate_comment(element, indent_level + 1))
 
         lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
@@ -98,11 +104,17 @@ class Generator:
             elif isinstance(element, ast.Option):
                 lines.append(self._generate_option(element, indent_level + 1))
             elif isinstance(element, ast.Comment):
-                lines.append(self._generate_comment(element, indent_level + 1))
+                if element.inline:
+                    lines[-1] = f"{lines[-1]} {element.text}"
+                else:
+                    lines.append(self._generate_comment(element, indent_level + 1))
         lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
 
     def _generate_comment(self, comment: ast.Comment, indent_level: int = 0) -> str:
+        if comment.inline:
+            # Inline comments will be handled by the caller
+            return f" {comment.text}"
         lines = [f"{'  ' * indent_level}{comment.text}"]
         return "\n".join(lines)
 
@@ -121,7 +133,10 @@ class Generator:
                 if isinstance(element, ast.Option):
                     lines.append(self._generate_option(element, indent_level + 1))
                 elif isinstance(element, ast.Comment):
-                    lines.append(self._generate_comment(element, indent_level + 1))
+                    if element.inline:
+                        lines[-1] = f"{lines[-1]} {element.text}"
+                    else:
+                        lines.append(self._generate_comment(element, indent_level + 1))
             lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
 
@@ -157,6 +172,11 @@ class Generator:
                 lines.append(self._generate_field(element, indent_level + 1))
             elif isinstance(element, ast.Option):
                 lines.append(self._generate_option(element, indent_level + 1))
+            elif isinstance(element, ast.Comment):
+                if element.inline:
+                    lines[-1] = f"{lines[-1]} {element.text}"
+                else:
+                    lines.append(self._generate_comment(element, indent_level + 1))
         lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
 
@@ -165,10 +185,15 @@ class Generator:
         for element in one_of.elements:
             if isinstance(element, ast.Field):
                 lines.append(self._generate_field(element, indent_level + 1))
+            elif isinstance(element, ast.Group):
+                lines.append(self._generate_group(element, indent_level + 1))
             elif isinstance(element, ast.Option):
                 lines.append(self._generate_option(element, indent_level + 1))
             elif isinstance(element, ast.Comment):
-                lines.append(self._generate_comment(element, indent_level + 1))
+                if element.inline:
+                    lines[-1] = f"{lines[-1]} {element.text}"
+                else:
+                    lines.append(self._generate_comment(element, indent_level + 1))
         lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
 
@@ -186,7 +211,10 @@ class Generator:
             elif isinstance(element, ast.Group):
                 lines.append(self._generate_group(element, indent_level + 1))
             elif isinstance(element, ast.Comment):
-                lines.append(self._generate_comment(element, indent_level + 1))
+                if element.inline:
+                    lines[-1] = f"{lines[-1]} {element.text}"
+                else:
+                    lines.append(self._generate_comment(element, indent_level + 1))
         lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
 
@@ -202,7 +230,11 @@ class Generator:
             elif isinstance(element, ast.Option):
                 lines.append(self._generate_option(element, indent_level + 1))
             elif isinstance(element, ast.Comment):
-                lines.append(self._generate_comment(element, indent_level + 1))
+                if element.inline:
+                    lines[-1] = f"{lines[-1]} {element.text}"
+                else:
+                    lines.append(self._generate_comment(element, indent_level + 1))
+
         lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
 
