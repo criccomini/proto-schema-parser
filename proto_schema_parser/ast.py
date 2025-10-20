@@ -40,6 +40,7 @@ class Comment:
     """
 
     text: str
+    inline: bool = False
 
 
 # packageDecl: PACKAGE packageName SEMICOLON;

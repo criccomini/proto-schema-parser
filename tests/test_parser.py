@@ -1334,9 +1334,9 @@ service Svc { // TC#47 service open
     expected = ast.File(
         syntax="proto2",
         file_elements=[
-            ast.Comment(text="// TC#1 syntax"),
+            ast.Comment(text="// TC#1 syntax", inline=True),
             ast.Package(name="very.complex.schema.v1"),
-            ast.Comment(text="// TC#2 package"),
+            ast.Comment(text="// TC#2 package", inline=True),
             ast.Import(name="google/protobuf/descriptor.proto"),
             ast.Comment(text="// TC#3 import1"),
             ast.Import(name="company/common.proto", public=True),
@@ -1456,7 +1456,9 @@ service Svc { // TC#47 service open
                                 type="G",
                                 options=[],
                             ),
-                            ast.Comment(text="// TC#26 fixed: groups are not allowed in oneof"),
+                            ast.Comment(
+                                text="// TC#26 fixed: groups are not allowed in oneof"
+                            ),
                         ],
                     ),
                     ast.Comment(text="// TC#29 oneof close"),
@@ -1587,7 +1589,7 @@ service Svc { // TC#47 service open
                         input_type=ast.MessageType(type="Outer", stream=True),
                         output_type=ast.MessageType(type="Outer", stream=True),
                         elements=[
-                            ast.Comment(text="// TC#55 rpc block open"),
+                            ast.Comment(text="// TC#55 rpc block open", inline=True),
                             ast.Option(name="(company.mtd_opt).num", value=7),
                             ast.Comment(text="// TC#56 method option"),
                         ],

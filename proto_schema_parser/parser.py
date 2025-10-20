@@ -1,5 +1,6 @@
 # pyright: reportOptionalMemberAccess=false, reportOptionalIterable=false
 
+from ctypes import Union
 from typing import Any, Callable, Optional
 
 from antlr4 import CommonTokenStream, InputStream
@@ -37,7 +38,30 @@ class _ASTConstructor(ProtobufParserVisitor):
         return ast.File(syntax=syntax, file_elements=file_elements)
 
     def visitCommentDecl(self, ctx: ProtobufParser.CommentDeclContext):
-        return ast.Comment(text=self._getText(ctx, False))
+        """
+        Creates a comment node from the given context.
+
+        The comment is inline if it is on the same line as the parent node. The parent node
+        is sometimes an empty container node, so we need to iteratively unwind until we
+        reach a node that isn't identical to the comment, itself.
+
+        Args:
+            ctx (ProtobufParser.CommentDeclContext): The context to create the comment from.
+
+        Returns:
+            ast.Comment: The comment node created from the given context.
+        """
+        text = self._getText(ctx)
+        parent = ctx.parentCtx
+        # Unwind until we reach a node that isn't identical to the comment, itself.
+        while self._getText(parent) == text and type(parent) != ProtobufParser.FileContext:
+            parent = parent.parentCtx
+        # Inline if the comment is on the same line as the parent node's start or stop line.
+        inline = (
+            parent.start.line == ctx.start.line
+            or parent.stop.line == ctx.stop.line
+        ) and type(parent) != ProtobufParser.FileContext
+        return ast.Comment(text=text, inline=inline)
 
     def visitPackageDecl(self, ctx: ProtobufParser.PackageDeclContext):
         name = self._getText(ctx.packageName())
