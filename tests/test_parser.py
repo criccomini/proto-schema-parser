@@ -963,7 +963,7 @@ def test_parse_comments_in_enum():
                         number=1,
                         options=[],
                     ),
-                    ast.Comment(text="// comment on same line"),
+                    ast.Comment(text="// comment on same line", inline=True),
                     ast.EnumValue(
                         name="ELSE",
                         number=2,
@@ -1025,7 +1025,7 @@ def test_parse_comments_in_oneofs():
                                 type="int32",
                                 options=[],
                             ),
-                            ast.Comment(text="// comment on same line"),
+                            ast.Comment(text="// comment on same line", inline=True),
                             ast.Comment(text="// trailing comment"),
                             ast.Field(
                                 name="active",
@@ -1087,7 +1087,7 @@ def test_parse_comments_in_service():
                             type="ExampleResponse", stream=True
                         ),
                     ),
-                    ast.Comment(text="// comment on same line"),
+                    ast.Comment(text="// comment on same line", inline=True),
                     ast.Comment(text="// trailing comment"),
                     ast.Method(
                         name="StreamingFromClient",
@@ -1096,7 +1096,9 @@ def test_parse_comments_in_service():
                         elements=[
                             ast.Comment(text="// comment in RPC"),
                             ast.Option(name="(my_method_option).foo", value=567),
-                            ast.Comment(text="// comment in RPC on same line"),
+                            ast.Comment(
+                                text="// comment in RPC on same line", inline=True
+                            ),
                             ast.Comment(
                                 text="/* multi-line\n            comment\n            in RPC */"
                             ),

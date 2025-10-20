@@ -38,30 +38,10 @@ class _ASTConstructor(ProtobufParserVisitor):
         return ast.File(syntax=syntax, file_elements=file_elements)
 
     def visitCommentDecl(self, ctx: ProtobufParser.CommentDeclContext):
-        """
-        Creates a comment node from the given context.
-
-        The comment is inline if it is on the same line as the parent node. The parent node
-        is sometimes an empty container node, so we need to iteratively unwind until we
-        reach a node that isn't identical to the comment, itself.
-
-        Args:
-            ctx (ProtobufParser.CommentDeclContext): The context to create the comment from.
-
-        Returns:
-            ast.Comment: The comment node created from the given context.
-        """
-        text = self._getText(ctx)
-        parent = ctx.parentCtx
-        # Unwind until we reach a node that isn't identical to the comment, itself.
-        while self._getText(parent) == text and type(parent) != ProtobufParser.FileContext:
-            parent = parent.parentCtx
-        # Inline if the comment is on the same line as the parent node's start or stop line.
-        inline = (
-            parent.start.line == ctx.start.line
-            or parent.stop.line == ctx.stop.line
-        ) and type(parent) != ProtobufParser.FileContext
-        return ast.Comment(text=text, inline=inline)
+        line_up_to_ctx = self._getLine(ctx)[0 : ctx.start.column]
+        # If the line up to the comment is not empty, it's an inline comment
+        inline = line_up_to_ctx.strip() != ""
+        return ast.Comment(text=self._getText(ctx), inline=inline)
 
     def visitPackageDecl(self, ctx: ProtobufParser.PackageDeclContext):
         name = self._getText(ctx.packageName())
@@ -397,8 +377,6 @@ class _ASTConstructor(ProtobufParserVisitor):
 
     # ctx: ParserRuleContext, but ANTLR generates untyped code
     def _getText(self, ctx: Any, strip_quotes: bool = True):
-        """ """
-
         token_source = (
             ctx.start.getTokenSource()
         )  # pyright: ignore [reportGeneralTypeIssues]
@@ -414,6 +392,18 @@ class _ASTConstructor(ProtobufParserVisitor):
             or (text.startswith("'") and text.endswith("'"))
         ):
             text = text[1:-1]
+        return text
+
+    def _getLine(self, ctx: Any):
+        token_source = (
+            ctx.start.getTokenSource()
+        )  # pyright: ignore [reportGeneralTypeIssues]
+        input_stream = token_source.inputStream
+        start, stop = (
+            ctx.start.start - ctx.start.column,
+            ctx.stop.stop,
+        )  # pyright: ignore [reportGeneralTypeIssues]
+        text = input_stream.getText(start, stop)
         return text
 
     def _stringToType(self, value: str):
