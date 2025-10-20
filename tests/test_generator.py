@@ -1617,3 +1617,17 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 };"""
 
     assert result == expected
+
+
+def test_option_with_comments_in_message_literal():
+    expected ="""syntax = "proto3";
+message Example {
+  option (policy) = {
+    foo: "bar" // comment should be preserved
+  };
+}"""
+
+    file = Parser().parse(expected)
+    result = Generator().generate(file)
+    assert result == expected
+    
