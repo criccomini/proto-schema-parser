@@ -140,8 +140,8 @@ Represents a message literal\.
 
 **Attributes:**
 
-- **fields**: List\[MessageLiteralField\]
-The fields of the message literal\.
+- **elements**: List\[MessageLiteralElement\]
+The elements \(fields and comments\) of the message literal\.
 <a name="proto_schema_parser-ast-Option"></a>
 ### 🅲 proto\_schema\_parser\.ast\.Option
 
