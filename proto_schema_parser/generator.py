@@ -270,46 +270,50 @@ class Generator:
         indent_level: int,
         inline: bool = False,
     ) -> str:
-        """Generate nested message literal with consistent indentation."""
+        """
+        Generate a message literal with consistent indentation.
+
+        Args:
+            message_literal (ast.MessageLiteral): The message literal to generate.
+            indent_level (int): The indentation level.
+            inline (bool): Whether to generate the message literal inline.
+
+        Returns:
+            str: The generated message literal.
+        """
+        fields = [
+            el
+            for el in message_literal.elements
+            if isinstance(el, ast.MessageLiteralField)
+        ]
+        if not fields:
+            return "{}"
+
         if inline:
-            if not message_literal.elements:
-                return "{}"
-            field_strings = []
-            for field in message_literal.elements:
-                assert isinstance(
-                    field, ast.MessageLiteralField
-                ), "Expected MessageLiteralField in inline message literal"
-                value = self._generate_option_value(
-                    field.value, indent_level, inline=True
-                )
-                field_strings.append(f"{field.name}: {value}")
+            field_strings = [
+                f"{field.name}: {self._generate_option_value(field.value, indent_level, inline=True)}"
+                for field in fields
+            ]
             return "{ " + ", ".join(field_strings) + " }"
 
-        lines = [f"{'  ' * indent_level}{{"]
-        field_count = 0
-        for i, element in enumerate(message_literal.elements):
+        indent = "  " * indent_level
+        lines = [f"{indent}{{"]
+
+        for element in message_literal.elements:
             if isinstance(element, ast.MessageLiteralField):
                 field_line = self._generate_message_literal_field(
                     element, indent_level + 1
                 )
+                if element != fields[-1]:
+                    field_line += ","  # add comma if this is not the last field
                 lines.append(field_line)
-                # Add comma if not the last field
-                remaining_fields = sum(
-                    1
-                    for el in message_literal.elements[i + 1 :]
-                    if isinstance(el, ast.MessageLiteralField)
-                )
-                if remaining_fields > 0:
-                    lines[-1] += ","
-                field_count += 1
             elif isinstance(element, ast.Comment):
                 if element.inline:
                     lines[-1] = f"{lines[-1]} {element.text}"
                 else:
                     lines.append(self._generate_comment(element, indent_level + 1))
-        lines.append(f"{'  ' * indent_level}}}")
-        if field_count == 0:
-            lines = ["{}"]  # Don't include a linebreak if there are no fields
+
+        lines.append(f"{indent}}}")
         return "\n".join(lines)
 
     def _generate_message_literal_field(
