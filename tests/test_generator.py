@@ -275,7 +275,7 @@ def test_generate_reserved():
                 elements=[
                     ast.Reserved(
                         ranges=["1 to 8", "10", "12"],
-                        names=['"foo"', '"bar"'],
+                        names=["foo", "bar"],
                     ),
                     ast.Reserved(
                         ranges=["13 to 17", "27", "54"],
@@ -283,7 +283,7 @@ def test_generate_reserved():
                     ),
                     ast.Reserved(
                         ranges=[],
-                        names=['"spam"', '"spamspam"'],
+                        names=["spam", "spamspam"],
                     ),
                 ],
             )
@@ -1156,14 +1156,16 @@ message Outer { // TC#16 message open
     } // TC#28 oneof group close
   } // TC#29 oneof close
   extensions 100 to 199, 500 to max; // TC#30 extensions
-  reserved 8, 9 to 11, "foo", "bar"; // TC#31 reserved
+  reserved 8, 9 to 11; // TC#31 reserved ranges
+  reserved "foo", "bar"; // TC#31b reserved names
   message Nested { // TC#32 nested message open
     optional bytes data = 1; // TC#33 nested field
   } // TC#34 nested message close
   enum Status { // TC#35 enum open
     UNKNOWN = 0; // TC#36 enum value
     READY = 1; // TC#37 enum value
-    reserved 2 to 4, "OLD"; // TC#38 enum reserved
+    reserved 2 to 4; // TC#38 enum reserved range
+    reserved "OLD"; // TC#38b enum reserved name
   } // TC#39 enum close
 } // TC#40 message close
 extend Outer { // TC#41 extension decl open

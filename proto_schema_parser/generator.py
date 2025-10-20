@@ -241,9 +241,13 @@ class Generator:
     def _generate_enum_reserved(
         self, reserved: ast.EnumReserved, indent_level: int = 0
     ) -> str:
-        ranges = ", ".join(reserved.ranges)
-        names = ", ".join(reserved.names)
-        return f"{'  ' * indent_level}reserved {ranges}, {names};"
+        parts = []
+        if reserved.ranges:
+            parts.extend(reserved.ranges)
+        if reserved.names:
+            parts.extend([f'"{name}"' for name in reserved.names])
+        reserved_values = ", ".join(parts)
+        return f"{'  ' * indent_level}reserved {reserved_values};"
 
     def _generate_extension_range(
         self, extension_range: ast.ExtensionRange, indent_level: int = 0
@@ -252,7 +256,12 @@ class Generator:
         return f"{'  ' * indent_level}extensions {ranges};"
 
     def _generate_reserved(self, reserved: ast.Reserved, indent_level: int = 0) -> str:
-        reserved_values = ", ".join(itertools.chain(reserved.ranges, reserved.names))
+        parts = []
+        if reserved.ranges:
+            parts.extend(reserved.ranges)
+        if reserved.names:
+            parts.extend([f'"{name}"' for name in reserved.names])
+        reserved_values = ", ".join(parts)
         return f"{'  ' * indent_level}reserved {reserved_values};"
 
     def _generate_message_literal(
