@@ -1183,7 +1183,7 @@ extend Outer { // TC#41 extension decl open
 service Svc { // TC#47 service open
   option (company.svc_opt) = { // TC#48 service option open
     get: "/v1/x", // TC#49 service opt field get
-    additional_bindings { // TC#50 nested msg literal open
+    additional_bindings: { // TC#50 nested msg literal open
       post: "/v1/y" // TC#51 nested field post
     } // TC#52 nested msg literal close
   }; // TC#53 service option close
@@ -1557,7 +1557,7 @@ def test_generate_multiple_options_with_complex_message_literals():
                                                                 name="name",
                                                                 value="Authorization",
                                                             ),
-                                                        ]
+                                                        ],
                                                     ),
                                                 ),
                                             ]
@@ -1620,7 +1620,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 
 
 def test_option_with_comments_in_message_literal():
-    expected ="""syntax = "proto3";
+    expected = """syntax = "proto3";
 message Example {
   option (policy) = {
     foo: "bar" // comment should be preserved
@@ -1630,4 +1630,3 @@ message Example {
     file = Parser().parse(expected)
     result = Generator().generate(file)
     assert result == expected
-    

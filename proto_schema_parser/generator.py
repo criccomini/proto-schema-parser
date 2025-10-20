@@ -283,13 +283,29 @@ class Generator:
             return "{ " + ", ".join(field_strings) + " }"
 
         lines = [f"{'  ' * indent_level}{{"]
-        for i, field in enumerate(message_literal.fields):
-            field_line = self._generate_message_literal_field(field, indent_level + 1)
-            lines.append(field_line)
-            if i < len(message_literal.fields) - 1:
-                lines[-1] += ","  # Add a comma except for the last field
+        field_count = 0
+        for i, element in enumerate(message_literal.elements):
+            if isinstance(element, ast.MessageLiteralField):
+                field_line = self._generate_message_literal_field(
+                    element, indent_level + 1
+                )
+                lines.append(field_line)
+                # Add comma if not the last field
+                remaining_fields = sum(
+                    1
+                    for el in message_literal.elements[i + 1 :]
+                    if isinstance(el, ast.MessageLiteralField)
+                )
+                if remaining_fields > 0:
+                    lines[-1] += ","
+                field_count += 1
+            elif isinstance(element, ast.Comment):
+                if element.inline:
+                    lines[-1] = f"{lines[-1]} {element.text}"
+                else:
+                    lines.append(self._generate_comment(element, indent_level + 1))
         lines.append(f"{'  ' * indent_level}}}")
-        if len(lines) == 2:
+        if field_count == 0:
             lines = ["{}"]  # Don't include a linebreak if there are no fields
         return "\n".join(lines)
 

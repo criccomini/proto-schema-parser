@@ -1234,7 +1234,10 @@ def test_comments_on_service_and_options():
                             ast.Option(
                                 name="(google.api.http)",
                                 value=ast.MessageLiteral(
-                                    fields=[
+                                    elements=[
+                                        ast.Comment(
+                                            text="// some comment about the option"
+                                        ),
                                         ast.MessageLiteralField(
                                             name="get",
                                             value="/v1/search/{query}",
@@ -1360,26 +1363,41 @@ service Svc { // TC#47 service open
             ast.Option(
                 name="(company.file_opt_msg)",
                 value=ast.MessageLiteral(
-                    fields=[
+                    elements=[
+                        ast.Comment(text="// TC#8 option msg begin", inline=True),
                         ast.MessageLiteralField(
                             name="inner",
                             value=ast.MessageLiteral(
-                                fields=[
+                                elements=[
+                                    ast.Comment(
+                                        text="// TC#9 inner begin", inline=True
+                                    ),
                                     ast.MessageLiteralField(name="a", value=1),
+                                    ast.Comment(
+                                        text="// TC#10 inner field a", inline=True
+                                    ),
                                     ast.MessageLiteralField(name="b", value=[1, 2, 3]),
+                                    ast.Comment(
+                                        text="// TC#11 inner field b list", inline=True
+                                    ),
                                     ast.MessageLiteralField(
                                         name="c",
                                         value=ast.MessageLiteral(
-                                            fields=[
+                                            elements=[
                                                 ast.MessageLiteralField(
                                                     name="x", value="y"
                                                 ),
                                             ]
                                         ),
                                     ),
+                                    ast.Comment(
+                                        text="// TC#12 inner inline message",
+                                        inline=True,
+                                    ),
                                 ]
                             ),
                         ),
+                        ast.Comment(text="// TC#13 inner end with comma", inline=True),
                         ast.MessageLiteralField(
                             name="list_of_msgs",
                             value=ast.MessageLiteral(
@@ -1388,6 +1406,7 @@ service Svc { // TC#47 service open
                                 ]
                             ),
                         ),
+                        ast.Comment(text="// TC#14 list of messages", inline=True),
                         ast.MessageLiteralField(
                             name="list_of_msgs",
                             value=ast.MessageLiteral(
@@ -1592,17 +1611,35 @@ service Svc { // TC#47 service open
                     ast.Option(
                         name="(company.svc_opt)",
                         value=ast.MessageLiteral(
-                            fields=[
+                            elements=[
+                                ast.Comment(
+                                    text="// TC#48 service option open", inline=True
+                                ),
                                 ast.MessageLiteralField(name="get", value="/v1/x"),
+                                ast.Comment(
+                                    text="// TC#49 service opt field get", inline=True
+                                ),
                                 ast.MessageLiteralField(
                                     name="additional_bindings",
                                     value=ast.MessageLiteral(
                                         fields=[
+                                            ast.Comment(
+                                                text="// TC#50 nested msg literal open",
+                                                inline=True,
+                                            ),
                                             ast.MessageLiteralField(
                                                 name="post", value="/v1/y"
                                             ),
+                                            ast.Comment(
+                                                text="// TC#51 nested field post",
+                                                inline=True,
+                                            ),
                                         ]
                                     ),
+                                ),
+                                ast.Comment(
+                                    text="// TC#52 nested msg literal close",
+                                    inline=True,
                                 ),
                             ]
                         ),
@@ -1935,13 +1972,15 @@ def test_option_with_comments_and_fields():
                             ast.Option(
                                 name="(test.option)",
                                 value=ast.MessageLiteral(
-                                    fields=[
+                                    elements=[
+                                        ast.Comment(text="// Comment about the field"),
                                         ast.MessageLiteralField(
                                             name="field1", value="value1"
                                         ),
                                         ast.MessageLiteralField(
                                             name="field2", value=99
                                         ),
+                                        ast.Comment(text="// Another comment"),
                                     ]
                                 ),
                             )

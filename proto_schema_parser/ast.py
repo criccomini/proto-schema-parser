@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum as PyEnum
-from typing import List, Union
+from typing import List, Optional, Union
 
 
 class FieldCardinality(str, PyEnum):
@@ -99,11 +99,24 @@ class MessageLiteral:
     Represents a message literal.
 
     Attributes:
-        fields: List[MessageLiteralField]
-            The fields of the message literal.
+        elements: List[MessageLiteralElement]
+            The elements (fields and comments) of the message literal.
     """
 
-    fields: List[MessageLiteralField] = field(default_factory=list)
+    def __init__(self, elements=None, fields=None):
+        # Support both elements and fields for backward compatibility
+        if elements is not None:
+            self.elements = elements
+        elif fields is not None:
+            self.elements = fields  # type: ignore
+        else:
+            self.elements = []
+
+    # Backward compatibility property
+    @property
+    def fields(self) -> List[MessageLiteralField]:
+        """Returns only the fields, filtering out comments."""
+        return [el for el in self.elements if isinstance(el, MessageLiteralField)]
 
 
 # optionDecl: OPTION optionName EQUALS optionValue SEMICOLON;
@@ -486,6 +499,10 @@ MethodElement = Union[Option, Comment]
 # Define a type alias for scalar values
 ScalarValue = Union[str, int, float, bool, Identifier]
 """Represents a scalar value in a .proto file."""
+
+# messageLiteralField | commentDecl
+MessageLiteralElement = Union[MessageLiteralField, Comment]
+"""Represents an element in a message literal."""
 
 # Define a recursive type alias for message values
 MessageValue = Union[ScalarValue, MessageLiteral, List["MessageValue"]]
