@@ -1371,7 +1371,9 @@ service Svc { // TC#47 service open
                                         name="c",
                                         value=ast.MessageLiteral(
                                             fields=[
-                                                ast.MessageLiteralField(name="x", value="y"),
+                                                ast.MessageLiteralField(
+                                                    name="x", value="y"
+                                                ),
                                             ]
                                         ),
                                     ),
@@ -1419,7 +1421,10 @@ service Svc { // TC#47 service open
                         cardinality=ast.FieldCardinality.OPTIONAL,
                         options=[],
                     ),
-                    ast.Comment(text="// TC#19 fixed: packed only valid on repeated", inline=True),
+                    ast.Comment(
+                        text="// TC#19 fixed: packed only valid on repeated",
+                        inline=True,
+                    ),
                     ast.MapField(
                         name="attrs",
                         number=3,
@@ -1462,7 +1467,10 @@ service Svc { // TC#47 service open
                                 type="G",
                                 options=[],
                             ),
-                            ast.Comment(text="// TC#26 fixed: groups are not allowed in oneof", inline=True),
+                            ast.Comment(
+                                text="// TC#26 fixed: groups are not allowed in oneof",
+                                inline=True,
+                            ),
                         ],
                     ),
                     ast.Comment(text="// TC#29 oneof close", inline=True),
@@ -1496,7 +1504,9 @@ service Svc { // TC#47 service open
                     ast.Message(
                         name="Nested",
                         elements=[
-                            ast.Comment(text="// TC#32 nested message open", inline=True),
+                            ast.Comment(
+                                text="// TC#32 nested message open", inline=True
+                            ),
                             ast.Field(
                                 name="data",
                                 number=1,
@@ -1527,11 +1537,15 @@ service Svc { // TC#47 service open
                             ast.EnumReserved(
                                 ranges=["2 to 4"],
                             ),
-                            ast.Comment(text="// TC#38 enum reserved range", inline=True),
+                            ast.Comment(
+                                text="// TC#38 enum reserved range", inline=True
+                            ),
                             ast.EnumReserved(
                                 names=["OLD"],
                             ),
-                            ast.Comment(text="// TC#38b enum reserved name", inline=True),
+                            ast.Comment(
+                                text="// TC#38b enum reserved name", inline=True
+                            ),
                         ],
                     ),
                     ast.Comment(text="// TC#39 enum close", inline=True),
@@ -1562,7 +1576,9 @@ service Svc { // TC#47 service open
                                 type="int32",
                                 options=[],
                             ),
-                            ast.Comment(text="// TC#44 extension group field", inline=True),
+                            ast.Comment(
+                                text="// TC#44 extension group field", inline=True
+                            ),
                         ],
                     ),
                     ast.Comment(text="// TC#45 extension group close", inline=True),
@@ -1582,7 +1598,9 @@ service Svc { // TC#47 service open
                                     name="additional_bindings",
                                     value=ast.MessageLiteral(
                                         fields=[
-                                            ast.MessageLiteralField(name="post", value="/v1/y"),
+                                            ast.MessageLiteralField(
+                                                name="post", value="/v1/y"
+                                            ),
                                         ]
                                     ),
                                 ),
