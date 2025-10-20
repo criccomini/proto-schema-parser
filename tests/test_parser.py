@@ -1293,7 +1293,8 @@ message Outer { // TC#16 message open
     G g = 6; // TC#26 fixed: groups are not allowed in oneof
   } // TC#29 oneof close
   extensions 100 to 199, 500 to max; // TC#30 extensions
-  reserved 8, 9 to 11, "foo", "bar"; // TC#31 reserved
+  reserved 8, 9 to 11; // TC#31 reserved ranges
+  reserved "foo", "bar"; // TC#31b reserved names
 
   // Replacement for the oneof group
   message G {
@@ -1306,7 +1307,8 @@ message Outer { // TC#16 message open
   enum Status { // TC#35 enum open
     UNKNOWN = 0; // TC#36 enum value
     READY = 1; // TC#37 enum value
-    reserved 2 to 4, "OLD"; // TC#38 enum reserved
+    reserved 2 to 4; // TC#38 enum reserved range
+    reserved "OLD"; // TC#38b enum reserved name
   } // TC#39 enum close
 } // TC#40 message close
 
@@ -1470,10 +1472,13 @@ service Svc { // TC#47 service open
                     ),
                     ast.Comment(text="// TC#30 extensions", inline=True),
                     ast.Reserved(
-                        ranges=["8", "9 to 11", "foo", "bar"],
-                        names=[],
+                        ranges=["8", "9 to 11"],
                     ),
-                    ast.Comment(text="// TC#31 reserved", inline=True),
+                    ast.Comment(text="// TC#31 reserved ranges", inline=True),
+                    ast.Reserved(
+                        names=["foo", "bar"],
+                    ),
+                    ast.Comment(text="// TC#31b reserved names", inline=True),
                     ast.Comment(text="// Replacement for the oneof group"),
                     ast.Message(
                         name="G",
@@ -1520,10 +1525,13 @@ service Svc { // TC#47 service open
                             ),
                             ast.Comment(text="// TC#37 enum value", inline=True),
                             ast.EnumReserved(
-                                ranges=["2 to 4", "OLD"],
-                                names=[],
+                                ranges=["2 to 4"],
                             ),
-                            ast.Comment(text="// TC#38 enum reserved", inline=True),
+                            ast.Comment(text="// TC#38 enum reserved range", inline=True),
+                            ast.EnumReserved(
+                                names=["OLD"],
+                            ),
+                            ast.Comment(text="// TC#38b enum reserved name", inline=True),
                         ],
                     ),
                     ast.Comment(text="// TC#39 enum close", inline=True),
