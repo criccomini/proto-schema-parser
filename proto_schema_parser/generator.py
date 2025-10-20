@@ -272,10 +272,13 @@ class Generator:
     ) -> str:
         """Generate nested message literal with consistent indentation."""
         if inline:
-            if not message_literal.fields:
+            if not message_literal.elements:
                 return "{}"
             field_strings = []
-            for field in message_literal.fields:
+            for field in message_literal.elements:
+                assert isinstance(
+                    field, ast.MessageLiteralField
+                ), "Expected MessageLiteralField in inline message literal"
                 value = self._generate_option_value(
                     field.value, indent_level, inline=True
                 )

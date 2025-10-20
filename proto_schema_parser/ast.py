@@ -103,20 +103,7 @@ class MessageLiteral:
             The elements (fields and comments) of the message literal.
     """
 
-    def __init__(self, elements=None, fields=None):
-        # Support both elements and fields for backward compatibility
-        if elements is not None:
-            self.elements = elements
-        elif fields is not None:
-            self.elements = fields  # type: ignore
-        else:
-            self.elements = []
-
-    # Backward compatibility property
-    @property
-    def fields(self) -> List[MessageLiteralField]:
-        """Returns only the fields, filtering out comments."""
-        return [el for el in self.elements if isinstance(el, MessageLiteralField)]
+    elements: List[MessageLiteralElement] = field(default_factory=list)
 
 
 # optionDecl: OPTION optionName EQUALS optionValue SEMICOLON;
