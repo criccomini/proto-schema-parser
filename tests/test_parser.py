@@ -1332,7 +1332,7 @@ service Svc { // TC#47 service open
     result = Parser().parse(schema)
 
     expected = ast.File(
-        syntax="proto3",
+        syntax="proto2",
         file_elements=[
             ast.Comment(text="// TC#1 syntax"),
             ast.Package(name="very.complex.schema.v1"),
@@ -1411,9 +1411,9 @@ service Svc { // TC#47 service open
                         number=2,
                         type="int32",
                         cardinality=ast.FieldCardinality.OPTIONAL,
-                        options=[ast.Option(name="packed", value=True)],
+                        options=[],
                     ),
-                    ast.Comment(text="// TC#19 field with compact options"),
+                    ast.Comment(text="// TC#19 fixed: packed only valid on repeated"),
                     ast.MapField(
                         name="attrs",
                         number=3,
@@ -1425,6 +1425,7 @@ service Svc { // TC#47 service open
                     ast.Group(
                         name="InnerGroup",
                         number=4,
+                        cardinality=ast.FieldCardinality.REQUIRED,
                         elements=[
                             ast.Comment(text="// TC#21 group open"),
                             ast.Field(
@@ -1449,21 +1450,13 @@ service Svc { // TC#47 service open
                                 options=[],
                             ),
                             ast.Comment(text="// TC#25 oneof field a"),
-                            ast.Group(
-                                name="G",
+                            ast.Field(
+                                name="g",
                                 number=6,
-                                elements=[
-                                    ast.Comment(text="// TC#26 oneof group open"),
-                                    ast.Field(
-                                        name="v",
-                                        number=1,
-                                        type="int32",
-                                        options=[],
-                                    ),
-                                    ast.Comment(text="// TC#27 oneof group field"),
-                                ],
+                                type="G",
+                                options=[],
                             ),
-                            ast.Comment(text="// TC#28 oneof group close"),
+                            ast.Comment(text="// TC#26 fixed: groups are not allowed in oneof"),
                         ],
                     ),
                     ast.Comment(text="// TC#29 oneof close"),
@@ -1477,6 +1470,19 @@ service Svc { // TC#47 service open
                         names=["foo", "bar"],
                     ),
                     ast.Comment(text="// TC#31 reserved"),
+                    ast.Message(
+                        name="G",
+                        elements=[
+                            ast.Field(
+                                name="v",
+                                number=1,
+                                type="int32",
+                                cardinality=ast.FieldCardinality.OPTIONAL,
+                                options=[],
+                            ),
+                            ast.Comment(text="// TC#27 oneof group field"),
+                        ],
+                    ),
                     ast.Message(
                         name="Nested",
                         elements=[
@@ -1526,8 +1532,9 @@ service Svc { // TC#47 service open
                     ast.Group(
                         name="ExtG",
                         number=1001,
+                        cardinality=ast.FieldCardinality.OPTIONAL,
                         elements=[
-                            ast.Comment(text="// TC#43 extension group open"),
+                            ast.Comment(text="// TC#43 fixed: add label"),
                             ast.Field(
                                 name="ev",
                                 number=1,
@@ -1572,9 +1579,9 @@ service Svc { // TC#47 service open
                     ast.Method(
                         name="Unary",
                         input_type=ast.MessageType(type="Outer"),
-                        output_type=ast.MessageType(type="Nested"),
+                        output_type=ast.MessageType(type="Outer.Nested"),
                     ),
-                    ast.Comment(text="// TC#54 rpc simple"),
+                    ast.Comment(text="// TC#54 fixed: qualify Nested"),
                     ast.Method(
                         name="Bidi",
                         input_type=ast.MessageType(type="Outer", stream=True),
