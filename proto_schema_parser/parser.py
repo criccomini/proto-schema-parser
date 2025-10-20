@@ -74,12 +74,6 @@ class _ASTConstructor(ProtobufParserVisitor):
     def visitMessageTextFormat(self, ctx: ProtobufParser.MessageTextFormatContext):
         elements = []
         for child in ctx.getChildren():
-            # Skip separators (commas, semicolons) and whitespace
-            if hasattr(child, "symbol") and child.symbol.type in [
-                ProtobufParser.COMMA,
-                ProtobufParser.SEMICOLON,
-            ]:
-                continue
             result = self.visit(child)
             if result is not None:
                 elements.append(result)
