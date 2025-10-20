@@ -57,7 +57,10 @@ class Generator:
             elif isinstance(element, ast.Service):
                 lines.append(self._generate_service(element))
             elif isinstance(element, ast.Comment):
-                lines.append(self._generate_comment(element))
+                if element.inline:
+                    lines[-1] = f"{lines[-1]} {element.text}"
+                else:
+                    lines.append(self._generate_comment(element))
 
         return "\n".join(lines)
 
@@ -85,7 +88,10 @@ class Generator:
             elif isinstance(element, ast.Extension):  # Extension
                 lines.append(self._generate_extension(element, indent_level + 1))
             elif isinstance(element, ast.Comment):
-                lines.append(self._generate_comment(element, indent_level + 1))
+                if element.inline:
+                    lines[-1] = f"{lines[-1]} {element.text}"
+                else:
+                    lines.append(self._generate_comment(element, indent_level + 1))
 
         lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
@@ -98,11 +104,17 @@ class Generator:
             elif isinstance(element, ast.Option):
                 lines.append(self._generate_option(element, indent_level + 1))
             elif isinstance(element, ast.Comment):
-                lines.append(self._generate_comment(element, indent_level + 1))
+                if element.inline:
+                    lines[-1] = f"{lines[-1]} {element.text}"
+                else:
+                    lines.append(self._generate_comment(element, indent_level + 1))
         lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
 
     def _generate_comment(self, comment: ast.Comment, indent_level: int = 0) -> str:
+        if comment.inline:
+            # Inline comments will be handled by the caller
+            return f" {comment.text}"
         lines = [f"{'  ' * indent_level}{comment.text}"]
         return "\n".join(lines)
 
@@ -121,7 +133,10 @@ class Generator:
                 if isinstance(element, ast.Option):
                     lines.append(self._generate_option(element, indent_level + 1))
                 elif isinstance(element, ast.Comment):
-                    lines.append(self._generate_comment(element, indent_level + 1))
+                    if element.inline:
+                        lines[-1] = f"{lines[-1]} {element.text}"
+                    else:
+                        lines.append(self._generate_comment(element, indent_level + 1))
             lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
 
@@ -157,6 +172,11 @@ class Generator:
                 lines.append(self._generate_field(element, indent_level + 1))
             elif isinstance(element, ast.Option):
                 lines.append(self._generate_option(element, indent_level + 1))
+            elif isinstance(element, ast.Comment):
+                if element.inline:
+                    lines[-1] = f"{lines[-1]} {element.text}"
+                else:
+                    lines.append(self._generate_comment(element, indent_level + 1))
         lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
 
@@ -165,10 +185,15 @@ class Generator:
         for element in one_of.elements:
             if isinstance(element, ast.Field):
                 lines.append(self._generate_field(element, indent_level + 1))
+            elif isinstance(element, ast.Group):
+                lines.append(self._generate_group(element, indent_level + 1))
             elif isinstance(element, ast.Option):
                 lines.append(self._generate_option(element, indent_level + 1))
             elif isinstance(element, ast.Comment):
-                lines.append(self._generate_comment(element, indent_level + 1))
+                if element.inline:
+                    lines[-1] = f"{lines[-1]} {element.text}"
+                else:
+                    lines.append(self._generate_comment(element, indent_level + 1))
         lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
 
@@ -186,7 +211,10 @@ class Generator:
             elif isinstance(element, ast.Group):
                 lines.append(self._generate_group(element, indent_level + 1))
             elif isinstance(element, ast.Comment):
-                lines.append(self._generate_comment(element, indent_level + 1))
+                if element.inline:
+                    lines[-1] = f"{lines[-1]} {element.text}"
+                else:
+                    lines.append(self._generate_comment(element, indent_level + 1))
         lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
 
@@ -202,16 +230,24 @@ class Generator:
             elif isinstance(element, ast.Option):
                 lines.append(self._generate_option(element, indent_level + 1))
             elif isinstance(element, ast.Comment):
-                lines.append(self._generate_comment(element, indent_level + 1))
+                if element.inline:
+                    lines[-1] = f"{lines[-1]} {element.text}"
+                else:
+                    lines.append(self._generate_comment(element, indent_level + 1))
+
         lines.append(f"{'  ' * indent_level}}}")
         return "\n".join(lines)
 
     def _generate_enum_reserved(
         self, reserved: ast.EnumReserved, indent_level: int = 0
     ) -> str:
-        ranges = ", ".join(reserved.ranges)
-        names = ", ".join(reserved.names)
-        return f"{'  ' * indent_level}reserved {ranges}, {names};"
+        parts = []
+        if reserved.ranges:
+            parts.extend(reserved.ranges)
+        if reserved.names:
+            parts.extend([f'"{name}"' for name in reserved.names])
+        reserved_values = ", ".join(parts)
+        return f"{'  ' * indent_level}reserved {reserved_values};"
 
     def _generate_extension_range(
         self, extension_range: ast.ExtensionRange, indent_level: int = 0
@@ -220,7 +256,12 @@ class Generator:
         return f"{'  ' * indent_level}extensions {ranges};"
 
     def _generate_reserved(self, reserved: ast.Reserved, indent_level: int = 0) -> str:
-        reserved_values = ", ".join(itertools.chain(reserved.ranges, reserved.names))
+        parts = []
+        if reserved.ranges:
+            parts.extend(reserved.ranges)
+        if reserved.names:
+            parts.extend([f'"{name}"' for name in reserved.names])
+        reserved_values = ", ".join(parts)
         return f"{'  ' * indent_level}reserved {reserved_values};"
 
     def _generate_message_literal(
@@ -229,27 +270,50 @@ class Generator:
         indent_level: int,
         inline: bool = False,
     ) -> str:
-        """Generate nested message literal with consistent indentation."""
+        """
+        Generate a message literal with consistent indentation.
+
+        Args:
+            message_literal (ast.MessageLiteral): The message literal to generate.
+            indent_level (int): The indentation level.
+            inline (bool): Whether to generate the message literal inline.
+
+        Returns:
+            str: The generated message literal.
+        """
+        fields = [
+            el
+            for el in message_literal.elements
+            if isinstance(el, ast.MessageLiteralField)
+        ]
+        if not fields:
+            return "{}"
+
         if inline:
-            if not message_literal.fields:
-                return "{}"
-            field_strings = []
-            for field in message_literal.fields:
-                value = self._generate_option_value(
-                    field.value, indent_level, inline=True
-                )
-                field_strings.append(f"{field.name}: {value}")
+            field_strings = [
+                f"{field.name}: {self._generate_option_value(field.value, indent_level, inline=True)}"
+                for field in fields
+            ]
             return "{ " + ", ".join(field_strings) + " }"
 
-        lines = [f"{'  ' * indent_level}{{"]
-        for i, field in enumerate(message_literal.fields):
-            field_line = self._generate_message_literal_field(field, indent_level + 1)
-            lines.append(field_line)
-            if i < len(message_literal.fields) - 1:
-                lines[-1] += ","  # Add a comma except for the last field
-        lines.append(f"{'  ' * indent_level}}}")
-        if len(lines) == 2:
-            lines = ["{}"]  # Don't include a linebreak if there are no fields
+        indent = "  " * indent_level
+        lines = [f"{indent}{{"]
+
+        for element in message_literal.elements:
+            if isinstance(element, ast.MessageLiteralField):
+                field_line = self._generate_message_literal_field(
+                    element, indent_level + 1
+                )
+                if element != fields[-1]:
+                    field_line += ","  # add comma if this is not the last field
+                lines.append(field_line)
+            elif isinstance(element, ast.Comment):
+                if element.inline:
+                    lines[-1] = f"{lines[-1]} {element.text}"
+                else:
+                    lines.append(self._generate_comment(element, indent_level + 1))
+
+        lines.append(f"{indent}}}")
         return "\n".join(lines)
 
     def _generate_message_literal_field(

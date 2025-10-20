@@ -1,5 +1,6 @@
 # pyright: reportOptionalMemberAccess=false, reportOptionalIterable=false
 
+from ctypes import Union
 from typing import Any, Callable, Optional
 
 from antlr4 import CommonTokenStream, InputStream
@@ -37,7 +38,10 @@ class _ASTConstructor(ProtobufParserVisitor):
         return ast.File(syntax=syntax, file_elements=file_elements)
 
     def visitCommentDecl(self, ctx: ProtobufParser.CommentDeclContext):
-        return ast.Comment(text=self._getText(ctx, False))
+        line_up_to_ctx = self._getLine(ctx)[0 : ctx.start.column]
+        # If the line up to the comment is not empty, it's an inline comment
+        inline = line_up_to_ctx.strip() != ""
+        return ast.Comment(text=self._getText(ctx), inline=inline)
 
     def visitPackageDecl(self, ctx: ProtobufParser.PackageDeclContext):
         name = self._getText(ctx.packageName())
@@ -68,13 +72,11 @@ class _ASTConstructor(ProtobufParserVisitor):
         return self.visit(ctx.messageTextFormat())
 
     def visitMessageTextFormat(self, ctx: ProtobufParser.MessageTextFormatContext):
-        if ctx.messageLiteralField():
-            fields = [self.visit(child) for child in ctx.messageLiteralField()]
-            return ast.MessageLiteral(fields=fields)
-        elif ctx.commentDecl():
-            return self.visit(ctx.commentDecl())
-        else:
-            return ast.MessageLiteral(fields=[])
+        elements = []
+        for child in ctx.getChildren():
+            if result := self.visit(child):
+                elements.append(result)
+        return ast.MessageLiteral(elements=elements)
 
     def visitMessageLiteralField(self, ctx: ProtobufParser.MessageLiteralFieldContext):
         """Parse individual fields inside a message literal."""
@@ -373,8 +375,6 @@ class _ASTConstructor(ProtobufParserVisitor):
 
     # ctx: ParserRuleContext, but ANTLR generates untyped code
     def _getText(self, ctx: Any, strip_quotes: bool = True):
-        """ """
-
         token_source = (
             ctx.start.getTokenSource()
         )  # pyright: ignore [reportGeneralTypeIssues]
@@ -390,6 +390,18 @@ class _ASTConstructor(ProtobufParserVisitor):
             or (text.startswith("'") and text.endswith("'"))
         ):
             text = text[1:-1]
+        return text
+
+    def _getLine(self, ctx: Any):
+        token_source = (
+            ctx.start.getTokenSource()
+        )  # pyright: ignore [reportGeneralTypeIssues]
+        input_stream = token_source.inputStream
+        start, stop = (
+            ctx.start.start - ctx.start.column,
+            ctx.stop.stop,
+        )  # pyright: ignore [reportGeneralTypeIssues]
+        text = input_stream.getText(start, stop)
         return text
 
     def _stringToType(self, value: str):

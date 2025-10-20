@@ -147,7 +147,7 @@ def test_parse_search_request():
                             ast.Option(
                                 name="(validate.rules).double",
                                 value=ast.MessageLiteral(
-                                    fields=[
+                                    elements=[
                                         ast.MessageLiteralField(name="gte", value=-90),
                                         ast.MessageLiteralField(name="lte", value=90),
                                     ]
@@ -963,7 +963,7 @@ def test_parse_comments_in_enum():
                         number=1,
                         options=[],
                     ),
-                    ast.Comment(text="// comment on same line"),
+                    ast.Comment(text="// comment on same line", inline=True),
                     ast.EnumValue(
                         name="ELSE",
                         number=2,
@@ -1025,7 +1025,7 @@ def test_parse_comments_in_oneofs():
                                 type="int32",
                                 options=[],
                             ),
-                            ast.Comment(text="// comment on same line"),
+                            ast.Comment(text="// comment on same line", inline=True),
                             ast.Comment(text="// trailing comment"),
                             ast.Field(
                                 name="active",
@@ -1087,7 +1087,7 @@ def test_parse_comments_in_service():
                             type="ExampleResponse", stream=True
                         ),
                     ),
-                    ast.Comment(text="// comment on same line"),
+                    ast.Comment(text="// comment on same line", inline=True),
                     ast.Comment(text="// trailing comment"),
                     ast.Method(
                         name="StreamingFromClient",
@@ -1096,7 +1096,9 @@ def test_parse_comments_in_service():
                         elements=[
                             ast.Comment(text="// comment in RPC"),
                             ast.Option(name="(my_method_option).foo", value=567),
-                            ast.Comment(text="// comment in RPC on same line"),
+                            ast.Comment(
+                                text="// comment in RPC on same line", inline=True
+                            ),
                             ast.Comment(
                                 text="/* multi-line\n            comment\n            in RPC */"
                             ),
@@ -1232,7 +1234,10 @@ def test_comments_on_service_and_options():
                             ast.Option(
                                 name="(google.api.http)",
                                 value=ast.MessageLiteral(
-                                    fields=[
+                                    elements=[
+                                        ast.Comment(
+                                            text="// some comment about the option"
+                                        ),
                                         ast.MessageLiteralField(
                                             name="get",
                                             value="/v1/search/{query}",
@@ -1244,6 +1249,423 @@ def test_comments_on_service_and_options():
                     ),
                 ],
             ),
+        ],
+    )
+
+    assert result == expected
+
+
+def test_trailing_comments_exhaustive_complex_schema_parser():
+    """
+    Exhaustive trailing-comment validation across a very complex schema.
+
+    This test verifies the exact AST structure including all comments in their
+    proper positions throughout the protobuf file.
+    """
+
+    schema = """
+syntax = "proto2"; // TC#1 syntax
+package very.complex.schema.v1; // TC#2 package
+
+import "google/protobuf/descriptor.proto"; // TC#3 import1
+import public "company/common.proto"; // TC#4 import public
+import weak "company/weak.proto"; // TC#5 import weak
+
+option (company.file_opt).enabled = true; // TC#6 file option bool
+option java_package = "com.company.schema"; // TC#7 file option string
+option (company.file_opt_msg) = { // TC#8 option msg begin
+  inner: { // TC#9 inner begin
+    a: 1, // TC#10 inner field a
+    b: [1, 2, 3], // TC#11 inner field b list
+    c: { x: "y" } // TC#12 inner inline message
+  }, // TC#13 inner end with comma
+  list_of_msgs: { i: 1 }, // TC#14 list of messages
+  list_of_msgs: { i: 2 }
+}; // TC#15 option msg end
+
+message Outer { // TC#16 message open
+  option deprecated = true; // TC#17 message option
+  required string name = 1; // TC#18 field required
+  optional int32 id = 2; // TC#19 fixed: packed only valid on repeated
+  map<string, int64> attrs = 3; // TC#20 map field
+  required group InnerGroup = 4 { // TC#21 group open
+    optional bool flag = 1; // TC#22 group field
+  } // TC#23 group close
+  oneof choice { // TC#24 oneof open
+    string a = 5; // TC#25 oneof field a
+    G g = 6; // TC#26 fixed: groups are not allowed in oneof
+  } // TC#29 oneof close
+  extensions 100 to 199, 500 to max; // TC#30 extensions
+  reserved 8, 9 to 11; // TC#31 reserved ranges
+  reserved "foo", "bar"; // TC#31b reserved names
+
+  // Replacement for the oneof group
+  message G {
+    optional int32 v = 1; // TC#27 oneof group field
+  }
+
+  message Nested { // TC#32 nested message open
+    optional bytes data = 1; // TC#33 nested field
+  } // TC#34 nested message close
+  enum Status { // TC#35 enum open
+    UNKNOWN = 0; // TC#36 enum value
+    READY = 1; // TC#37 enum value
+    reserved 2 to 4; // TC#38 enum reserved range
+    reserved "OLD"; // TC#38b enum reserved name
+  } // TC#39 enum close
+} // TC#40 message close
+
+extend Outer { // TC#41 extension decl open
+  optional string ext_f = 1000; // TC#42 extension field
+  optional group ExtG = 1001 { // TC#43 fixed: add label
+    int32 ev = 1; // TC#44 extension group field
+  } // TC#45 extension group close
+} // TC#46 extension decl close
+
+service Svc { // TC#47 service open
+  option (company.svc_opt) = { // TC#48 service option open
+    get: "/v1/x", // TC#49 service opt field get
+    additional_bindings { // TC#50 nested msg literal open
+      post: "/v1/y" // TC#51 nested field post
+    } // TC#52 nested msg literal close
+  }; // TC#53 service option close
+  rpc Unary (Outer) returns (Outer.Nested); // TC#54 fixed: qualify Nested
+  rpc Bidi (stream Outer) returns (stream Outer) { // TC#55 rpc block open
+    option (company.mtd_opt).num = 7; // TC#56 method option
+  } // TC#57 rpc block close
+} // TC#58 service close
+"""
+
+    result = Parser().parse(schema)
+
+    expected = ast.File(
+        syntax="proto2",
+        file_elements=[
+            ast.Comment(text="// TC#1 syntax", inline=True),
+            ast.Package(name="very.complex.schema.v1"),
+            ast.Comment(text="// TC#2 package", inline=True),
+            ast.Import(name="google/protobuf/descriptor.proto"),
+            ast.Comment(text="// TC#3 import1", inline=True),
+            ast.Import(name="company/common.proto", public=True),
+            ast.Comment(text="// TC#4 import public", inline=True),
+            ast.Import(name="company/weak.proto", weak=True),
+            ast.Comment(text="// TC#5 import weak", inline=True),
+            ast.Option(
+                name="(company.file_opt).enabled",
+                value=True,
+            ),
+            ast.Comment(text="// TC#6 file option bool", inline=True),
+            ast.Option(
+                name="java_package",
+                value="com.company.schema",
+            ),
+            ast.Comment(text="// TC#7 file option string", inline=True),
+            ast.Option(
+                name="(company.file_opt_msg)",
+                value=ast.MessageLiteral(
+                    elements=[
+                        ast.Comment(text="// TC#8 option msg begin", inline=True),
+                        ast.MessageLiteralField(
+                            name="inner",
+                            value=ast.MessageLiteral(
+                                elements=[
+                                    ast.Comment(
+                                        text="// TC#9 inner begin", inline=True
+                                    ),
+                                    ast.MessageLiteralField(name="a", value=1),
+                                    ast.Comment(
+                                        text="// TC#10 inner field a", inline=True
+                                    ),
+                                    ast.MessageLiteralField(name="b", value=[1, 2, 3]),
+                                    ast.Comment(
+                                        text="// TC#11 inner field b list", inline=True
+                                    ),
+                                    ast.MessageLiteralField(
+                                        name="c",
+                                        value=ast.MessageLiteral(
+                                            elements=[
+                                                ast.MessageLiteralField(
+                                                    name="x", value="y"
+                                                ),
+                                            ]
+                                        ),
+                                    ),
+                                    ast.Comment(
+                                        text="// TC#12 inner inline message",
+                                        inline=True,
+                                    ),
+                                ]
+                            ),
+                        ),
+                        ast.Comment(text="// TC#13 inner end with comma", inline=True),
+                        ast.MessageLiteralField(
+                            name="list_of_msgs",
+                            value=ast.MessageLiteral(
+                                elements=[
+                                    ast.MessageLiteralField(name="i", value=1),
+                                ]
+                            ),
+                        ),
+                        ast.Comment(text="// TC#14 list of messages", inline=True),
+                        ast.MessageLiteralField(
+                            name="list_of_msgs",
+                            value=ast.MessageLiteral(
+                                elements=[
+                                    ast.MessageLiteralField(name="i", value=2),
+                                ]
+                            ),
+                        ),
+                    ]
+                ),
+            ),
+            ast.Comment(text="// TC#15 option msg end", inline=True),
+            ast.Message(
+                name="Outer",
+                elements=[
+                    ast.Comment(text="// TC#16 message open", inline=True),
+                    ast.Option(name="deprecated", value=True),
+                    ast.Comment(text="// TC#17 message option", inline=True),
+                    ast.Field(
+                        name="name",
+                        number=1,
+                        type="string",
+                        cardinality=ast.FieldCardinality.REQUIRED,
+                        options=[],
+                    ),
+                    ast.Comment(text="// TC#18 field required", inline=True),
+                    ast.Field(
+                        name="id",
+                        number=2,
+                        type="int32",
+                        cardinality=ast.FieldCardinality.OPTIONAL,
+                        options=[],
+                    ),
+                    ast.Comment(
+                        text="// TC#19 fixed: packed only valid on repeated",
+                        inline=True,
+                    ),
+                    ast.MapField(
+                        name="attrs",
+                        number=3,
+                        key_type="string",
+                        value_type="int64",
+                        options=[],
+                    ),
+                    ast.Comment(text="// TC#20 map field", inline=True),
+                    ast.Group(
+                        name="InnerGroup",
+                        number=4,
+                        cardinality=ast.FieldCardinality.REQUIRED,
+                        elements=[
+                            ast.Comment(text="// TC#21 group open", inline=True),
+                            ast.Field(
+                                name="flag",
+                                number=1,
+                                type="bool",
+                                cardinality=ast.FieldCardinality.OPTIONAL,
+                                options=[],
+                            ),
+                            ast.Comment(text="// TC#22 group field", inline=True),
+                        ],
+                    ),
+                    ast.Comment(text="// TC#23 group close", inline=True),
+                    ast.OneOf(
+                        name="choice",
+                        elements=[
+                            ast.Comment(text="// TC#24 oneof open", inline=True),
+                            ast.Field(
+                                name="a",
+                                number=5,
+                                type="string",
+                                options=[],
+                            ),
+                            ast.Comment(text="// TC#25 oneof field a", inline=True),
+                            ast.Field(
+                                name="g",
+                                number=6,
+                                type="G",
+                                options=[],
+                            ),
+                            ast.Comment(
+                                text="// TC#26 fixed: groups are not allowed in oneof",
+                                inline=True,
+                            ),
+                        ],
+                    ),
+                    ast.Comment(text="// TC#29 oneof close", inline=True),
+                    ast.ExtensionRange(
+                        ranges=["100 to 199", "500 to max"],
+                        options=[],
+                    ),
+                    ast.Comment(text="// TC#30 extensions", inline=True),
+                    ast.Reserved(
+                        ranges=["8", "9 to 11"],
+                    ),
+                    ast.Comment(text="// TC#31 reserved ranges", inline=True),
+                    ast.Reserved(
+                        names=["foo", "bar"],
+                    ),
+                    ast.Comment(text="// TC#31b reserved names", inline=True),
+                    ast.Comment(text="// Replacement for the oneof group"),
+                    ast.Message(
+                        name="G",
+                        elements=[
+                            ast.Field(
+                                name="v",
+                                number=1,
+                                type="int32",
+                                cardinality=ast.FieldCardinality.OPTIONAL,
+                                options=[],
+                            ),
+                            ast.Comment(text="// TC#27 oneof group field", inline=True),
+                        ],
+                    ),
+                    ast.Message(
+                        name="Nested",
+                        elements=[
+                            ast.Comment(
+                                text="// TC#32 nested message open", inline=True
+                            ),
+                            ast.Field(
+                                name="data",
+                                number=1,
+                                type="bytes",
+                                cardinality=ast.FieldCardinality.OPTIONAL,
+                                options=[],
+                            ),
+                            ast.Comment(text="// TC#33 nested field", inline=True),
+                        ],
+                    ),
+                    ast.Comment(text="// TC#34 nested message close", inline=True),
+                    ast.Enum(
+                        name="Status",
+                        elements=[
+                            ast.Comment(text="// TC#35 enum open", inline=True),
+                            ast.EnumValue(
+                                name="UNKNOWN",
+                                number=0,
+                                options=[],
+                            ),
+                            ast.Comment(text="// TC#36 enum value", inline=True),
+                            ast.EnumValue(
+                                name="READY",
+                                number=1,
+                                options=[],
+                            ),
+                            ast.Comment(text="// TC#37 enum value", inline=True),
+                            ast.EnumReserved(
+                                ranges=["2 to 4"],
+                            ),
+                            ast.Comment(
+                                text="// TC#38 enum reserved range", inline=True
+                            ),
+                            ast.EnumReserved(
+                                names=["OLD"],
+                            ),
+                            ast.Comment(
+                                text="// TC#38b enum reserved name", inline=True
+                            ),
+                        ],
+                    ),
+                    ast.Comment(text="// TC#39 enum close", inline=True),
+                ],
+            ),
+            ast.Comment(text="// TC#40 message close", inline=True),
+            ast.Extension(
+                typeName="Outer",
+                elements=[
+                    ast.Comment(text="// TC#41 extension decl open", inline=True),
+                    ast.Field(
+                        name="ext_f",
+                        number=1000,
+                        type="string",
+                        cardinality=ast.FieldCardinality.OPTIONAL,
+                        options=[],
+                    ),
+                    ast.Comment(text="// TC#42 extension field", inline=True),
+                    ast.Group(
+                        name="ExtG",
+                        number=1001,
+                        cardinality=ast.FieldCardinality.OPTIONAL,
+                        elements=[
+                            ast.Comment(text="// TC#43 fixed: add label", inline=True),
+                            ast.Field(
+                                name="ev",
+                                number=1,
+                                type="int32",
+                                options=[],
+                            ),
+                            ast.Comment(
+                                text="// TC#44 extension group field", inline=True
+                            ),
+                        ],
+                    ),
+                    ast.Comment(text="// TC#45 extension group close", inline=True),
+                ],
+            ),
+            ast.Comment(text="// TC#46 extension decl close", inline=True),
+            ast.Service(
+                name="Svc",
+                elements=[
+                    ast.Comment(text="// TC#47 service open", inline=True),
+                    ast.Option(
+                        name="(company.svc_opt)",
+                        value=ast.MessageLiteral(
+                            elements=[
+                                ast.Comment(
+                                    text="// TC#48 service option open", inline=True
+                                ),
+                                ast.MessageLiteralField(name="get", value="/v1/x"),
+                                ast.Comment(
+                                    text="// TC#49 service opt field get", inline=True
+                                ),
+                                ast.MessageLiteralField(
+                                    name="additional_bindings",
+                                    value=ast.MessageLiteral(
+                                        elements=[
+                                            ast.Comment(
+                                                text="// TC#50 nested msg literal open",
+                                                inline=True,
+                                            ),
+                                            ast.MessageLiteralField(
+                                                name="post", value="/v1/y"
+                                            ),
+                                            ast.Comment(
+                                                text="// TC#51 nested field post",
+                                                inline=True,
+                                            ),
+                                        ]
+                                    ),
+                                ),
+                                ast.Comment(
+                                    text="// TC#52 nested msg literal close",
+                                    inline=True,
+                                ),
+                            ]
+                        ),
+                    ),
+                    ast.Comment(text="// TC#53 service option close", inline=True),
+                    ast.Method(
+                        name="Unary",
+                        input_type=ast.MessageType(type="Outer"),
+                        output_type=ast.MessageType(type="Outer.Nested"),
+                        elements=[],
+                    ),
+                    ast.Comment(text="// TC#54 fixed: qualify Nested", inline=True),
+                    ast.Method(
+                        name="Bidi",
+                        input_type=ast.MessageType(type="Outer", stream=True),
+                        output_type=ast.MessageType(type="Outer", stream=True),
+                        elements=[
+                            ast.Comment(text="// TC#55 rpc block open", inline=True),
+                            ast.Option(name="(company.mtd_opt).num", value=7),
+                            ast.Comment(text="// TC#56 method option", inline=True),
+                        ],
+                    ),
+                    ast.Comment(text="// TC#57 rpc block close", inline=True),
+                ],
+            ),
+            ast.Comment(text="// TC#58 service close", inline=True),
         ],
     )
 
@@ -1308,13 +1730,13 @@ def test_parse_message_literal_with_braces():
                     ast.Option(
                         name="(custom_option)",
                         value=ast.MessageLiteral(
-                            fields=[
+                            elements=[
                                 ast.MessageLiteralField(name="field1", value="value1"),
                                 ast.MessageLiteralField(name="field2", value=42),
                                 ast.MessageLiteralField(
                                     name="nested_field",
                                     value=ast.MessageLiteral(
-                                        fields=[
+                                        elements=[
                                             ast.MessageLiteralField(
                                                 name="key1", value="nested_value1"
                                             ),
@@ -1382,10 +1804,11 @@ def test_parse_nested_empty_message_literal_option():
     option = title_field.options[0]
     assert isinstance(option.value, ast.MessageLiteral)
 
-    nested_field = option.value.fields[0]
+    nested_field = option.value.elements[0]
+    assert isinstance(nested_field, ast.MessageLiteralField)
     assert nested_field.name == "nested"
     assert isinstance(nested_field.value, ast.MessageLiteral)
-    assert nested_field.value.fields == []
+    assert nested_field.value.elements == []
 
 
 def test_option_with_scalar_values():
@@ -1417,7 +1840,7 @@ def test_option_with_scalar_values():
                             ast.Option(
                                 name="(test.option)",
                                 value=ast.MessageLiteral(
-                                    fields=[
+                                    elements=[
                                         ast.MessageLiteralField(
                                             name="int_field", value=123
                                         )
@@ -1427,7 +1850,7 @@ def test_option_with_scalar_values():
                             ast.Option(
                                 name="(test.option)",
                                 value=ast.MessageLiteral(
-                                    fields=[
+                                    elements=[
                                         ast.MessageLiteralField(
                                             name="float_field", value=45.67
                                         )
@@ -1437,7 +1860,7 @@ def test_option_with_scalar_values():
                             ast.Option(
                                 name="(test.option)",
                                 value=ast.MessageLiteral(
-                                    fields=[
+                                    elements=[
                                         ast.MessageLiteralField(
                                             name="bool_field", value=True
                                         )
@@ -1447,7 +1870,7 @@ def test_option_with_scalar_values():
                             ast.Option(
                                 name="(test.option)",
                                 value=ast.MessageLiteral(
-                                    fields=[
+                                    elements=[
                                         ast.MessageLiteralField(
                                             name="string_field", value="Hello"
                                         )
@@ -1492,11 +1915,11 @@ def test_option_with_nested_message_literal():
                             ast.Option(
                                 name="(test.nested)",
                                 value=ast.MessageLiteral(
-                                    fields=[
+                                    elements=[
                                         ast.MessageLiteralField(
                                             name="inner",
                                             value=ast.MessageLiteral(
-                                                fields=[
+                                                elements=[
                                                     ast.MessageLiteralField(
                                                         name="field1", value="abc"
                                                     ),
@@ -1550,13 +1973,15 @@ def test_option_with_comments_and_fields():
                             ast.Option(
                                 name="(test.option)",
                                 value=ast.MessageLiteral(
-                                    fields=[
+                                    elements=[
+                                        ast.Comment(text="// Comment about the field"),
                                         ast.MessageLiteralField(
                                             name="field1", value="value1"
                                         ),
                                         ast.MessageLiteralField(
                                             name="field2", value=99
                                         ),
+                                        ast.Comment(text="// Another comment"),
                                     ]
                                 ),
                             )
@@ -1676,7 +2101,7 @@ def test_parse_bool_options():
                     ast.Option(
                         name="(test.message_option)",
                         value=ast.MessageLiteral(
-                            fields=[
+                            elements=[
                                 ast.MessageLiteralField(
                                     name="bool_field1",
                                     value=True,
@@ -1763,7 +2188,7 @@ def test_parse_service_with_additional_bindings():
                             ast.Option(
                                 name="(google.api.http)",
                                 value=ast.MessageLiteral(
-                                    fields=[
+                                    elements=[
                                         ast.MessageLiteralField(
                                             name="post", value="/v3/lease/revoke"
                                         ),
@@ -1771,7 +2196,7 @@ def test_parse_service_with_additional_bindings():
                                         ast.MessageLiteralField(
                                             name="additional_bindings",
                                             value=ast.MessageLiteral(
-                                                fields=[
+                                                elements=[
                                                     ast.MessageLiteralField(
                                                         name="post",
                                                         value="/v3/kv/lease/revoke",
@@ -1852,7 +2277,7 @@ def test_parse_complex_compact_option():
                             ast.Option(
                                 name="(oompa.loompa)",
                                 value=ast.MessageLiteral(
-                                    fields=[
+                                    elements=[
                                         ast.MessageLiteralField(
                                             name="example",
                                             value="mini@mouse.com",
@@ -1899,7 +2324,7 @@ def test_parse_complex_compact_option_with_escaped_string():
                             ast.Option(
                                 name="(oompa.loompa)",
                                 value=ast.MessageLiteral(
-                                    fields=[
+                                    elements=[
                                         ast.MessageLiteralField(
                                             name="example",
                                             value='\\"blah\\"',
@@ -1946,7 +2371,7 @@ def test_parse_email_compact_option_with_escaped_string():
                             ast.Option(
                                 name="(oompa.loompa)",
                                 value=ast.MessageLiteral(
-                                    fields=[
+                                    elements=[
                                         ast.MessageLiteralField(
                                             name="example",
                                             value='\\"mini@mouse.com\\"',
