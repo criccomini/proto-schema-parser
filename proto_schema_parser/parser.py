@@ -74,8 +74,7 @@ class _ASTConstructor(ProtobufParserVisitor):
     def visitMessageTextFormat(self, ctx: ProtobufParser.MessageTextFormatContext):
         elements = []
         for child in ctx.getChildren():
-            result = self.visit(child)
-            if result is not None:
+            if result := self.visit(child):
                 elements.append(result)
         return ast.MessageLiteral(elements=elements)
 
