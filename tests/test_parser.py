@@ -1340,15 +1340,21 @@ service Svc { // TC#47 service open
             ast.Package(name="very.complex.schema.v1"),
             ast.Comment(text="// TC#2 package", inline=True),
             ast.Import(name="google/protobuf/descriptor.proto"),
-            ast.Comment(text="// TC#3 import1"),
+            ast.Comment(text="// TC#3 import1", inline=True),
             ast.Import(name="company/common.proto", public=True),
-            ast.Comment(text="// TC#4 import public"),
+            ast.Comment(text="// TC#4 import public", inline=True),
             ast.Import(name="company/weak.proto", weak=True),
-            ast.Comment(text="// TC#5 import weak"),
-            ast.Option(name="(company.file_opt).enabled", value=True),
-            ast.Comment(text="// TC#6 file option bool"),
-            ast.Option(name="java_package", value="com.company.schema"),
-            ast.Comment(text="// TC#7 file option string"),
+            ast.Comment(text="// TC#5 import weak", inline=True),
+            ast.Option(
+                name="(company.file_opt).enabled",
+                value=True,
+            ),
+            ast.Comment(text="// TC#6 file option bool", inline=True),
+            ast.Option(
+                name="java_package",
+                value="com.company.schema",
+            ),
+            ast.Comment(text="// TC#7 file option string", inline=True),
             ast.Option(
                 name="(company.file_opt_msg)",
                 value=ast.MessageLiteral(
@@ -1363,9 +1369,7 @@ service Svc { // TC#47 service open
                                         name="c",
                                         value=ast.MessageLiteral(
                                             fields=[
-                                                ast.MessageLiteralField(
-                                                    name="x", value="y"
-                                                )
+                                                ast.MessageLiteralField(name="x", value="y"),
                                             ]
                                         ),
                                     ),
@@ -1374,32 +1378,30 @@ service Svc { // TC#47 service open
                         ),
                         ast.MessageLiteralField(
                             name="list_of_msgs",
-                            value=[
-                                ast.MessageLiteral(
-                                    fields=[ast.MessageLiteralField(name="i", value=1)]
-                                ),
-                                ast.MessageLiteral(
-                                    fields=[ast.MessageLiteralField(name="i", value=2)]
-                                ),
-                            ],
+                            value=ast.MessageLiteral(
+                                fields=[
+                                    ast.MessageLiteralField(name="i", value=1),
+                                ]
+                            ),
+                        ),
+                        ast.MessageLiteralField(
+                            name="list_of_msgs",
+                            value=ast.MessageLiteral(
+                                fields=[
+                                    ast.MessageLiteralField(name="i", value=2),
+                                ]
+                            ),
                         ),
                     ]
                 ),
             ),
-            ast.Comment(text="// TC#8 option msg begin"),
-            ast.Comment(text="// TC#9 inner begin"),
-            ast.Comment(text="// TC#10 inner field a"),
-            ast.Comment(text="// TC#11 inner field b list"),
-            ast.Comment(text="// TC#12 inner inline message"),
-            ast.Comment(text="// TC#13 inner end with comma"),
-            ast.Comment(text="// TC#14 list of messages"),
-            ast.Comment(text="// TC#15 option msg end"),
+            ast.Comment(text="// TC#15 option msg end", inline=True),
             ast.Message(
                 name="Outer",
                 elements=[
-                    ast.Comment(text="// TC#16 message open"),
+                    ast.Comment(text="// TC#16 message open", inline=True),
                     ast.Option(name="deprecated", value=True),
-                    ast.Comment(text="// TC#17 message option"),
+                    ast.Comment(text="// TC#17 message option", inline=True),
                     ast.Field(
                         name="name",
                         number=1,
@@ -1407,7 +1409,7 @@ service Svc { // TC#47 service open
                         cardinality=ast.FieldCardinality.REQUIRED,
                         options=[],
                     ),
-                    ast.Comment(text="// TC#18 field required"),
+                    ast.Comment(text="// TC#18 field required", inline=True),
                     ast.Field(
                         name="id",
                         number=2,
@@ -1415,7 +1417,7 @@ service Svc { // TC#47 service open
                         cardinality=ast.FieldCardinality.OPTIONAL,
                         options=[],
                     ),
-                    ast.Comment(text="// TC#19 fixed: packed only valid on repeated"),
+                    ast.Comment(text="// TC#19 fixed: packed only valid on repeated", inline=True),
                     ast.MapField(
                         name="attrs",
                         number=3,
@@ -1423,13 +1425,13 @@ service Svc { // TC#47 service open
                         value_type="int64",
                         options=[],
                     ),
-                    ast.Comment(text="// TC#20 map field"),
+                    ast.Comment(text="// TC#20 map field", inline=True),
                     ast.Group(
                         name="InnerGroup",
                         number=4,
                         cardinality=ast.FieldCardinality.REQUIRED,
                         elements=[
-                            ast.Comment(text="// TC#21 group open"),
+                            ast.Comment(text="// TC#21 group open", inline=True),
                             ast.Field(
                                 name="flag",
                                 number=1,
@@ -1437,43 +1439,42 @@ service Svc { // TC#47 service open
                                 cardinality=ast.FieldCardinality.OPTIONAL,
                                 options=[],
                             ),
-                            ast.Comment(text="// TC#22 group field"),
+                            ast.Comment(text="// TC#22 group field", inline=True),
                         ],
                     ),
-                    ast.Comment(text="// TC#23 group close"),
+                    ast.Comment(text="// TC#23 group close", inline=True),
                     ast.OneOf(
                         name="choice",
                         elements=[
-                            ast.Comment(text="// TC#24 oneof open"),
+                            ast.Comment(text="// TC#24 oneof open", inline=True),
                             ast.Field(
                                 name="a",
                                 number=5,
                                 type="string",
                                 options=[],
                             ),
-                            ast.Comment(text="// TC#25 oneof field a"),
+                            ast.Comment(text="// TC#25 oneof field a", inline=True),
                             ast.Field(
                                 name="g",
                                 number=6,
                                 type="G",
                                 options=[],
                             ),
-                            ast.Comment(
-                                text="// TC#26 fixed: groups are not allowed in oneof"
-                            ),
+                            ast.Comment(text="// TC#26 fixed: groups are not allowed in oneof", inline=True),
                         ],
                     ),
-                    ast.Comment(text="// TC#29 oneof close"),
+                    ast.Comment(text="// TC#29 oneof close", inline=True),
                     ast.ExtensionRange(
                         ranges=["100 to 199", "500 to max"],
                         options=[],
                     ),
-                    ast.Comment(text="// TC#30 extensions"),
+                    ast.Comment(text="// TC#30 extensions", inline=True),
                     ast.Reserved(
-                        ranges=["8", "9 to 11"],
-                        names=["foo", "bar"],
+                        ranges=["8", "9 to 11", "foo", "bar"],
+                        names=[],
                     ),
-                    ast.Comment(text="// TC#31 reserved"),
+                    ast.Comment(text="// TC#31 reserved", inline=True),
+                    ast.Comment(text="// Replacement for the oneof group"),
                     ast.Message(
                         name="G",
                         elements=[
@@ -1484,13 +1485,13 @@ service Svc { // TC#47 service open
                                 cardinality=ast.FieldCardinality.OPTIONAL,
                                 options=[],
                             ),
-                            ast.Comment(text="// TC#27 oneof group field"),
+                            ast.Comment(text="// TC#27 oneof group field", inline=True),
                         ],
                     ),
                     ast.Message(
                         name="Nested",
                         elements=[
-                            ast.Comment(text="// TC#32 nested message open"),
+                            ast.Comment(text="// TC#32 nested message open", inline=True),
                             ast.Field(
                                 name="data",
                                 number=1,
@@ -1498,33 +1499,41 @@ service Svc { // TC#47 service open
                                 cardinality=ast.FieldCardinality.OPTIONAL,
                                 options=[],
                             ),
-                            ast.Comment(text="// TC#33 nested field"),
+                            ast.Comment(text="// TC#33 nested field", inline=True),
                         ],
                     ),
-                    ast.Comment(text="// TC#34 nested message close"),
+                    ast.Comment(text="// TC#34 nested message close", inline=True),
                     ast.Enum(
                         name="Status",
                         elements=[
-                            ast.Comment(text="// TC#35 enum open"),
-                            ast.EnumValue(name="UNKNOWN", number=0, options=[]),
-                            ast.Comment(text="// TC#36 enum value"),
-                            ast.EnumValue(name="READY", number=1, options=[]),
-                            ast.Comment(text="// TC#37 enum value"),
-                            ast.EnumReserved(
-                                ranges=["2 to 4"],
-                                names=["OLD"],
+                            ast.Comment(text="// TC#35 enum open", inline=True),
+                            ast.EnumValue(
+                                name="UNKNOWN",
+                                number=0,
+                                options=[],
                             ),
-                            ast.Comment(text="// TC#38 enum reserved"),
+                            ast.Comment(text="// TC#36 enum value", inline=True),
+                            ast.EnumValue(
+                                name="READY",
+                                number=1,
+                                options=[],
+                            ),
+                            ast.Comment(text="// TC#37 enum value", inline=True),
+                            ast.EnumReserved(
+                                ranges=["2 to 4", "OLD"],
+                                names=[],
+                            ),
+                            ast.Comment(text="// TC#38 enum reserved", inline=True),
                         ],
                     ),
-                    ast.Comment(text="// TC#39 enum close"),
+                    ast.Comment(text="// TC#39 enum close", inline=True),
                 ],
             ),
-            ast.Comment(text="// TC#40 message close"),
+            ast.Comment(text="// TC#40 message close", inline=True),
             ast.Extension(
                 typeName="Outer",
                 elements=[
-                    ast.Comment(text="// TC#41 extension decl open"),
+                    ast.Comment(text="// TC#41 extension decl open", inline=True),
                     ast.Field(
                         name="ext_f",
                         number=1000,
@@ -1532,30 +1541,30 @@ service Svc { // TC#47 service open
                         cardinality=ast.FieldCardinality.OPTIONAL,
                         options=[],
                     ),
-                    ast.Comment(text="// TC#42 extension field"),
+                    ast.Comment(text="// TC#42 extension field", inline=True),
                     ast.Group(
                         name="ExtG",
                         number=1001,
                         cardinality=ast.FieldCardinality.OPTIONAL,
                         elements=[
-                            ast.Comment(text="// TC#43 fixed: add label"),
+                            ast.Comment(text="// TC#43 fixed: add label", inline=True),
                             ast.Field(
                                 name="ev",
                                 number=1,
                                 type="int32",
                                 options=[],
                             ),
-                            ast.Comment(text="// TC#44 extension group field"),
+                            ast.Comment(text="// TC#44 extension group field", inline=True),
                         ],
                     ),
-                    ast.Comment(text="// TC#45 extension group close"),
+                    ast.Comment(text="// TC#45 extension group close", inline=True),
                 ],
             ),
-            ast.Comment(text="// TC#46 extension decl close"),
+            ast.Comment(text="// TC#46 extension decl close", inline=True),
             ast.Service(
                 name="Svc",
                 elements=[
-                    ast.Comment(text="// TC#47 service open"),
+                    ast.Comment(text="// TC#47 service open", inline=True),
                     ast.Option(
                         name="(company.svc_opt)",
                         value=ast.MessageLiteral(
@@ -1565,27 +1574,21 @@ service Svc { // TC#47 service open
                                     name="additional_bindings",
                                     value=ast.MessageLiteral(
                                         fields=[
-                                            ast.MessageLiteralField(
-                                                name="post", value="/v1/y"
-                                            )
+                                            ast.MessageLiteralField(name="post", value="/v1/y"),
                                         ]
                                     ),
                                 ),
                             ]
                         ),
                     ),
-                    ast.Comment(text="// TC#48 service option open"),
-                    ast.Comment(text="// TC#49 service opt field get"),
-                    ast.Comment(text="// TC#50 nested msg literal open"),
-                    ast.Comment(text="// TC#51 nested field post"),
-                    ast.Comment(text="// TC#52 nested msg literal close"),
-                    ast.Comment(text="// TC#53 service option close"),
+                    ast.Comment(text="// TC#53 service option close", inline=True),
                     ast.Method(
                         name="Unary",
                         input_type=ast.MessageType(type="Outer"),
                         output_type=ast.MessageType(type="Outer.Nested"),
+                        elements=[],
                     ),
-                    ast.Comment(text="// TC#54 fixed: qualify Nested"),
+                    ast.Comment(text="// TC#54 fixed: qualify Nested", inline=True),
                     ast.Method(
                         name="Bidi",
                         input_type=ast.MessageType(type="Outer", stream=True),
@@ -1593,13 +1596,13 @@ service Svc { // TC#47 service open
                         elements=[
                             ast.Comment(text="// TC#55 rpc block open", inline=True),
                             ast.Option(name="(company.mtd_opt).num", value=7),
-                            ast.Comment(text="// TC#56 method option"),
+                            ast.Comment(text="// TC#56 method option", inline=True),
                         ],
                     ),
-                    ast.Comment(text="// TC#57 rpc block close"),
+                    ast.Comment(text="// TC#57 rpc block close", inline=True),
                 ],
             ),
-            ast.Comment(text="// TC#58 service close"),
+            ast.Comment(text="// TC#58 service close", inline=True),
         ],
     )
 
