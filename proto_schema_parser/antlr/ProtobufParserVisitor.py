@@ -34,6 +34,16 @@ class ProtobufParserVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by ProtobufParser#editionDecl.
+    def visitEditionDecl(self, ctx:ProtobufParser.EditionDeclContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by ProtobufParser#editionLevel.
+    def visitEditionLevel(self, ctx:ProtobufParser.EditionLevelContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by ProtobufParser#stringLiteral.
     def visitStringLiteral(self, ctx:ProtobufParser.StringLiteralContext):
         return self.visitChildren(ctx)

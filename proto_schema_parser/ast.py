@@ -11,7 +11,7 @@ class FieldCardinality(str, PyEnum):
     REPEATED = "REPEATED"
 
 
-# file: BYTE_ORDER_MARK? syntaxDecl? fileElement* EOF;
+# file: BYTE_ORDER_MARK? (syntaxDecl | editionDecl)? fileElement* EOF;
 @dataclass
 class File:
     """
@@ -20,11 +20,14 @@ class File:
     Attributes:
         syntax: Union[str, None]
             The syntax level of the .proto file.
+        edition: Union[str, None]
+            The edition level of the .proto file.
         file_elements: List[FileElement]
             A list of file elements in the .proto file.
     """
 
     syntax: Union[str, None] = None
+    edition: Union[str, None] = None
     file_elements: List[FileElement] = field(default_factory=list)
 
 

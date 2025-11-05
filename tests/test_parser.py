@@ -2386,3 +2386,122 @@ def test_parse_email_compact_option_with_escaped_string():
         ],
     )
     assert result == expected
+
+
+def test_parse_edition_2023():
+    """Test parsing a protobuf file with edition = "2023";"""
+    text = """edition = "2023";
+
+message SearchRequest {
+  string query = 1;
+  int32 page_number = 2;
+  int32 result_per_page = 3;
+}
+"""
+    result = Parser().parse(text)
+    expected = ast.File(
+        syntax=None,
+        edition="2023",
+        file_elements=[
+            ast.Message(
+                name="SearchRequest",
+                elements=[
+                    ast.Field(
+                        name="query",
+                        number=1,
+                        type="string",
+                        cardinality=None,
+                        options=[],
+                    ),
+                    ast.Field(
+                        name="page_number",
+                        number=2,
+                        type="int32",
+                        cardinality=None,
+                        options=[],
+                    ),
+                    ast.Field(
+                        name="result_per_page",
+                        number=3,
+                        type="int32",
+                        cardinality=None,
+                        options=[],
+                    ),
+                ],
+            ),
+        ],
+    )
+    assert result == expected
+
+
+def test_parse_edition_2024():
+    """Test parsing a protobuf file with edition = "2024";"""
+    text = """edition = "2024";
+
+message Person {
+  string name = 1;
+  int32 id = 2;
+}
+"""
+    result = Parser().parse(text)
+    expected = ast.File(
+        syntax=None,
+        edition="2024",
+        file_elements=[
+            ast.Message(
+                name="Person",
+                elements=[
+                    ast.Field(
+                        name="name",
+                        number=1,
+                        type="string",
+                        cardinality=None,
+                        options=[],
+                    ),
+                    ast.Field(
+                        name="id",
+                        number=2,
+                        type="int32",
+                        cardinality=None,
+                        options=[],
+                    ),
+                ],
+            ),
+        ],
+    )
+    assert result == expected
+
+
+def test_parse_edition_with_package_and_imports():
+    """Test parsing a protobuf file with edition, package, and imports"""
+    text = """edition = "2023";
+
+package com.example;
+import "other.proto";
+
+message Example {
+  string field = 1;
+}
+"""
+    result = Parser().parse(text)
+    expected = ast.File(
+        syntax=None,
+        edition="2023",
+        file_elements=[
+            ast.Package(name="com.example"),
+            ast.Import(name="other.proto", weak=False, public=False),
+            ast.Message(
+                name="Example",
+                elements=[
+                    ast.Field(
+                        name="field",
+                        number=1,
+                        type="string",
+                        cardinality=None,
+                        options=[],
+                    ),
+                ],
+            ),
+        ],
+    )
+    assert result == expected

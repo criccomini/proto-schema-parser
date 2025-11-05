@@ -4,7 +4,7 @@ options {
 	tokenVocab = ProtobufLexer;
 }
 
-file: BYTE_ORDER_MARK? commentDecl* syntaxDecl? fileElement* EOF;
+file: BYTE_ORDER_MARK? commentDecl* (syntaxDecl | editionDecl)? fileElement* EOF;
 
 fileElement: importDecl |
                packageDecl |
@@ -21,6 +21,10 @@ commentDecl: (LINE_COMMENT | BLOCK_COMMENT);
 syntaxDecl: SYNTAX EQUALS syntaxLevel SEMICOLON;
 
 syntaxLevel: stringLiteral;
+
+editionDecl: EDITION EQUALS editionLevel SEMICOLON;
+
+editionLevel: stringLiteral;
 
 stringLiteral: STRING_LITERAL+;
 
@@ -256,6 +260,7 @@ identifier: alwaysIdent | sometimesIdent;
 
 alwaysIdent: IDENTIFIER
     | SYNTAX
+    | EDITION
     | IMPORT
     | WEAK
     | PUBLIC
