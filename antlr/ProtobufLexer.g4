@@ -17,6 +17,7 @@ BYTE_ORDER_MARK: '\uFEFF';
 
 // identifiers and keywords
 SYNTAX: 'syntax';
+EDITION: 'edition';
 IMPORT: 'import';
 WEAK: 'weak';
 PUBLIC: 'public';

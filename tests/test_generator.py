@@ -1637,3 +1637,128 @@ message Example {
     file = Parser().parse(expected)
     result = Generator().generate(file)
     assert result == expected
+
+
+def test_generate_edition_2023():
+    """Test generating a protobuf file with edition = "2023";"""
+    file = ast.File(
+        syntax=None,
+        edition="2023",
+        file_elements=[
+            ast.Message(
+                name="SearchRequest",
+                elements=[
+                    ast.Field(
+                        name="query",
+                        number=1,
+                        type="string",
+                        cardinality=None,
+                        options=[],
+                    ),
+                    ast.Field(
+                        name="page_number",
+                        number=2,
+                        type="int32",
+                        cardinality=None,
+                        options=[],
+                    ),
+                ],
+            ),
+        ],
+    )
+    result = Generator().generate(file)
+    expected = """edition = "2023";
+message SearchRequest {
+  string query = 1;
+  int32 page_number = 2;
+}"""
+    assert result == expected
+
+
+def test_generate_edition_2024():
+    """Test generating a protobuf file with edition = "2024";"""
+    file = ast.File(
+        syntax=None,
+        edition="2024",
+        file_elements=[
+            ast.Message(
+                name="Person",
+                elements=[
+                    ast.Field(
+                        name="name",
+                        number=1,
+                        type="string",
+                        cardinality=None,
+                        options=[],
+                    ),
+                ],
+            ),
+        ],
+    )
+    result = Generator().generate(file)
+    expected = """edition = "2024";
+message Person {
+  string name = 1;
+}"""
+    assert result == expected
+
+
+def test_generate_edition_with_package():
+    """Test generating a protobuf file with edition, package, and other elements"""
+    file = ast.File(
+        syntax=None,
+        edition="2023",
+        file_elements=[
+            ast.Package(name="com.example"),
+            ast.Import(name="other.proto", weak=False, public=False),
+            ast.Message(
+                name="Example",
+                elements=[
+                    ast.Field(
+                        name="field",
+                        number=1,
+                        type="string",
+                        cardinality=None,
+                        options=[],
+                    ),
+                ],
+            ),
+        ],
+    )
+    result = Generator().generate(file)
+    expected = """edition = "2023";
+package com.example;
+import "other.proto";
+message Example {
+  string field = 1;
+}"""
+    assert result == expected
+
+
+def test_roundtrip_edition_2023():
+    """Test that parsing and generating edition files produces the same output"""
+    text = """edition = "2023";
+
+message SearchRequest {
+  string query = 1;
+  int32 page_number = 2;
+}"""
+    parsed = Parser().parse(text)
+    generated = Generator().generate(parsed)
+    # Normalize whitespace for comparison
+    assert generated.replace("\n\n", "\n") == text.replace("\n\n", "\n")
+
+
+def test_roundtrip_edition_2024():
+    """Test that parsing and generating edition 2024 files produces the same output"""
+    text = """edition = "2024";
+
+package com.example;
+
+message Example {
+  string field = 1;
+}"""
+    parsed = Parser().parse(text)
+    generated = Generator().generate(parsed)
+    # Normalize whitespace for comparison
+    assert generated.replace("\n\n", "\n") == text.replace("\n\n", "\n")

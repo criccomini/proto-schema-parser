@@ -22,9 +22,11 @@ class Generator:
         """
         lines = []
 
-        # Syntax
+        # Syntax or Edition
         if file.syntax:
             lines.append(f'syntax = "{file.syntax}";')
+        elif file.edition:
+            lines.append(f'edition = "{file.edition}";')
 
         # File Elements
         for element in file.file_elements:

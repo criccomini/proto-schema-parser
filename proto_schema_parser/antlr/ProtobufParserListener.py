@@ -53,6 +53,24 @@ class ProtobufParserListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by ProtobufParser#editionDecl.
+    def enterEditionDecl(self, ctx:ProtobufParser.EditionDeclContext):
+        pass
+
+    # Exit a parse tree produced by ProtobufParser#editionDecl.
+    def exitEditionDecl(self, ctx:ProtobufParser.EditionDeclContext):
+        pass
+
+
+    # Enter a parse tree produced by ProtobufParser#editionLevel.
+    def enterEditionLevel(self, ctx:ProtobufParser.EditionLevelContext):
+        pass
+
+    # Exit a parse tree produced by ProtobufParser#editionLevel.
+    def exitEditionLevel(self, ctx:ProtobufParser.EditionLevelContext):
+        pass
+
+
     # Enter a parse tree produced by ProtobufParser#stringLiteral.
     def enterStringLiteral(self, ctx:ProtobufParser.StringLiteralContext):
         pass

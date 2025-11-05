@@ -32,10 +32,15 @@ class _ASTConstructor(ProtobufParserVisitor):
         syntax = (
             self._getText(ctx.syntaxDecl().syntaxLevel()) if ctx.syntaxDecl() else None
         )
+        edition = (
+            self._getText(ctx.editionDecl().editionLevel())
+            if ctx.editionDecl()
+            else None
+        )
         file_elements = [self.visit(child) for child in ctx.commentDecl()] + [
             self.visit(child) for child in ctx.fileElement()
         ]
-        return ast.File(syntax=syntax, file_elements=file_elements)
+        return ast.File(syntax=syntax, edition=edition, file_elements=file_elements)
 
     def visitCommentDecl(self, ctx: ProtobufParser.CommentDeclContext):
         line_up_to_ctx = self._getLine(ctx)[0 : ctx.start.column]
