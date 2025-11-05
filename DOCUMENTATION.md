@@ -69,6 +69,8 @@ Represents a \.proto file\.
 
 - **syntax**: Union\[str, None\]
 The syntax level of the \.proto file\.
+- **edition**: Union\[str, None\]
+The edition level of the \.proto file\.
 - **file_elements**: List\[FileElement\]
 A list of file elements in the \.proto file\.
 <a name="proto_schema_parser-ast-Comment"></a>
